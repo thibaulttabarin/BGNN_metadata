@@ -12,7 +12,8 @@ import pycocotools
 import detectron2.structures as structures
 import detectron2.data.datasets.coco as coco
 from detectron2.data.datasets import register_coco_instances
-from detectron2.data import DatasetCatalog, MetadataCatalog
+from detectron2.data import DatasetCatalog, MetadataCatalog,\
+        build_detection_train_loader
 from detectron2.engine.defaults import DefaultTrainer
 import detectron2.data.transforms as T
 from detectron2.data import DatasetMapper
@@ -167,7 +168,16 @@ def overlay_mask_on_image(data, name):
     img = Image.fromarray(out)
     img.save(PREFIX_DIR + 'overlays/' + name + '.png')
 
-if __name__ == '__main__':
+class Trainer(DefaultTrainer):
+
+    @classmethod
+    def build_train_loader(cls, cfg):
+        return build_detection_train_loader(cfg,
+           mapper=DatasetMapper(cfg, is_train=True, augmentations=[
+               T.Resize((800, 600))
+           ]))
+
+def main():
     #data, _ = nrrd.read(PREFIX_DIR + LM_DIR + 'INHS_FISH_51445.nrrd',
     #        index_order='C')
     #mask = gen_mask(data)
@@ -188,6 +198,12 @@ if __name__ == '__main__':
     in_file = PREFIX_DIR + 'fish_val.json'
     register_coco_instances('fish', {}, in_file, PREFIX_DIR + IMAGES_DIR)
     cfg.DATASETS.TRAIN = ('fish',)
-    trainer = DefaultTrainer(cfg)
+    cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 32
+    #cfg.INPUT.MIN_SIZE_TRAIN = (100,)
+    trainer = Trainer(cfg)
     torch.cuda.empty_cache()
+    #return trainer
     trainer.train()
+
+if __name__ == '__main__':
+    main()
