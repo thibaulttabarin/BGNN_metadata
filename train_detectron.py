@@ -6,10 +6,22 @@ import numpy as np
 import nrrd
 from PIL import Image
 
+import torch
+
+import pycocotools
+import detectron2.structures as structures
+import detectron2.data.datasets.coco as coco
+from detectron2.data.datasets import register_coco_instances
+from detectron2.data import DatasetCatalog, MetadataCatalog
+from detectron2.engine.defaults import DefaultTrainer
+import detectron2.data.transforms as T
+from detectron2.data import DatasetMapper
+from detectron2.config import get_cfg
+
 PREFIX_DIR = '/home/HDD/bgnn_data/'
 IMAGES_DIR = 'INHS_segmented_padded_fish/'
 SEGS_DIR = 'segmentations_wt/'
-LM_DIR = 'labelmaps/'
+LM_DIR = 'labelmaps/validation/'
 
 def process_nrrds():
     segments = os.listdir(PREFIX_DIR + LM_DIR)
@@ -71,6 +83,14 @@ def print_image_outline(name):
         img = Image.fromarray(out.astype(np.uint8))
         img.save(PREFIX_DIR + 'outlines/' + name + f'_{size}.png')
 
+def gen_mask(data):
+    out = np.zeros((data.shape[1], data.shape[2])).astype(np.uint8)
+    for i in range(data.shape[1]):
+        for j in range(data.shape[2]):
+            if data[0][i][j] != 0:
+                out[i][j] = 1
+    return out
+
 def print_nrrd_map(data, name):
     out = np.full((data.shape[1], data.shape[2]), 255).astype(np.uint8)
     for i in range(data.shape[1]):
@@ -79,6 +99,58 @@ def print_nrrd_map(data, name):
                 out[i][j] = 0
     img = Image.fromarray(out)
     img.save(PREFIX_DIR + 'maps_lm/' + name + '.png')
+
+def gen_coco_dataset():
+    segments = os.listdir(PREFIX_DIR + LM_DIR)
+    names = [i.split('.')[0] for i in segments]
+    segs = PREFIX_DIR + LM_DIR
+    errored = set()
+    count = 1
+    total = len(names)
+    dataset = []
+
+    for name in names:
+        curr_file = segs + name + '.nrrd'
+        try:
+            data, _ = nrrd.read(curr_file, index_order='C')
+            if data.shape == (1, 1, 1):
+                errored.add(name)
+            else:
+                print(f'{count} / {total} | {name}: {data.shape}')
+                count += 1
+                dataset.append(gen_dict(gen_mask(data), name))
+        except FileNotFoundError:
+            print(f'Error: could not find {curr_file}')
+            errored.add(name)
+    print(f'Errored: {errored}')
+    return dataset
+
+def gen_dict(mask, name):
+    fish_dict = {}
+    fish_dict['file_name'] = f'{PREFIX_DIR}{IMAGES_DIR}{name}.jpg'
+    fish_dict['height'], fish_dict['width'] = mask.shape
+    fish_dict['image_id'] = name
+    annotate = {}
+    annotate['bbox'] = bbox(mask)
+    annotate['bbox_mode'] = structures.BoxMode.XYXY_ABS
+    annotate['category_id'] = 0
+    annotate['segmentation'] = \
+            pycocotools.mask.encode(np.asarray(mask, order="F"))
+    fish_dict['annotations'] = [annotate]
+    return fish_dict
+
+#https://stackoverflow.com/questions/31400769/bounding-box-of-numpy-array
+def bbox(mask):
+    rows = np.any(mask, axis=1)
+    cols = np.any(mask, axis=0)
+    #print(mask)
+    #print(rows)
+    #print(cols)
+    #exit(0)
+    rmin, rmax = np.where(rows)[0][[0, -1]]
+    cmin, cmax = np.where(cols)[0][[0, -1]]
+
+    return [float(x) for x in [rmin, cmin, rmax, cmax]]
 
 def overlay_mask_on_image(data, name):
     try:
@@ -96,11 +168,26 @@ def overlay_mask_on_image(data, name):
     img.save(PREFIX_DIR + 'overlays/' + name + '.png')
 
 if __name__ == '__main__':
-    #(nrrd.read(PREFIX_DIR + SEGS_DIR +
-        #'INHS_FISH_51445.nrrd', index_order='C')[0], 'INHS_FISH_51445')
+    #data, _ = nrrd.read(PREFIX_DIR + LM_DIR + 'INHS_FISH_51445.nrrd',
+    #        index_order='C')
+    #mask = gen_mask(data)
+    #fdict = gen_dict(mask, 'INHS_FISH_51445')
+    #print(fdict)
     #print_image_outline('INHS_FISH_51445')
-    process_nrrds()
-    #name = 'INHS_FISH_59772.nrrd'
-    #curr_file = PREFIX_DIR + SEGS_DIR + name
+    #process_nrrds()
+    #name = 'INHS_FISH_51445.nrrd'
+    #curr_file = PREFIX_DIR + LM_DIR + name
     #data, _ = nrrd.read(curr_file, index_order='C')
     #print_nrrd_map(data, name)
+    #DatasetCatalog.register('fish', gen_coco_dataset)
+    #MetadataCatalog.get('fish').set(thing_classes=['fish'])
+    #gen_coco_dataset()
+    #print(f'Saving to file {out_file}')
+    #coco.convert_to_coco_json('fish', out_file)
+    cfg = get_cfg()
+    in_file = PREFIX_DIR + 'fish_val.json'
+    register_coco_instances('fish', {}, in_file, PREFIX_DIR + IMAGES_DIR)
+    cfg.DATASETS.TRAIN = ('fish',)
+    trainer = DefaultTrainer(cfg)
+    torch.cuda.empty_cache()
+    trainer.train()
