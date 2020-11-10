@@ -136,6 +136,7 @@ def train():
     trainer = Trainer(cfg)
     torch.cuda.empty_cache()
     #return trainer
+    trainer.resume_or_load()
     trainer.train()
 
 if __name__ == '__main__':
