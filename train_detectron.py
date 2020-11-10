@@ -14,17 +14,21 @@ import detectron2.structures as structures
 import detectron2.data.datasets.coco as coco
 from detectron2.data.datasets import register_coco_instances
 from detectron2.data import DatasetCatalog, MetadataCatalog,\
-        build_detection_train_loader
-from detectron2.engine.defaults import DefaultTrainer
+        build_detection_train_loader,\
+        build_detection_test_loader
+from detectron2.engine.defaults import DefaultTrainer,\
+        default_argument_parser
+from detectron2.engine import launch
 import detectron2.data.transforms as T
 from detectron2.data import DatasetMapper
 from detectron2.config import get_cfg
+from detectron2.checkpoint import DetectionCheckpointer
+from detectron2.modeling import build_model
 
 PREFIX_DIR = '/home/jcp353/bgnn_data/'
 IMAGES_DIR = 'INHS_segmented_padded_fish/'
 LM_DIR = 'labelmaps/validation/'
 SEGS = PREFIX_DIR + LM_DIR
-
 
 def gen_mask(data):
     out = np.zeros((data.shape[1], data.shape[2])).astype(np.uint8)
@@ -92,6 +96,10 @@ class Trainer(DefaultTrainer):
                T.Resize((800, 600))
            ]))
 
+    #@classmethod
+    #def build_test_loader(cfg, dataset_name):
+        #return build_detection_test_loader(cfg)
+
 def gen_dataset_json():
     DatasetCatalog.register('fish', gen_coco_dataset)
     MetadataCatalog.get('fish').set(thing_classes=['fish'])
@@ -131,14 +139,18 @@ def train():
             PREFIX_DIR + IMAGES_DIR)
     cfg.DATASETS.TRAIN = ('fish_train',)
     cfg.DATASETS.TEST = ('fish_val',)
-    cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 32
+    cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 64
+    cfg.SOLVER.MAX_ITER = 19
+    #cfg.DATALOADER.NUM_WORKERS = 2
     #cfg.INPUT.MIN_SIZE_TRAIN = (100,)
     trainer = Trainer(cfg)
     torch.cuda.empty_cache()
     #return trainer
-    trainer.train()
+    return trainer.train()
+    #model = build_model(cfg)
+    #torch.save(model.state_dict(), 'model0.pth')
 
 if __name__ == '__main__':
-    train()
+    launch(train, 2)
     #gen_dataset_json()
     #check_size()

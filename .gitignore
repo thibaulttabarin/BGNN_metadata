@@ -132,3 +132,4 @@ dmypy.json
 images/
 output/
 Pipfile.lock
+*.pth
