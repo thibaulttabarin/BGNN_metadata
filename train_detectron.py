@@ -18,7 +18,7 @@ import detectron2.data.transforms as T
 from detectron2.data import DatasetMapper
 from detectron2.config import get_cfg
 
-PREFIX_DIR = '/home/HDD/bgnn_data/'
+PREFIX_DIR = '/home/jcp353/bgnn_data/'
 IMAGES_DIR = 'INHS_segmented_padded_fish/'
 SEGS_DIR = 'segmentations_wt/'
 LM_DIR = 'labelmaps/validation/'
