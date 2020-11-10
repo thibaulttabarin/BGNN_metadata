@@ -1,6 +1,7 @@
 #!/bin/python3
 
 import os
+from multiprocessing import Pool
 
 import numpy as np
 import nrrd
@@ -21,68 +22,9 @@ from detectron2.config import get_cfg
 
 PREFIX_DIR = '/home/HDD/bgnn_data/'
 IMAGES_DIR = 'INHS_segmented_padded_fish/'
-SEGS_DIR = 'segmentations_wt/'
 LM_DIR = 'labelmaps/validation/'
+SEGS = PREFIX_DIR + LM_DIR
 
-def process_nrrds():
-    segments = os.listdir(PREFIX_DIR + LM_DIR)
-    names = [i.split('.')[0] for i in segments]
-    segs = PREFIX_DIR + LM_DIR
-    errored = set()
-    for name in names:
-        curr_file = segs + name + '.nrrd'
-        try:
-            data, _ = nrrd.read(curr_file, index_order='C')
-            if data.shape == (1, 1, 1):
-                errored.add(name)
-            else:
-                if data.shape[0] < 4:
-                    print(f'{name}: {data.shape}')
-                    print_nrrd_map(data, name)
-        except FileNotFoundError:
-            print(f'Error: could not find {curr_file}')
-            errored.add(name)
-    print(len(set(names).difference(errored)))
-
-def print_image_mask(name):
-    try:
-        orig = Image.open(PREFIX_DIR + IMAGES_DIR + name + '.jpg')
-    except FileNotFoundError:
-        orig = Image.open(PREFIX_DIR + IMAGES_DIR + name + '.JPG')
-    orig = orig.convert('L')
-    orig = np.array(orig).astype(np.int32)
-    out = np.full(orig.shape, 255).astype(np.int32)
-    for i in range(orig.shape[0]):
-        for j in range(orig.shape[1]):
-            d = orig[i][j]
-            if d < 240 and d > 45:
-                out[i][j] = 0
-    img = Image.fromarray(out.astype(np.uint8))
-    img.save(PREFIX_DIR + 'auto_masks/' + name + '.png')
-
-def print_image_outline(name):
-    try:
-        orig = Image.open(PREFIX_DIR + IMAGES_DIR + name + '.jpg')
-    except FileNotFoundError:
-        orig = Image.open(PREFIX_DIR + IMAGES_DIR + name + '.JPG')
-    orig = orig.convert('L')
-    orig = np.array(orig).astype(np.int32)
-    for size in range(5, 200, 5):
-        print(size)
-        out = np.full(orig.shape, 255).astype(np.int32)
-        for i in range(orig.shape[0]):
-            for j in range(orig.shape[1]):
-                d = orig[i][j]
-                for k in range(-1, 2):
-                    for w in range(-1, 2):
-                        try:
-                            if d-orig[i+k][j+w] > size:
-                                out[i][j] = 0
-                        except IndexError:
-                            # Just means we are at an edge
-                            pass
-        img = Image.fromarray(out.astype(np.uint8))
-        img.save(PREFIX_DIR + 'outlines/' + name + f'_{size}.png')
 
 def gen_mask(data):
     out = np.zeros((data.shape[1], data.shape[2])).astype(np.uint8)
@@ -92,39 +34,27 @@ def gen_mask(data):
                 out[i][j] = 1
     return out
 
-def print_nrrd_map(data, name):
-    out = np.full((data.shape[1], data.shape[2]), 255).astype(np.uint8)
-    for i in range(data.shape[1]):
-        for j in range(data.shape[2]):
-            if data[0][i][j] != 0:
-                out[i][j] = 0
-    img = Image.fromarray(out)
-    img.save(PREFIX_DIR + 'maps_lm/' + name + '.png')
+def gen_mask_wrapper(name, segs):
+    curr_file = segs + name + '.nrrd'
+    try:
+        data, _ = nrrd.read(curr_file, index_order='C')
+        if data.shape == (1, 1, 1):
+            print(f'Error: bad nrrd file {curr_file}')
+        else:
+            print(f'{name}: {data.shape}')
+            return gen_dict(gen_mask(data), name)
+    except FileNotFoundError:
+        print(f'Error: could not find and/or output {curr_file}')
+    return None
+
+def lambda_wrapper(name):
+    return gen_mask_wrapper(name, SEGS)
 
 def gen_coco_dataset():
     segments = os.listdir(PREFIX_DIR + LM_DIR)
     names = [i.split('.')[0] for i in segments]
-    segs = PREFIX_DIR + LM_DIR
-    errored = set()
-    count = 1
-    total = len(names)
-    dataset = []
-
-    for name in names:
-        curr_file = segs + name + '.nrrd'
-        try:
-            data, _ = nrrd.read(curr_file, index_order='C')
-            if data.shape == (1, 1, 1):
-                errored.add(name)
-            else:
-                print(f'{count} / {total} | {name}: {data.shape}')
-                count += 1
-                dataset.append(gen_dict(gen_mask(data), name))
-        except FileNotFoundError:
-            print(f'Error: could not find {curr_file}')
-            errored.add(name)
-    print(f'Errored: {errored}')
-    return dataset
+    with Pool(8) as p:
+        return p.map(lambda_wrapper, names)
 
 def gen_dict(mask, name):
     fish_dict = {}
@@ -153,21 +83,6 @@ def bbox(mask):
 
     return [float(x) for x in [rmin, cmin, rmax, cmax]]
 
-def overlay_mask_on_image(data, name):
-    try:
-        orig = Image.open(PREFIX_DIR + IMAGES_DIR + name + '.jpg')
-    except FileNotFoundError:
-        orig = Image.open(PREFIX_DIR + IMAGES_DIR + name + '.JPG')
-    out = np.array(orig)
-    for w in range(data.shape[0]):
-        for i in range(data.shape[1]):
-            for j in range(data.shape[2]):
-                if data[w][i][j][0] > 0:
-                    init = out[i][j]
-                    out[i][j] = [max(x-100, 0) for x in init]
-    img = Image.fromarray(out)
-    img.save(PREFIX_DIR + 'overlays/' + name + '.png')
-
 class Trainer(DefaultTrainer):
 
     @classmethod
@@ -177,27 +92,45 @@ class Trainer(DefaultTrainer):
                T.Resize((800, 600))
            ]))
 
-def main():
+def gen_dataset_json():
+    DatasetCatalog.register('fish', gen_coco_dataset)
+    MetadataCatalog.get('fish').set(thing_classes=['fish'])
+    out_file = PREFIX_DIR + 'fish_val.json'
+    print(f'Saving to file {out_file}')
+    coco.convert_to_coco_json('fish', out_file)
+
+def check_size():
     #data, _ = nrrd.read(PREFIX_DIR + LM_DIR + 'INHS_FISH_51445.nrrd',
-    #        index_order='C')
+            #index_order='C')
     #mask = gen_mask(data)
     #fdict = gen_dict(mask, 'INHS_FISH_51445')
     #print(fdict)
     #print_image_outline('INHS_FISH_51445')
     #process_nrrds()
-    #name = 'INHS_FISH_51445.nrrd'
+    #name = 'INHS_FISH_2401.nrrd'
     #curr_file = PREFIX_DIR + LM_DIR + name
-    #data, _ = nrrd.read(curr_file, index_order='C')
-    #print_nrrd_map(data, name)
-    #DatasetCatalog.register('fish', gen_coco_dataset)
-    #MetadataCatalog.get('fish').set(thing_classes=['fish'])
-    #gen_coco_dataset()
-    #print(f'Saving to file {out_file}')
-    #coco.convert_to_coco_json('fish', out_file)
+    #print(gen_mask(data).shape)
+    segments = os.listdir(PREFIX_DIR + LM_DIR)
+    names = [i.split('.')[0] for i in segments]
+    for name in names:
+        curr_nrrd = PREFIX_DIR + LM_DIR + name + '.nrrd'
+        curr_img = PREFIX_DIR + IMAGES_DIR + name + '.jpg'
+        data, _ = nrrd.read(curr_nrrd, index_order='C')
+        im = Image.open(curr_img)
+        if data.shape[2] != im.width or data.shape[1] != im.height:
+            print(f'image: {im.width}, {im.height}')
+            print(f'nrrd: {data.shape[2]}, {data.shape[1]}')
+            print(name)
+
+def train():
     cfg = get_cfg()
-    in_file = PREFIX_DIR + 'fish_val.json'
-    register_coco_instances('fish', {}, in_file, PREFIX_DIR + IMAGES_DIR)
-    cfg.DATASETS.TRAIN = ('fish',)
+    val_file = PREFIX_DIR + 'fish_val.json'
+    train_file = PREFIX_DIR + 'fish_train.json'
+    register_coco_instances('fish_val', {}, val_file, PREFIX_DIR + IMAGES_DIR)
+    register_coco_instances('fish_train', {}, train_file,
+            PREFIX_DIR + IMAGES_DIR)
+    cfg.DATASETS.TRAIN = ('fish_train',)
+    cfg.DATASETS.TEST = ('fish_val',)
     cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 32
     #cfg.INPUT.MIN_SIZE_TRAIN = (100,)
     trainer = Trainer(cfg)
@@ -206,4 +139,6 @@ def main():
     trainer.train()
 
 if __name__ == '__main__':
-    main()
+    train()
+    #gen_dataset_json()
+    #check_size()
