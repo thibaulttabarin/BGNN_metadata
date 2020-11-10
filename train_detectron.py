@@ -57,7 +57,7 @@ def lambda_wrapper(name):
 def gen_coco_dataset():
     segments = os.listdir(PREFIX_DIR + LM_DIR)
     names = [i.split('.')[0] for i in segments]
-    with Pool(8) as p:
+    with Pool() as p:
         return p.map(lambda_wrapper, names)
 
 def gen_dict(mask, name):
@@ -70,7 +70,7 @@ def gen_dict(mask, name):
     annotate['bbox_mode'] = structures.BoxMode.XYXY_ABS
     annotate['category_id'] = 0
     annotate['segmentation'] = \
-            pycocotools.mask.encode(np.asarray(mask, order="F"))
+            pycocotools.mask.encode(np.asfortranarray(mask))
     fish_dict['annotations'] = [annotate]
     return fish_dict
 
