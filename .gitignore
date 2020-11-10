@@ -133,3 +133,4 @@ images/
 output/
 Pipfile.lock
 *.pth
+test_images_output/

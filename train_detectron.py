@@ -139,8 +139,8 @@ def train():
             PREFIX_DIR + IMAGES_DIR)
     cfg.DATASETS.TRAIN = ('fish_train',)
     cfg.DATASETS.TEST = ('fish_val',)
-    cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 64
-    cfg.SOLVER.MAX_ITER = 19
+    cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 100
+    cfg.SOLVER.MAX_ITER = 125000
     #cfg.DATALOADER.NUM_WORKERS = 2
     #cfg.INPUT.MIN_SIZE_TRAIN = (100,)
     trainer = Trainer(cfg)
