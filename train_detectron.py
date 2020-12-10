@@ -6,6 +6,7 @@ from multiprocessing import Pool
 import numpy as np
 import nrrd
 from PIL import Image
+from multiprocessing import Pool
 
 import torch
 
@@ -25,8 +26,8 @@ from detectron2.config import get_cfg
 from detectron2.checkpoint import DetectionCheckpointer
 from detectron2.modeling import build_model
 
-PREFIX_DIR = '/home/jcp353/bgnn_data/'
-IMAGES_DIR = 'INHS_segmented_padded_fish/'
+PREFIX_DIR = '/home/HDD/bgnn_data/'
+IMAGES_DIR = 'white_background_fish/'
 LM_DIR = 'labelmaps/validation/'
 SEGS = PREFIX_DIR + LM_DIR
 
@@ -107,9 +108,44 @@ def gen_dataset_json():
     print(f'Saving to file {out_file}')
     coco.convert_to_coco_json('fish', out_file)
 
-def check_size():
+def f(name):
+    #curr_nrrd = PREFIX_DIR + LM_DIR + name + '.nrrd'
+    curr_img = PREFIX_DIR + IMAGES_DIR + name + '.jpg'
+    #data, _ = nrrd.read(curr_nrrd, index_order='C')
+    x = np.array(Image.open(curr_img))
+    for i in range(x.shape[0]):
+        for j in range(x.shape[1]):
+            if not x[i][j].any():
+                x[i][j] = np.array([255,255,255])
+    return x
+
+def white_out_background():
     #data, _ = nrrd.read(PREFIX_DIR + LM_DIR + 'INHS_FISH_51445.nrrd',
             #index_order='C')
+    #mask = gen_mask(data)
+    #fdict = gen_dict(mask, 'INHS_FISH_51445')
+    #print(fdict)
+    #print_image_outline('INHS_FISH_51445')
+    #process_nrrds()
+    #name = 'INHS_FISH_2401.nrrd'
+    #curr_file = PREFIX_DIR + LM_DIR + name
+    #print(gen_mask(data).shape)
+    segments = os.listdir(PREFIX_DIR + LM_DIR)
+    names = [i.split('.')[0] for i in segments]
+    with Pool() as p:
+        images = p.map(f, names)
+    for i in range(len(images)):
+        curr_img = PREFIX_DIR + IMAGES_DIR + names[i] + '.jpg'
+        im2 = Image.fromarray(images[i])
+        im2.save(curr_img)
+        #if data.shape[2] != im.width or data.shape[1] != im.height:
+        #    print(f'image: {im.width}, {im.height}')
+        #    print(f'nrrd: {data.shape[2]}, {data.shape[1]}')
+        #    print(name)
+
+def check_size():
+    #data, _ = nrrd.read(PREFIX_DIR + LM_DIR + 'INHS_FISH_51445.nrrd',
+        #index_order='C')
     #mask = gen_mask(data)
     #fdict = gen_dict(mask, 'INHS_FISH_51445')
     #print(fdict)
@@ -150,6 +186,7 @@ def train():
     return trainer.train()
 
 if __name__ == '__main__':
-    launch(train, 2)
+    white_out_background()
+    #launch(train, 2)
     #gen_dataset_json()
     #check_size()
