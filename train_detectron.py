@@ -2,7 +2,7 @@
 
 import os
 from multiprocessing import Pool
-
+import pandas as pd
 import numpy as np
 import nrrd
 from PIL import Image
@@ -26,8 +26,10 @@ from detectron2.config import get_cfg
 from detectron2.checkpoint import DetectionCheckpointer
 from detectron2.modeling import build_model
 
-PREFIX_DIR = '/home/HDD/bgnn_data/'
-IMAGES_DIR = 'white_background_fish/'
+from skimage import filters
+
+PREFIX_DIR = '/home/jcp353/bgnn_data/'
+IMAGES_DIR = 'full_imgs_large/'
 LM_DIR = 'labelmaps/validation/'
 SEGS = PREFIX_DIR + LM_DIR
 
@@ -55,19 +57,45 @@ def gen_mask_wrapper(name, segs):
 def lambda_wrapper(name):
     return gen_mask_wrapper(name, SEGS)
 
+def gen_coco_dataset2():
+    df = pd.read_csv(f'{PREFIX_DIR}inhs_bboxes.csv', sep=' ')
+    output = []
+    for i in range(len(df)):
+        print(i)
+        name = df['Name'][i]
+        l = df['x1'][i]
+        r = df['x2'][i]
+        t = df['y1'][i]
+        b = df['y2'][i]
+
+        im = Image.open(f'{PREFIX_DIR}{IMAGES_DIR}{name}').convert('L')
+        shape = np.array(im).shape
+        bbox = (l,t,r,b)
+        arr0 = np.array(im.crop(bbox))
+
+        val = filters.threshold_otsu(arr0)
+        arr1 = np.where(arr0 < val, 1, 0).astype(np.uint8)
+        arr2 = np.full(shape, 0).astype(np.uint8)
+        arr2[t:b,l:r] = arr1
+        #im2 = Image.fromarray(arr2, 'L')
+        #im2.save("/home/joel/test_out.jpg")
+        output.append(gen_dict(arr2, name, list(bbox)))
+    return output
+
 def gen_coco_dataset():
     segments = os.listdir(PREFIX_DIR + LM_DIR)
     names = [i.split('.')[0] for i in segments]
     with Pool() as p:
         return p.map(lambda_wrapper, names)
 
-def gen_dict(mask, name):
+def gen_dict(mask, name, bbox):
     fish_dict = {}
     fish_dict['file_name'] = f'{PREFIX_DIR}{IMAGES_DIR}{name}.jpg'
     fish_dict['height'], fish_dict['width'] = mask.shape
     fish_dict['image_id'] = name
     annotate = {}
-    annotate['bbox'] = bbox(mask)
+    #annotate['bbox'] = bbox(mask)
+    annotate['bbox'] = bbox
     annotate['bbox_mode'] = structures.BoxMode.XYXY_ABS
     annotate['category_id'] = 0
     annotate['segmentation'] = \
@@ -102,9 +130,9 @@ class Trainer(DefaultTrainer):
         #return build_detection_test_loader(cfg)
 
 def gen_dataset_json():
-    DatasetCatalog.register('fish', gen_coco_dataset)
+    DatasetCatalog.register('fish', gen_coco_dataset2)
     MetadataCatalog.get('fish').set(thing_classes=['fish'])
-    out_file = PREFIX_DIR + 'fish_val.json'
+    out_file = PREFIX_DIR + 'fish_train.json'
     print(f'Saving to file {out_file}')
     coco.convert_to_coco_json('fish', out_file)
 
@@ -186,7 +214,7 @@ def train():
     return trainer.train()
 
 if __name__ == '__main__':
-    white_out_background()
+    #white_out_background()
     #launch(train, 2)
-    #gen_dataset_json()
+    gen_dataset_json()
     #check_size()
