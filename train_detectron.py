@@ -27,9 +27,11 @@ from detectron2.checkpoint import DetectionCheckpointer
 from detectron2.modeling import build_model
 
 from skimage import filters
+from skimage.morphology import flood_fill
+from random import shuffle
 
-PREFIX_DIR = '/home/jcp353/bgnn_data/'
-IMAGES_DIR = 'full_imgs_large/'
+PREFIX_DIR = '/home/HDD/bgnn_data/'
+IMAGES_DIR = 'blue_gill/'
 LM_DIR = 'labelmaps/validation/'
 SEGS = PREFIX_DIR + LM_DIR
 
@@ -57,23 +59,67 @@ def gen_mask_wrapper(name, segs):
 def lambda_wrapper(name):
     return gen_mask_wrapper(name, SEGS)
 
+def gen_temp3(bbox, name):
+    #print(bbox)
+    print(name)
+    l = round(bbox[0])
+    r = round(bbox[2])
+    t = round(bbox[1])
+    b = round(bbox[3])
+
+    im = Image.open(f'{PREFIX_DIR}{IMAGES_DIR}{name}').convert('L')
+    arr2 = np.array(im)
+    shape = arr2.shape
+    bbox = (l,t,r,b)
+    arr0 = np.array(im.crop(bbox))
+    bb_size = arr0.size
+
+    val = filters.threshold_otsu(arr0) * 1.3
+    #val = filters.threshold_otsu(arr0) * 0.75
+    arr1 = np.where(arr0 < val, 1, 0).astype(np.uint8)
+    #arr1 = np.where(arr0 > val, 1, 0).astype(np.uint8)
+    indicies = list(zip(*np.where(arr1 == 1)))
+    shuffle(indicies)
+    count = 0
+    for ind in indicies:
+        count += 1
+        if count > 10000:
+            print(f'ERROR on flood fill: {name}')
+            return None
+        temp = flood_fill(arr1, ind, 2)
+        temp = np.where(temp == 2, 1, 0)
+        percent = np.count_nonzero(temp) / bb_size
+        #print(percent)
+        if percent > 0.1:
+            temp = flood_fill(temp, (0, 0), 2)
+            arr1 = np.where(temp != 2, 1, 0).astype(np.uint8)
+            break
+    arr3 = np.full(shape, 0).astype(np.uint8)
+    arr3[t:b,l:r] = arr1
+    arr3 = np.where(arr3 == 1, 255, 0).astype(np.uint8)
+    im2 = Image.fromarray(arr3, 'L')
+    im2.save(f'image_output/{name.split(".")[0]}_pixel_mask.jpg')
+
 def gen_coco_dataset2():
     df = pd.read_csv(f'{PREFIX_DIR}inhs_bboxes.csv', sep=' ')
     output = []
     for i in range(len(df)):
-        print(i)
+        #print(i)
         name = df['Name'][i]
+        print(name)
         l = df['x1'][i]
         r = df['x2'][i]
         t = df['y1'][i]
         b = df['y2'][i]
 
-        im = Image.open(f'{PREFIX_DIR}{IMAGES_DIR}{name}').convert('L')
+        im = Image.open(f'{PREFIX_DIR}{IMAGES_DIR}{name}')#.convert('L')
         shape = np.array(im).shape
         bbox = (l,t,r,b)
         arr0 = np.array(im.crop(bbox))
 
         val = filters.threshold_otsu(arr0)
+        print(val)
+        exit(0)
         arr1 = np.where(arr0 < val, 1, 0).astype(np.uint8)
         arr2 = np.full(shape, 0).astype(np.uint8)
         arr2[t:b,l:r] = arr1
