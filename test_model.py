@@ -14,11 +14,8 @@ from detectron2.modeling import build_model
 from detectron2.checkpoint import DetectionCheckpointer
 import torch
 
-PREFIX_DIR = '/home/HDD/bgnn_data/'
-#IMAGES_DIR = 'INHS_segmented_padded_fish/full_imgs/'
-#IMAGES_DIR = 'full_imgs/'
+PREFIX_DIR = '/home/jcp353/bgnn_data/'
 IMAGES_DIR = 'blue_gill/'
-#IMAGES_DIR = 'white_background_fish/'
 IMS = PREFIX_DIR + IMAGES_DIR
 
 cfg = get_cfg()
@@ -50,14 +47,13 @@ names = [i.split('.')[0] for i in segments]
 #names = ['INHS_FISH_00190', 'INHS_FISH_000314', 'INHS_FISH_00357']
 #print(names)
 random.shuffle(names)
-i=0
 j=0
 while j < 1:
     curr_img = IMS + names[i] + '.jpg'
     #curr_img = 'OSUM0000001.JPG'
     print(curr_img)
     im = cv2.imread(curr_img)
-    #im = cv2.resize(im, (800, 600))
+    print(f'{j}: {curr_img}')
     outputs.append(predictor(im))
     #if outputs[-1]['instances'].num_instances > 0:
     #if True:

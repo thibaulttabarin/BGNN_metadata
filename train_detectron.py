@@ -6,7 +6,7 @@ import pandas as pd
 import numpy as np
 import nrrd
 from PIL import Image
-from multiprocessing import Pool
+from functools import partial
 
 import torch
 
@@ -100,6 +100,7 @@ def gen_temp3(bbox, name):
     im2 = Image.fromarray(arr3, 'L')
     im2.save(f'image_output/{name.split(".")[0]}_pixel_mask.jpg')
 
+"""
 def gen_coco_dataset2():
     df = pd.read_csv(f'{PREFIX_DIR}inhs_bboxes.csv', sep=' ')
     output = []
@@ -113,6 +114,70 @@ def gen_coco_dataset2():
         b = df['y2'][i]
 
         im = Image.open(f'{PREFIX_DIR}{IMAGES_DIR}{name}')#.convert('L')
+"""
+
+def gen_coco_dataset2():
+    df = pd.read_csv(f'{PREFIX_DIR}inhs_bboxes.csv', sep=' ')
+    f = partial(wrapper2, df)
+    #output = [f(0)]
+    with Pool() as p:
+        output = p.map(f, list(range(len(df))))
+        #output = p.map(f, list(range(1000)))
+    return [x for x in output if x is not None]
+
+def wrapper2(df, i):
+    name = df['Name'][i]
+    l = df['x1'][i]
+    r = df['x2'][i]
+    t = df['y1'][i]
+    b = df['y2'][i]
+    print(f'{i}: {name}')
+
+    try:
+        im = Image.open(f'{PREFIX_DIR}{IMAGES_DIR}{name}').convert('L')
+        arr2 = np.array(im)
+        shape = arr2.shape
+        bbox = (l,t,r,b)
+        arr0 = np.array(im.crop(bbox))
+        bb_size = arr0.size
+
+        val = filters.threshold_otsu(arr0) * 1.4
+        arr1 = np.where(arr0 < val, 1, 0).astype(np.uint8)
+        indicies = list(zip(*np.where(arr1 == 1)))
+        shuffle(indicies)
+        count = 0
+        for ind in indicies:
+            count += 1
+            if count > 10000:
+                print(f'ERROR on flood fill: {name}')
+                return None
+            temp = flood_fill(arr1, ind, 2)
+            temp = np.where(temp == 2, 1, 0)
+            percent = np.count_nonzero(temp) / bb_size
+            #print(percent)
+            if percent > 0.1:
+                temp = flood_fill(temp, (0, 0), 2)
+                arr1 = np.where(temp != 2, 1, 0).astype(np.uint8)
+                break
+        arr3 = np.full(shape, 0).astype(np.uint8)
+        arr3[t:b,l:r] = arr1
+        #im2 = Image.fromarray(arr2, 'L')
+        #im2.save(f"/home/jcp353/out_imgs/{name}")
+        return gen_dict(arr3, name, list(bbox))
+    except FileNotFoundError:
+        return None
+
+"""
+def wrapper2(df, i):
+    print(i)
+    name = df['Name'][i]
+    l = df['x1'][i]
+    r = df['x2'][i]
+    t = df['y1'][i]
+    b = df['y2'][i]
+
+    try:
+        im = Image.open(f'{PREFIX_DIR}{IMAGES_DIR}{name}').convert('L')
         shape = np.array(im).shape
         bbox = (l,t,r,b)
         arr0 = np.array(im.crop(bbox))
@@ -121,12 +186,14 @@ def gen_coco_dataset2():
         print(val)
         exit(0)
         arr1 = np.where(arr0 < val, 1, 0).astype(np.uint8)
-        arr2 = np.full(shape, 0).astype(np.uint8)
-        arr2[t:b,l:r] = arr1
+        #arr2 = np.full(shape, 0).astype(np.uint8)
+        #arr2[t:b,l:r] = arr1
         #im2 = Image.fromarray(arr2, 'L')
         #im2.save("/home/joel/test_out.jpg")
-        output.append(gen_dict(arr2, name, list(bbox)))
-    return output
+        return gen_dict(arr1, name, list(bbox))
+    except FileNotFoundError:
+        return None
+"""
 
 def gen_coco_dataset():
     segments = os.listdir(PREFIX_DIR + LM_DIR)
@@ -134,14 +201,18 @@ def gen_coco_dataset():
     with Pool() as p:
         return p.map(lambda_wrapper, names)
 
-def gen_dict(mask, name, bbox):
+def gen_dict(mask, name, bbox_in):
     fish_dict = {}
-    fish_dict['file_name'] = f'{PREFIX_DIR}{IMAGES_DIR}{name}.jpg'
+    fish_dict['file_name'] = f'{PREFIX_DIR}{IMAGES_DIR}{name}'
     fish_dict['height'], fish_dict['width'] = mask.shape
-    fish_dict['image_id'] = name
+    fish_dict['image_id'] = name.split('.')[0]
     annotate = {}
-    #annotate['bbox'] = bbox(mask)
-    annotate['bbox'] = bbox
+    temp = bbox(mask)
+    if temp is None:
+        print(f'ERROR on bbox: {name}')
+        return None
+    annotate['bbox'] = bbox(mask)
+    #print(annotate['bbox'])
     annotate['bbox_mode'] = structures.BoxMode.XYXY_ABS
     annotate['category_id'] = 0
     annotate['segmentation'] = \
@@ -157,8 +228,11 @@ def bbox(mask):
     #print(rows)
     #print(cols)
     #exit(0)
-    rmin, rmax = np.where(rows)[0][[0, -1]]
-    cmin, cmax = np.where(cols)[0][[0, -1]]
+    try:
+        rmin, rmax = np.where(rows)[0][[0, -1]]
+        cmin, cmax = np.where(cols)[0][[0, -1]]
+    except:
+        return None
 
     return [float(x) for x in [rmin, cmin, rmax, cmax]]
 
@@ -178,7 +252,7 @@ class Trainer(DefaultTrainer):
 def gen_dataset_json():
     DatasetCatalog.register('fish', gen_coco_dataset2)
     MetadataCatalog.get('fish').set(thing_classes=['fish'])
-    out_file = PREFIX_DIR + 'fish_train.json'
+    out_file = PREFIX_DIR + 'fish_train2.json'
     print(f'Saving to file {out_file}')
     coco.convert_to_coco_json('fish', out_file)
 
@@ -243,14 +317,14 @@ def check_size():
 def train():
     cfg = get_cfg()
     val_file = PREFIX_DIR + 'fish_val.json'
-    train_file = PREFIX_DIR + 'fish_train.json'
+    train_file = PREFIX_DIR + 'fish_train2.json'
     register_coco_instances('fish_val', {}, val_file, PREFIX_DIR + IMAGES_DIR)
-    register_coco_instances('fish_train', {}, train_file,
+    register_coco_instances('fish_train2', {}, train_file,
             PREFIX_DIR + IMAGES_DIR)
-    cfg.DATASETS.TRAIN = ('fish_train',)
+    cfg.DATASETS.TRAIN = ('fish_train2',)
     cfg.DATASETS.TEST = ('fish_val',)
-    cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 100
-    cfg.SOLVER.MAX_ITER = 125000
+    cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 64
+    cfg.SOLVER.MAX_ITER = 25000
     #cfg.DATALOADER.NUM_WORKERS = 2
     #cfg.INPUT.MIN_SIZE_TRAIN = (100,)
     trainer = Trainer(cfg)
