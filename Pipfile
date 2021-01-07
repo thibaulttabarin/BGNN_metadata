@@ -15,8 +15,9 @@ ipython = "*"
 scikit-image = "*"
 pandas = "*"
 iopath = "*"
+model-zoo = "*"
 
 [dev-packages]
 
 [requires]
-python_version = "3.8.6"
+python_version = "3.6"
