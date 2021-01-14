@@ -14,8 +14,8 @@ from detectron2.modeling import build_model
 from detectron2.checkpoint import DetectionCheckpointer
 import torch
 
-PREFIX_DIR = '/home/jcp353/bgnn_data/'
-IMAGES_DIR = 'blue_gill/'
+PREFIX_DIR = '/home/HDD/bgnn_data/'
+IMAGES_DIR = 'other_museums/osum/osum1/'
 IMS = PREFIX_DIR + IMAGES_DIR
 
 cfg = get_cfg()
@@ -48,9 +48,10 @@ names = [i.split('.')[0] for i in segments]
 #print(names)
 random.shuffle(names)
 j=0
+i=0
 while j < 1:
-    curr_img = IMS + names[i] + '.jpg'
-    #curr_img = 'OSUM0000001.JPG'
+    #curr_img = IMS + names[i] + '.jpg'
+    curr_img = IMS + 'OSUM0000049.jpg'
     print(curr_img)
     im = cv2.imread(curr_img)
     print(f'{j}: {curr_img}')
@@ -69,3 +70,4 @@ while j < 1:
         cv2.imwrite(f'my_image.jpg', v.get_image())
         j+=1
     i+=1
+    exit(0)

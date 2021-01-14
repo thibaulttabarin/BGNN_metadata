@@ -136,3 +136,4 @@ Pipfile.lock
 test_images_output/
 *.jpg
 *.JPG
+temp/

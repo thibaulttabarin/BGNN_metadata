@@ -74,7 +74,7 @@ def gen_temp3(bbox, name):
     arr0 = np.array(im.crop(bbox))
     bb_size = arr0.size
 
-    val = filters.threshold_otsu(arr0) * 1.3
+    val = filters.threshold_otsu(arr0) * 1.0
     #val = filters.threshold_otsu(arr0) * 0.75
     arr1 = np.where(arr0 < val, 1, 0).astype(np.uint8)
     #arr1 = np.where(arr0 > val, 1, 0).astype(np.uint8)
