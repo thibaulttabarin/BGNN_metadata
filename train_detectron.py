@@ -119,13 +119,29 @@ def gen_coco_dataset2():
 """
 
 def gen_coco_dataset2():
-    df = pd.read_csv(f'{PREFIX_DIR}inhs_bboxes.csv', sep=' ')
-    f = partial(wrapper2, df)
-    output = [f(0)]
-    #with Pool() as p:
+    df = pd.read_csv(f'{PREFIX_DIR}boxes.csv', sep=',')
+    #f = partial(wrapper2, df)
+    f = partial(wrapper3, df)
+    #output = [f(0)]
+    with Pool(1) as p:
+        output = map(f, df['Name'].unique())
         #output = p.map(f, list(range(len(df))))
         #output = p.map(f, list(range(1000)))
-    return [x for x in output if x is not None]
+    g = [x for x in output if x is not None]
+    print(g[0])
+    return g
+
+def wrapper3(df, name):
+    print(name)
+    rows = df[df['Name']==name]
+    #print(rows)
+    two = rows[rows['Class']=='two']
+    three = rows[rows['Class']=='three']
+    bbox_2 = (int(two['x']), int(two['y']), int(two['w']), int(two['h']))
+    bbox_3 = (int(three['x']), int(three['y']), int(three['w']), int(three['h']))
+    bboxes = [bbox_2, bbox_3]
+    g = gen_dict2(name, bboxes, (two['image_h'], two['image_w']))
+    return g
 
 def wrapper2(df, i):
     name = df['Name'][i]
@@ -222,6 +238,29 @@ def gen_dict(mask, name, bbox_in):
     fish_dict['annotations'] = [annotate]
     return fish_dict
 
+def gen_dict2(name, bboxes_in, shape):
+    fish_dict = {}
+    fish_dict['file_name'] = name
+    fish_dict['height'], fish_dict['width'] = shape
+    fish_dict['image_id'] = name.split('.')[0]
+    annotate2 = {}
+    annotate2['bbox'] = bboxes_in[0]
+    annotate2['bbox_mode'] = structures.BoxMode.XYWH_ABS
+    annotate2['category_id'] = 0
+    box = bboxes_in[0]
+    annotate2['segmentation'] = \
+            [[box[0], box[1], box[0], box[1] + box[3], box[0] + box[2], box[1] + box[3], box[0] + box[2], box[1]]]
+            #pycocotools.mask.encode(np.asfortranarray([[box[0], box[1], box[0], box[1] + box[3], box[0] + box[2], box[1] + box[3], box[0] + box[2], box[1]]]))
+    annotate3 = {}
+    annotate3['bbox'] = bboxes_in[1]
+    annotate3['bbox_mode'] = structures.BoxMode.XYWH_ABS
+    annotate3['category_id'] = 1
+    box = bboxes_in[1]
+    annotate3['segmentation'] = \
+            [[box[0], box[1], box[0], box[1] + box[3], box[0] + box[2], box[1] + box[3], box[0] + box[2], box[1]]]
+    fish_dict['annotations'] = [annotate2, annotate3]
+    return fish_dict
+
 #https://stackoverflow.com/questions/31400769/bounding-box-of-numpy-array
 def bbox(mask):
     rows = np.any(mask, axis=1)
@@ -252,11 +291,11 @@ class Trainer(DefaultTrainer):
         #return build_detection_test_loader(cfg)
 
 def gen_dataset_json():
-    DatasetCatalog.register('fish', gen_coco_dataset2)
-    MetadataCatalog.get('fish').set(thing_classes=['fish'])
-    out_file = PREFIX_DIR + 'fish_train2.json'
+    DatasetCatalog.register('two_three', gen_coco_dataset2)
+    MetadataCatalog.get('two_three').set(thing_classes=['two', 'three'])
+    out_file = PREFIX_DIR + 'two_three.json'
     print(f'Saving to file {out_file}')
-    coco.convert_to_coco_json('fish', out_file)
+    coco.convert_to_coco_json('two_three', out_file)
 
 def f(name):
     #curr_nrrd = PREFIX_DIR + LM_DIR + name + '.nrrd'
