@@ -31,7 +31,7 @@ from skimage.morphology import flood_fill
 from random import shuffle
 
 PREFIX_DIR = '/home/HDD/bgnn_data/'
-IMAGES_DIR = 'blue_gill/'
+IMAGES_DIR = 'full_imgs_large/'
 LM_DIR = 'labelmaps/validation/'
 SEGS = PREFIX_DIR + LM_DIR
 
@@ -74,7 +74,7 @@ def gen_temp3(bbox, name):
     arr0 = np.array(im.crop(bbox))
     bb_size = arr0.size
 
-    val = filters.threshold_otsu(arr0) * 1.0
+    val = filters.threshold_otsu(arr0) * 1.4
     #val = filters.threshold_otsu(arr0) * 0.75
     arr1 = np.where(arr0 < val, 1, 0).astype(np.uint8)
     #arr1 = np.where(arr0 > val, 1, 0).astype(np.uint8)
@@ -96,9 +96,11 @@ def gen_temp3(bbox, name):
             break
     arr3 = np.full(shape, 0).astype(np.uint8)
     arr3[t:b,l:r] = arr1
+    #arr3 = arr1
     arr3 = np.where(arr3 == 1, 255, 0).astype(np.uint8)
     im2 = Image.fromarray(arr3, 'L')
-    im2.save(f'image_output/{name.split(".")[0]}_pixel_mask.jpg')
+    im2.save(f'image_output/THIS_{name.split(".")[0]}_pixel_mask.jpg')
+    exit(0)
 
 """
 def gen_coco_dataset2():
@@ -119,9 +121,9 @@ def gen_coco_dataset2():
 def gen_coco_dataset2():
     df = pd.read_csv(f'{PREFIX_DIR}inhs_bboxes.csv', sep=' ')
     f = partial(wrapper2, df)
-    #output = [f(0)]
-    with Pool() as p:
-        output = p.map(f, list(range(len(df))))
+    output = [f(0)]
+    #with Pool() as p:
+        #output = p.map(f, list(range(len(df))))
         #output = p.map(f, list(range(1000)))
     return [x for x in output if x is not None]
 
@@ -334,6 +336,8 @@ def train():
     return trainer.train()
 
 if __name__ == '__main__':
+    #gen_temp3((481,748,2451,1433), 'INHS_FISH_000452.jpg')
+    gen_temp3((319,825,3208,1938), 'INHS_FISH_000452.jpg')
     #white_out_background()
     #launch(train, 2)
     gen_dataset_json()

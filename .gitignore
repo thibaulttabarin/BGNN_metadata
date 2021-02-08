@@ -137,3 +137,5 @@ test_images_output/
 *.jpg
 *.JPG
 temp/
+*.png
+data/
