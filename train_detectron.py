@@ -30,7 +30,7 @@ from skimage import filters
 from skimage.morphology import flood_fill
 from random import shuffle
 
-PREFIX_DIR = '/home/jcp353/bgnn_data/'
+PREFIX_DIR = '/home/HDD/bgnn_data/'
 IMAGES_DIR = 'full_imgs_large/'
 LM_DIR = 'labelmaps/validation/'
 SEGS = PREFIX_DIR + LM_DIR
@@ -74,7 +74,7 @@ def gen_temp3(bbox, name):
     arr0 = np.array(im.crop(bbox))
     bb_size = arr0.size
 
-    val = filters.threshold_otsu(arr0) * 1.0
+    val = filters.threshold_otsu(arr0) * 1.4
     #val = filters.threshold_otsu(arr0) * 0.75
     arr1 = np.where(arr0 < val, 1, 0).astype(np.uint8)
     #arr1 = np.where(arr0 > val, 1, 0).astype(np.uint8)
@@ -96,18 +96,40 @@ def gen_temp3(bbox, name):
             break
     arr3 = np.full(shape, 0).astype(np.uint8)
     arr3[t:b,l:r] = arr1
+    #arr3 = arr1
     arr3 = np.where(arr3 == 1, 255, 0).astype(np.uint8)
     im2 = Image.fromarray(arr3, 'L')
-    im2.save(f'image_output/{name.split(".")[0]}_pixel_mask.jpg')
+    im2.save(f'image_output/THIS_{name.split(".")[0]}_pixel_mask.jpg')
+    exit(0)
 
 def gen_coco_dataset2():
-    df = pd.read_csv(f'{PREFIX_DIR}inhs_bboxes.csv', sep=' ')
-    f = partial(wrapper2, df)
+    df = pd.read_csv(f'{PREFIX_DIR}boxes.csv', sep=',')
+    #f = partial(wrapper2, df)
+    f = partial(wrapper3, df)
     #output = [f(0)]
-    with Pool() as p:
-        output = p.map(f, list(range(len(df))))
+    #with Pool() as p:
+        #output = p.map(f, list(range(len(df))))
         #output = p.map(f, list(range(10)))
-    return [x for x in output if x is not None]
+    #return [x for x in output if x is not None]
+    with Pool(1) as p:
+        output = map(f, df['Name'].unique())
+        #output = p.map(f, list(range(len(df))))
+        #output = p.map(f, list(range(1000)))
+    g = [x for x in output if x is not None]
+    print(g[0])
+    return g
+
+def wrapper3(df, name):
+    print(name)
+    rows = df[df['Name']==name]
+    #print(rows)
+    two = rows[rows['Class']=='two']
+    three = rows[rows['Class']=='three']
+    bbox_2 = (int(two['x']), int(two['y']), int(two['w']), int(two['h']))
+    bbox_3 = (int(three['x']), int(three['y']), int(three['w']), int(three['h']))
+    bboxes = [bbox_2, bbox_3]
+    g = gen_dict2(name, bboxes, (two['image_h'], two['image_w']))
+    return g
 
 def wrapper2(df, i):
     name = df['Name'][i]
@@ -176,6 +198,29 @@ def gen_dict(mask, name, bbox_in):
     fish_dict['annotations'] = [annotate]
     return fish_dict
 
+def gen_dict2(name, bboxes_in, shape):
+    fish_dict = {}
+    fish_dict['file_name'] = name
+    fish_dict['height'], fish_dict['width'] = shape
+    fish_dict['image_id'] = name.split('.')[0]
+    annotate2 = {}
+    annotate2['bbox'] = bboxes_in[0]
+    annotate2['bbox_mode'] = structures.BoxMode.XYWH_ABS
+    annotate2['category_id'] = 0
+    box = bboxes_in[0]
+    annotate2['segmentation'] = \
+            [[box[0], box[1], box[0], box[1] + box[3], box[0] + box[2], box[1] + box[3], box[0] + box[2], box[1]]]
+            #pycocotools.mask.encode(np.asfortranarray([[box[0], box[1], box[0], box[1] + box[3], box[0] + box[2], box[1] + box[3], box[0] + box[2], box[1]]]))
+    annotate3 = {}
+    annotate3['bbox'] = bboxes_in[1]
+    annotate3['bbox_mode'] = structures.BoxMode.XYWH_ABS
+    annotate3['category_id'] = 1
+    box = bboxes_in[1]
+    annotate3['segmentation'] = \
+            [[box[0], box[1], box[0], box[1] + box[3], box[0] + box[2], box[1] + box[3], box[0] + box[2], box[1]]]
+    fish_dict['annotations'] = [annotate2, annotate3]
+    return fish_dict
+
 #https://stackoverflow.com/questions/31400769/bounding-box-of-numpy-array
 def bbox(mask):
     rows = np.any(mask, axis=1)
@@ -206,11 +251,11 @@ class Trainer(DefaultTrainer):
         #return build_detection_test_loader(cfg)
 
 def gen_dataset_json():
-    DatasetCatalog.register('fish', gen_coco_dataset2)
-    MetadataCatalog.get('fish').set(thing_classes=['fish'])
-    out_file = PREFIX_DIR + 'fish_train2.json'
+    DatasetCatalog.register('two_three', gen_coco_dataset2)
+    MetadataCatalog.get('two_three').set(thing_classes=['two', 'three'])
+    out_file = PREFIX_DIR + 'two_three.json'
     print(f'Saving to file {out_file}')
-    coco.convert_to_coco_json('fish', out_file)
+    coco.convert_to_coco_json('two_three', out_file)
 
 def f(name):
     #curr_nrrd = PREFIX_DIR + LM_DIR + name + '.nrrd'
@@ -290,6 +335,8 @@ def train():
     return trainer.train()
 
 if __name__ == '__main__':
+    #gen_temp3((481,748,2451,1433), 'INHS_FISH_000452.jpg')
+    gen_temp3((319,825,3208,1938), 'INHS_FISH_000452.jpg')
     #white_out_background()
     #launch(train, 2)
     gen_dataset_json()

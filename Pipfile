@@ -15,7 +15,8 @@ ipython = "*"
 scikit-image = "*"
 pandas = "*"
 iopath = "*"
-model-zoo = "*"
+imutils = "*"
+jedi = "==0.17.2"
 
 [dev-packages]
 
