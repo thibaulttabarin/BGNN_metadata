@@ -30,8 +30,8 @@ from skimage import filters
 from skimage.morphology import flood_fill
 from random import shuffle
 
-PREFIX_DIR = '/home/HDD/bgnn_data/'
-IMAGES_DIR = 'blue_gill/'
+PREFIX_DIR = '/home/jcp353/bgnn_data/'
+IMAGES_DIR = 'full_imgs_large/'
 LM_DIR = 'labelmaps/validation/'
 SEGS = PREFIX_DIR + LM_DIR
 
@@ -100,29 +100,13 @@ def gen_temp3(bbox, name):
     im2 = Image.fromarray(arr3, 'L')
     im2.save(f'image_output/{name.split(".")[0]}_pixel_mask.jpg')
 
-"""
-def gen_coco_dataset2():
-    df = pd.read_csv(f'{PREFIX_DIR}inhs_bboxes.csv', sep=' ')
-    output = []
-    for i in range(len(df)):
-        #print(i)
-        name = df['Name'][i]
-        print(name)
-        l = df['x1'][i]
-        r = df['x2'][i]
-        t = df['y1'][i]
-        b = df['y2'][i]
-
-        im = Image.open(f'{PREFIX_DIR}{IMAGES_DIR}{name}')#.convert('L')
-"""
-
 def gen_coco_dataset2():
     df = pd.read_csv(f'{PREFIX_DIR}inhs_bboxes.csv', sep=' ')
     f = partial(wrapper2, df)
     #output = [f(0)]
     with Pool() as p:
         output = p.map(f, list(range(len(df))))
-        #output = p.map(f, list(range(1000)))
+        #output = p.map(f, list(range(10)))
     return [x for x in output if x is not None]
 
 def wrapper2(df, i):
@@ -167,34 +151,6 @@ def wrapper2(df, i):
     except FileNotFoundError:
         return None
 
-"""
-def wrapper2(df, i):
-    print(i)
-    name = df['Name'][i]
-    l = df['x1'][i]
-    r = df['x2'][i]
-    t = df['y1'][i]
-    b = df['y2'][i]
-
-    try:
-        im = Image.open(f'{PREFIX_DIR}{IMAGES_DIR}{name}').convert('L')
-        shape = np.array(im).shape
-        bbox = (l,t,r,b)
-        arr0 = np.array(im.crop(bbox))
-
-        val = filters.threshold_otsu(arr0)
-        print(val)
-        exit(0)
-        arr1 = np.where(arr0 < val, 1, 0).astype(np.uint8)
-        #arr2 = np.full(shape, 0).astype(np.uint8)
-        #arr2[t:b,l:r] = arr1
-        #im2 = Image.fromarray(arr2, 'L')
-        #im2.save("/home/joel/test_out.jpg")
-        return gen_dict(arr1, name, list(bbox))
-    except FileNotFoundError:
-        return None
-"""
-
 def gen_coco_dataset():
     segments = os.listdir(PREFIX_DIR + LM_DIR)
     names = [i.split('.')[0] for i in segments]
@@ -203,7 +159,7 @@ def gen_coco_dataset():
 
 def gen_dict(mask, name, bbox_in):
     fish_dict = {}
-    fish_dict['file_name'] = f'{PREFIX_DIR}{IMAGES_DIR}{name}'
+    fish_dict['file_name'] = name
     fish_dict['height'], fish_dict['width'] = mask.shape
     fish_dict['image_id'] = name.split('.')[0]
     annotate = {}
@@ -234,7 +190,7 @@ def bbox(mask):
     except:
         return None
 
-    return [float(x) for x in [rmin, cmin, rmax, cmax]]
+    return [float(x) for x in [cmin, rmin, cmax, rmax]]
 
 class Trainer(DefaultTrainer):
 

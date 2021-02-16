@@ -137,3 +137,4 @@ test_images_output/
 *.jpg
 *.JPG
 temp/
+output.bak/
