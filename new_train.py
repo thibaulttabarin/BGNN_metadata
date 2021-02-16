@@ -81,7 +81,7 @@ def main():
     cfg.SOLVER.IMS_PER_BATCH = 2
     cfg.SOLVER.BASE_LR = 0.02
     cfg.SOLVER.MAX_ITER = (
-        4000
+        500
     )
     cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = (
         128
@@ -95,28 +95,29 @@ def main():
 
     cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")
     # set the testing threshold for this model
-    cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.3
+    cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.1
     predictor = DefaultPredictor(cfg)
 
     i = 0
     names = os.listdir(test_images)
 
-    outputs = None
+    outputs = []
     for d in random.sample(names, 10):
         im = cv2.imread(test_images + d)
-        outputs = predictor(im)
+        outputs.append(predictor(im))
         v = Visualizer(im[:, :, ::-1],
                        metadata=metadata,
                        scale=0.8,
                        # remove the colors of unsegmented pixels
                        instance_mode=ColorMode.IMAGE_BW
         )
-        v = v.draw_instance_predictions(outputs["instances"].to("cpu"))
+        v = v.draw_instance_predictions(outputs[-1]["instances"].to("cpu"))
         i+=1
         print(f'{i}: {d}')
         os.makedirs('images', exist_ok=True)
         print(f'images/prediction_{d}')
         cv2.imwrite(f'images/prediction_{d}', v.get_image()[:, :, ::-1])
+    return outputs
 
 if __name__ == '__main__':
     main()
