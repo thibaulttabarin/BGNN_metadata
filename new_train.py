@@ -1,3 +1,4 @@
+import numpy as np
 import cv2
 import random
 from detectron2.utils.visualizer import Visualizer
@@ -13,6 +14,9 @@ from detectron2.utils.visualizer import ColorMode
 PREFIX_DIR = '/home/HDD/bgnn_data/'
 IMAGES_DIR = 'full_imgs/'
 IMS = PREFIX_DIR + IMAGES_DIR
+
+def distance(pt1, pt2):
+    return np.sqrt((pt1[0] - pt2[0])**2 + (pt1[1] - pt2[1])**2)
 
 """
 register_coco_instances('eyes', {}, PREFIX_DIR + 'eyes.json',
@@ -89,6 +93,7 @@ loc = '/home/HDD/bgnn_data/full_imgs_grouped/4/'
 names = os.listdir(loc)
 #names = [i.split('.')[0] for i in segments]
 
+outputs = None
 for d in random.sample(names, 10):
 #for d in ['INHS_FISH_008363.jpg', 'INHS_FISH_001980.jpg']:
 #for d in ['INHS_FISH_000452.jpg']:
@@ -104,7 +109,10 @@ for d in random.sample(names, 10):
     )
     v = v.draw_instance_predictions(outputs["instances"].to("cpu"))
     i+=1
-    print(i)
+    print(f'{i}: {d}')
+    pt1 = outputs['instances'][0].get('pred_boxes').get_centers()
+    pt2 = outputs['instances'][1].get('pred_boxes').get_centers()
+    print(f'\tPixels/Inch: {distance([float(pt1[0][0]), float(pt1[0][1])], [float(pt2[0][0]), float(pt2[0][1])])}')
     cv2.imwrite(f'temp/testing2/{d}', v.get_image()[:, :, ::-1])
     #exit(0)
 

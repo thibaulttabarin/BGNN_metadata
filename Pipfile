@@ -16,6 +16,7 @@ scikit-image = "*"
 pandas = "*"
 iopath = "*"
 imutils = "*"
+jedi = "==0.17.2"
 
 [dev-packages]
 
