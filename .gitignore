@@ -140,4 +140,4 @@ temp/
 output.bak/
 *.png
 data/
-overall_prefix.txt
+config/overall_prefix.txt
