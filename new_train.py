@@ -29,12 +29,26 @@ def visualize_input(metadata, count):
         print(f'images/{name}_{file_name}')
         cv2.imwrite(f'images/{name}_{file_name}', vis.get_image()[:, :, ::-1])
 
+def calc_scale(output):
+    # This needs fixed to actually get 'two' and 'three' and not
+    # just the first and second things
+    pt1 = output['instances'][0].get('pred_boxes').get_centers()
+    pt2 = output['instances'][1].get('pred_boxes').get_centers()
+    try:
+        scale = distance([float(pt1[0][0]), float(pt1[0][1])],
+                [float(pt2[0][0]), float(pt2[0][1])])
+        print(f'\tPixels/Inch: {scale}')
+        return scale
+    except:
+        print('Failed pixels/inch: {d}')
+        return None
+
 def main():
     prefix = open('config/overall_prefix.txt').readlines()[0].strip()
     conf = json.load(open('config/training_data.json'))
     metadata = None # Need it in outer block for reuse
     train = []
-    test_images = f'{prefix}full_imgs'
+    test_images = f'{prefix}full_imgs/'
 
     for img_dir in conf.keys():
         ims = f'{prefix}{img_dir}'
@@ -43,8 +57,8 @@ def main():
             name = dataset.split('.')[0]
             train.append(name)
             # This if only matters if you want to visualize a certain
-            # dataset with the `visualize_input` function. Otherwise,
-            # any of the datasets will work.
+            # dataset with the `visualize_input` function after the loop.
+            # Otherwise, any of the datasets will work.
             if name == '1':
                 metadata = Metadata(evaluator_type='coco', image_root=ims,
                         json_file=json_file,
@@ -58,9 +72,7 @@ def main():
     #visualize_input(metadata, 1)
 
     cfg = get_cfg()
-    cfg.merge_from_file(
-        "/home/joel/detectron2_clean/configs/COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml"
-    )
+    cfg.merge_from_file("config/mask_rcnn_R_50_FPN_3x.yaml")
     cfg.DATASETS.TRAIN = tuple(train)
     cfg.DATASETS.TEST = ()  # no metrics implemented yet
     cfg.DATALOADER.NUM_WORKERS = 2
@@ -69,7 +81,7 @@ def main():
     cfg.SOLVER.IMS_PER_BATCH = 2
     cfg.SOLVER.BASE_LR = 0.02
     cfg.SOLVER.MAX_ITER = (
-        2000
+        4000
     )
     cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = (
         128
@@ -82,53 +94,29 @@ def main():
     trainer.train()
 
     cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")
-    cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.3   # set the testing threshold for this model
+    # set the testing threshold for this model
+    cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.3
     predictor = DefaultPredictor(cfg)
 
-"""
-i = 0
-loc = '/home/jcp353/bgnn_data/uwzm1/'
-names = os.listdir(loc)
-#names = [i.split('.')[0] for i in segments]
+    i = 0
+    names = os.listdir(test_images)
 
-for d in random.sample(names, 100):
-    im = cv2.imread(loc + d)
-    outputs = predictor(im)
-    #print(outputs)
-    v = Visualizer(im[:, :, ::-1],
-                   metadata=the_metadata,
-                   scale=0.8,
-                   instance_mode=ColorMode.IMAGE_BW   # remove the colors of unsegmented pixels
-    )
-    v = v.draw_instance_predictions(outputs["instances"].to("cpu"))
-    i+=1
-    print(i)
-    cv2.imwrite(f'temp/testing/{d}', v.get_image()[:, :, ::-1])
-
-cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.3   # set the testing threshold for this model
-predictor = DefaultPredictor(cfg)
-
-i = 0
-loc = '/home/HDD/bgnn_data/full_imgs_grouped/4/'
-names = os.listdir(loc)
-
-outputs = None
-for d in random.sample(names, 10):
-    im = cv2.imread(IMS + d)
-    outputs = predictor(im)
-    v = Visualizer(im[:, :, ::-1],
-                   metadata=the_metadata,
-                   scale=0.8,
-                   instance_mode=ColorMode.IMAGE_BW   # remove the colors of unsegmented pixels
-    )
-    v = v.draw_instance_predictions(outputs["instances"].to("cpu"))
-    i+=1
-    print(f'{i}: {d}')
-    pt1 = outputs['instances'][0].get('pred_boxes').get_centers()
-    pt2 = outputs['instances'][1].get('pred_boxes').get_centers()
-    print(f'\tPixels/Inch: {distance([float(pt1[0][0]), float(pt1[0][1])], [float(pt2[0][0]), float(pt2[0][1])])}')
-    cv2.imwrite(f'temp/testing2/{d}', v.get_image()[:, :, ::-1])
-"""
+    outputs = None
+    for d in random.sample(names, 10):
+        im = cv2.imread(test_images + d)
+        outputs = predictor(im)
+        v = Visualizer(im[:, :, ::-1],
+                       metadata=metadata,
+                       scale=0.8,
+                       # remove the colors of unsegmented pixels
+                       instance_mode=ColorMode.IMAGE_BW
+        )
+        v = v.draw_instance_predictions(outputs["instances"].to("cpu"))
+        i+=1
+        print(f'{i}: {d}')
+        os.makedirs('images', exist_ok=True)
+        print(f'images/prediction_{d}')
+        cv2.imwrite(f'images/prediction_{d}', v.get_image()[:, :, ::-1])
 
 if __name__ == '__main__':
     main()
