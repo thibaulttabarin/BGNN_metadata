@@ -1,5 +1,3 @@
-#!/bin/python3
-
 import sys
 import os
 from multiprocessing import Pool
@@ -9,6 +7,7 @@ import nrrd
 from PIL import Image
 from functools import partial
 import matplotlib.pyplot as plt
+import pprint
 
 import torch
 
@@ -56,33 +55,74 @@ def gen_metadata(file_path):
     insts = output['instances']
     selector = insts.pred_classes==0
     selector = selector.cumsum(axis=0).cumsum(axis=0) == 1
+    results = {}
     for i in range(1, 5):
         temp = insts.pred_classes==i
         selector += temp.cumsum(axis=0).cumsum(axis=0) == 1
-    fish = insts[insts.pred_classes==0][0]
-    eye = insts[insts.pred_classes==2][0]
-    two = insts[insts.pred_classes==3][0]
-    three = insts[insts.pred_classes==4][0]
-    visualizer = Visualizer(im[:, :, ::-1], metadata=metadata, scale=1.0)
-    vis = visualizer.draw_instance_predictions(insts[selector].to('cpu'))
-    os.makedirs('images', exist_ok=True)
-    file_name = file_path.split('/')[-1]
-    print(f'images/gen_mask_{file_name}')
-    cv2.imwrite(f'images/gen_mask_prediction_{file_name}',
-            vis.get_image()[:, :, ::-1])
+    try:
+        fish = insts[insts.pred_classes==0][0]
+        results['fish'] = [{}]
+    except:
+        fish = None
+    results['is_fish'] = bool(fish)
+    try:
+        ruler = insts[insts.pred_classes==1][0]
+        print(ruler)
+        ruler_bbox = list(ruler.pred_boxes.tensor.cpu().numpy()[0])
+        results['ruler_bbox'] = [round(x) for x in ruler_bbox]
+    except:
+        ruler = None
+    results['is_ruler'] = bool(ruler)
+    try:
+        two = insts[insts.pred_classes==3][0]
+    except:
+        two = None
+    try:
+        three = insts[insts.pred_classes==4][0]
+    except:
+        three = None
+    if ruler and two and three:
+        scale = calc_scale(two, three)
+        results['scale'] = scale
+    if fish:
+        try:
+            eye = insts[insts.pred_classes==2][0]
+        except:
+            eye = None
+        results['fish'][0]['is_eye'] = bool(eye)
+        results['fish_count'] = len(insts[(insts.pred_classes==0).logical_and(
+                insts.scores > 0.3)])
+        visualizer = Visualizer(im[:, :, ::-1], metadata=metadata, scale=1.0)
+        vis = visualizer.draw_instance_predictions(insts[selector].to('cpu'))
+        os.makedirs('images', exist_ok=True)
+        file_name = file_path.split('/')[-1]
+        print(file_name)
+        cv2.imwrite(f'images/gen_mask_prediction_{file_name}',
+                vis.get_image()[:, :, ::-1])
 
-    bbox, mask = gen_mask(
-            fish.pred_boxes.tensor.cpu().numpy().astype('float64')[0],
-            file_path, file_name)
+        bbox, mask = gen_mask(
+                fish.pred_boxes.tensor.cpu().numpy().astype('float64')[0],
+                file_path, file_name)
+        results['fish'][0]['bbox'] = list(bbox)
+        #results['mask'] = mask.astype('uint8').tolist()
+        results['mask'] = '[...]'
 
-    centroid, evec = pca(mask)
-    eye_center = eye.pred_boxes.get_centers()[0].cpu().numpy()
-    dist1 = distance(centroid, eye_center + evec)
-    dist2 = distance(centroid, eye_center - evec)
-    if dist2 > dist1:
-        evec *= -1
+        centroid, evec = pca(mask)
+        results['fish'][0]['centroid'] = list(centroid)
+        if eye:
+            eye_center = eye.pred_boxes.get_centers()[0].cpu().numpy()
+            results['fish'][0]['eye_center'] = list(eye_center)
+            dist1 = distance(centroid, eye_center + evec)
+            dist2 = distance(centroid, eye_center - evec)
+            if dist2 > dist1:
+                evec *= -1
+        results['fish'][0]['primary_axis'] = list(evec)
+        if evec[0] <= 0.0:
+            results['fish'][0]['side'] = 'left'
+        else:
+            results['fish'][0]['side'] = 'right'
+    pprint.pprint(results)
 
-    scale = calc_scale(two, three)
 
 def pca(img):
     moments = cv2.moments(img)
@@ -109,7 +149,7 @@ def calc_scale(two, three):
     pt2 = three.pred_boxes.get_centers()[0]
     scale = distance([float(pt1[0]), float(pt1[1])],
             [float(pt2[0]), float(pt2[1])])
-    scale *= 2.54
+    scale /= 2.54
     #print(f'Pixels/cm: {scale}')
     return scale
 
@@ -129,7 +169,7 @@ def gen_mask(bbox, file_path, file_name):
         arr0 = np.array(im.crop(bbox))
         bb_size = arr0.size
 
-        val = filters.threshold_otsu(arr0) * 1.29
+        val = filters.threshold_otsu(arr0) * 1.19
         #val = filters.threshold_otsu(arr0) * 0.75
         arr1 = np.where(arr0 < val, 1, 0).astype(np.uint8)
         #arr1 = np.where(arr0 > val, 1, 0).astype(np.uint8)
