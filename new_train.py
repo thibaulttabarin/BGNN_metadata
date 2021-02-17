@@ -13,9 +13,6 @@ from detectron2.engine import DefaultTrainer, DefaultPredictor
 from detectron2.config import get_cfg
 from detectron2.utils.visualizer import ColorMode
 
-def distance(pt1, pt2):
-    return np.sqrt((pt1[0] - pt2[0])**2 + (pt1[1] - pt2[1])**2)
-
 def visualize_input(metadata, count):
     name = metadata.get("name")
     dataset_dicts = DatasetCatalog.get(name)
@@ -28,20 +25,6 @@ def visualize_input(metadata, count):
         os.makedirs('images', exist_ok=True)
         print(f'images/{name}_{file_name}')
         cv2.imwrite(f'images/{name}_{file_name}', vis.get_image()[:, :, ::-1])
-
-def calc_scale(output):
-    # This needs fixed to actually get 'two' and 'three' and not
-    # just the first and second things
-    pt1 = output['instances'][0].get('pred_boxes').get_centers()
-    pt2 = output['instances'][1].get('pred_boxes').get_centers()
-    try:
-        scale = distance([float(pt1[0][0]), float(pt1[0][1])],
-                [float(pt2[0][0]), float(pt2[0][1])])
-        print(f'\tPixels/Inch: {scale}')
-        return scale
-    except:
-        print('Failed pixels/inch: {d}')
-        return None
 
 def main():
     prefix = open('config/overall_prefix.txt').readlines()[0].strip()

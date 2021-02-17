@@ -8,6 +8,7 @@ import numpy as np
 import nrrd
 from PIL import Image
 from functools import partial
+import matplotlib.pyplot as plt
 
 import torch
 
@@ -59,7 +60,6 @@ def gen_metadata(file_path):
         temp = insts.pred_classes==i
         selector += temp.cumsum(axis=0).cumsum(axis=0) == 1
     fish = insts[insts.pred_classes==0][0]
-    ruler = insts[insts.pred_classes==1][0]
     eye = insts[insts.pred_classes==2][0]
     two = insts[insts.pred_classes==3][0]
     three = insts[insts.pred_classes==4][0]
@@ -70,8 +70,48 @@ def gen_metadata(file_path):
     print(f'images/gen_mask_{file_name}')
     cv2.imwrite(f'images/gen_mask_prediction_{file_name}',
             vis.get_image()[:, :, ::-1])
-    return gen_mask(fish.pred_boxes.tensor.cpu().numpy().astype('float64')[0],
+
+    bbox, mask = gen_mask(
+            fish.pred_boxes.tensor.cpu().numpy().astype('float64')[0],
             file_path, file_name)
+
+    centroid, evec = pca(mask)
+    eye_center = eye.pred_boxes.get_centers()[0].cpu().numpy()
+    dist1 = distance(centroid, eye_center + evec)
+    dist2 = distance(centroid, eye_center - evec)
+    if dist2 > dist1:
+        evec *= -1
+
+    scale = calc_scale(two, three)
+
+def pca(img):
+    moments = cv2.moments(img)
+    centroid = (int(moments["m10"] / moments["m00"]),
+            int(moments["m01"] / moments["m00"]))
+    #print(centroid)
+    y, x = np.nonzero(img)
+
+    x = x - np.mean(x)
+    y = y - np.mean(y)
+    coords = np.vstack([x, y])
+
+    cov = np.cov(coords)
+    evals, evecs = np.linalg.eig(cov)
+
+    sort_indices = np.argsort(evals)[::-1]
+    return (np.array(centroid), evecs[:, sort_indices[0]])
+
+def distance(pt1, pt2):
+    return np.sqrt((pt1[0] - pt2[0])**2 + (pt1[1] - pt2[1])**2)
+
+def calc_scale(two, three):
+    pt1 = two.pred_boxes.get_centers()[0]
+    pt2 = three.pred_boxes.get_centers()[0]
+    scale = distance([float(pt1[0]), float(pt1[1])],
+            [float(pt2[0]), float(pt2[1])])
+    scale *= 2.54
+    #print(f'Pixels/cm: {scale}')
+    return scale
 
 def gen_mask(bbox, file_path, file_name):
     l = round(bbox[0])
@@ -82,33 +122,52 @@ def gen_mask(bbox, file_path, file_name):
     im = Image.open(file_path).convert('L')
     arr2 = np.array(im)
     shape = arr2.shape
-    bbox = (l,t,r,b)
-    return bbox
-    arr0 = np.array(im.crop(bbox))
-    bb_size = arr0.size
+    done = False
+    while not done:
+        done = True
+        bbox = (l,t,r,b)
+        arr0 = np.array(im.crop(bbox))
+        bb_size = arr0.size
 
-    val = filters.threshold_otsu(arr0) * 1.29
-    #val = filters.threshold_otsu(arr0) * 0.75
-    arr1 = np.where(arr0 < val, 1, 0).astype(np.uint8)
-    #arr1 = np.where(arr0 > val, 1, 0).astype(np.uint8)
-    indicies = list(zip(*np.where(arr1 == 1)))
-    shuffle(indicies)
-    count = 0
-    for ind in indicies:
-        count += 1
-        if count > 10000:
-            print(f'ERROR on flood fill: {name}')
-            return None
-        temp = flood_fill(arr1, ind, 2)
-        temp = np.where(temp == 2, 1, 0)
-        percent = np.count_nonzero(temp) / bb_size
-        if percent > 0.1:
-            temp = flood_fill(temp, (0, 0), 2)
-            arr1 = np.where(temp != 2, 1, 0).astype(np.uint8)
-            break
-    arr3 = np.full(shape, 0).astype(np.uint8)
-    arr3[t:b,l:r] = arr1
+        val = filters.threshold_otsu(arr0) * 1.29
+        #val = filters.threshold_otsu(arr0) * 0.75
+        arr1 = np.where(arr0 < val, 1, 0).astype(np.uint8)
+        #arr1 = np.where(arr0 > val, 1, 0).astype(np.uint8)
+        indicies = list(zip(*np.where(arr1 == 1)))
+        shuffle(indicies)
+        count = 0
+        for ind in indicies:
+            count += 1
+            if count > 10000:
+                print(f'ERROR on flood fill: {name}')
+                return None
+            temp = flood_fill(arr1, ind, 2)
+            temp = np.where(temp == 2, 1, 0)
+            percent = np.count_nonzero(temp) / bb_size
+            if percent > 0.1:
+                temp = flood_fill(temp, (0, 0), 2)
+                arr1 = np.where(temp != 2, 1, 0).astype(np.uint8)
+                break
+        arr3 = np.full(shape, 0).astype(np.uint8)
+        arr3[t:b,l:r] = arr1
+        if np.any(arr3[t:b,l] != 0):
+            l -= 1
+            done = False
+        if np.any(arr3[t:b,r] != 0):
+            r += 1
+            done = False
+        if np.any(arr3[t,l:r] != 0):
+            t -= 1
+            done = False
+        if np.any(arr3[b,l:r] != 0):
+            b += 1
+            done = False
     arr4 = np.where(arr3 == 1, 255, 0).astype(np.uint8)
+    (l,t,r,b) = shrink_bbox(arr3)
+    arr4[t:b,l] = 175
+    arr4[t:b,r] = 175
+    arr4[t,l:r] = 175
+    arr4[b,l:r] = 175
     im2 = Image.fromarray(arr4, 'L')
     im2.save(f'images/gen_mask_mask_{file_name}')
     return (bbox, arr3)
@@ -222,7 +281,7 @@ def gen_coco_dataset():
         return p.map(lambda_wrapper, names)
 
 #https://stackoverflow.com/questions/31400769/bounding-box-of-numpy-array
-def bbox(mask):
+def shrink_bbox(mask):
     rows = np.any(mask, axis=1)
     cols = np.any(mask, axis=0)
     #print(mask)
@@ -235,7 +294,7 @@ def bbox(mask):
     except:
         return None
 
-    return [float(x) for x in [cmin, rmin, cmax, rmax]]
+    return (cmin, rmin, cmax, rmax)
 
 def f(name):
     #curr_nrrd = PREFIX_DIR + LM_DIR + name + '.nrrd'
