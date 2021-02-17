@@ -141,3 +141,7 @@ output.bak/
 *.png
 data/
 config/overall_prefix.txt
+*.cut
+*.aux
+*.out
+*.pdf
