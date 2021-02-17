@@ -1,5 +1,6 @@
 #!/bin/python3
 
+import sys
 import os
 from multiprocessing import Pool
 import pandas as pd
@@ -25,10 +26,92 @@ from detectron2.data import DatasetMapper
 from detectron2.config import get_cfg
 from detectron2.checkpoint import DetectionCheckpointer
 from detectron2.modeling import build_model
+from detectron2.engine import DefaultPredictor
+from detectron2.data import Metadata
+from detectron2.utils.visualizer import Visualizer
+
+import cv2
 
 from skimage import filters
 from skimage.morphology import flood_fill
 from random import shuffle
+
+def gen_metadata(file_path):
+    cfg = get_cfg()
+    cfg.merge_from_file("config/mask_rcnn_R_50_FPN_3x.yaml")
+    cfg.MODEL.ROI_HEADS.NUM_CLASSES = 5
+    cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")
+    cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.05
+    predictor = DefaultPredictor(cfg)
+    im = cv2.imread(file_path)
+    metadata = Metadata(evaluator_type='coco', image_root='.',
+            json_file='',
+            name='metadata',
+            thing_classes=['fish', 'ruler', 'eye', 'two', 'three'],
+            thing_dataset_id_to_contiguous_id=
+                {1: 0, 2: 1, 3: 2, 4: 3, 5: 4}
+            )
+    output = predictor(im)
+    insts = output['instances']
+    selector = insts.pred_classes==0
+    selector = selector.cumsum(axis=0).cumsum(axis=0) == 1
+    for i in range(1, 5):
+        temp = insts.pred_classes==i
+        selector += temp.cumsum(axis=0).cumsum(axis=0) == 1
+    fish = insts[insts.pred_classes==0][0]
+    ruler = insts[insts.pred_classes==1][0]
+    eye = insts[insts.pred_classes==2][0]
+    two = insts[insts.pred_classes==3][0]
+    three = insts[insts.pred_classes==4][0]
+    visualizer = Visualizer(im[:, :, ::-1], metadata=metadata, scale=1.0)
+    vis = visualizer.draw_instance_predictions(insts[selector].to('cpu'))
+    os.makedirs('images', exist_ok=True)
+    file_name = file_path.split('/')[-1]
+    print(f'images/gen_mask_{file_name}')
+    cv2.imwrite(f'images/gen_mask_prediction_{file_name}',
+            vis.get_image()[:, :, ::-1])
+    return gen_mask(fish.pred_boxes.tensor.cpu().numpy().astype('float64')[0],
+            file_path, file_name)
+
+def gen_mask(bbox, file_path, file_name):
+    l = round(bbox[0])
+    r = round(bbox[2])
+    t = round(bbox[1])
+    b = round(bbox[3])
+
+    im = Image.open(file_path).convert('L')
+    arr2 = np.array(im)
+    shape = arr2.shape
+    bbox = (l,t,r,b)
+    return bbox
+    arr0 = np.array(im.crop(bbox))
+    bb_size = arr0.size
+
+    val = filters.threshold_otsu(arr0) * 1.29
+    #val = filters.threshold_otsu(arr0) * 0.75
+    arr1 = np.where(arr0 < val, 1, 0).astype(np.uint8)
+    #arr1 = np.where(arr0 > val, 1, 0).astype(np.uint8)
+    indicies = list(zip(*np.where(arr1 == 1)))
+    shuffle(indicies)
+    count = 0
+    for ind in indicies:
+        count += 1
+        if count > 10000:
+            print(f'ERROR on flood fill: {name}')
+            return None
+        temp = flood_fill(arr1, ind, 2)
+        temp = np.where(temp == 2, 1, 0)
+        percent = np.count_nonzero(temp) / bb_size
+        if percent > 0.1:
+            temp = flood_fill(temp, (0, 0), 2)
+            arr1 = np.where(temp != 2, 1, 0).astype(np.uint8)
+            break
+    arr3 = np.full(shape, 0).astype(np.uint8)
+    arr3[t:b,l:r] = arr1
+    arr4 = np.where(arr3 == 1, 255, 0).astype(np.uint8)
+    im2 = Image.fromarray(arr4, 'L')
+    im2.save(f'images/gen_mask_mask_{file_name}')
+    return (bbox, arr3)
 
 def gen_temp3(bbox, name):
     #print(bbox)
@@ -165,3 +248,5 @@ def f(name):
                 x[i][j] = np.array([255,255,255])
     return x
 
+if __name__ == '__main__':
+    gen_metadata(sys.argv[1])
