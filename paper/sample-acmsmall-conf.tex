@@ -1,4 +1,6 @@
-\documentclass[acmsmall,screen,review]{acmart}
+%\documentclass[acmsmall,screen,review]{acmart}
+\documentclass[acmconf,screen,review]{acmart}
+\usepackage{todonotes}
 
 %%
 %% \BibTeX command to typeset BibTeX logo in the docs
@@ -85,7 +87,7 @@
 %% The abstract is a short summary of the work to be presented in the
 %% article.
 \begin{abstract}
-  A clear and well-documented \LaTeX\ document is presented as an
+  A clear\todo{test} and well-documented \LaTeX\ document is presented as an
   article formatted for publication by ACM in a conference proceedings
   or journal publication. Based on the ``acmart'' document class, this
   article presents and explains many of the common variations, as well
@@ -130,9 +132,9 @@
 \maketitle
 
 \section{Introduction}
-Text
+Text~\ref{demo-intro}~\todo{Liney}
 \section{Background}
-Text
+Text~\todo[noline]{Do this}
 \subsection{Related Work}
 Text
 \section{Objectives}
@@ -140,13 +142,13 @@ Text
 \section{Data Analysis}
 Text
 \section{Discussion}
-Text
+Text \textit{texty text}~\cite{Lamport:LaTeX}
 \section{Conclusion}
-Text
+Text \textbf{text}
 
 \pagebreak{}
 
-\section{Introduction}
+\section{Introduction}~\label{demo-intro}
 ACM's consolidated article template, introduced in 2017, provides a
 consistent \LaTeX\ style for use across ACM publications, and
 incorporates accessibility and metadata-extraction functionality
