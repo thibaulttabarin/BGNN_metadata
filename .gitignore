@@ -145,3 +145,4 @@ config/overall_prefix.txt
 *.aux
 *.out
 *.pdf
+*.gz
