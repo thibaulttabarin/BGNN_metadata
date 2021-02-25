@@ -117,11 +117,33 @@ def gen_metadata(file_path):
             fground = im_crop.reshape(-1)[f_bbox_crop.reshape(-1)]
             bground = im_crop.reshape(-1)[np.invert(f_bbox_crop.reshape(-1))]
             sign = -1 if np.mean(bground) > np.mean(fground) else 1
-            #print(np.std(fground))
-            #print(np.std(bground))
+            #print(np.mean(fground))
+            #print(np.mean(bground))
             #print(len(curr_fish.pred_masks[0].cpu().numpy().reshape(-1)))
             bbox, mask = gen_mask(bbox_d, file_path, file_name,
                     val=np.mean(bground) + sign * np.std(bground) * 2)
+            bbox_d = bbox
+            im_crop = im_gray[bbox_d[1]:bbox_d[3],bbox_d[0]:bbox_d[2]]
+            f_bbox_crop = curr_fish.pred_masks[0].cpu().numpy()\
+                    [bbox_d[1]:bbox_d[3],bbox_d[0]:bbox_d[2]]
+            fground = im_crop.reshape(-1)[f_bbox_crop.reshape(-1)]
+            bground = im_crop.reshape(-1)[np.invert(f_bbox_crop.reshape(-1))]
+            sign = -1 if np.mean(bground) > np.mean(fground) else 1
+            #print(np.mean(fground))
+            #print(np.mean(bground))
+            #im_crop = im_gray[bbox[1]:bbox[3],bbox[0]:bbox[2]]
+            #mask_crop = mask[bbox[1]:bbox[3],bbox[0]:bbox[2]]
+            #print(im_gray)
+            #print(mask_crop)
+            #exit(0)
+            #fground = im_crop.reshape(-1)[mask_crop.reshape(-1)]
+            #bground = im_crop.reshape(-1)[np.invert(mask_crop.reshape(-1))]
+            results['fish'][i]['foreground'] = {}
+            results['fish'][i]['foreground']['mean'] = np.mean(fground)
+            results['fish'][i]['foreground']['std'] = np.std(fground)
+            results['fish'][i]['background'] = {}
+            results['fish'][i]['background']['mean'] = np.mean(bground)
+            results['fish'][i]['background']['std'] = np.std(bground)
             results['fish'][i]['bbox'] = list(bbox)
             #results['mask'] = mask.astype('uint8').tolist()
 
