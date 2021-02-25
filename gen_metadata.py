@@ -41,7 +41,7 @@ def gen_metadata(file_path):
     cfg.merge_from_file("config/mask_rcnn_R_50_FPN_3x.yaml")
     cfg.MODEL.ROI_HEADS.NUM_CLASSES = 5
     cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")
-    cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.05
+    cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.3
     predictor = DefaultPredictor(cfg)
     im = cv2.imread(file_path)
     metadata = Metadata(evaluator_type='coco', image_root='.',
@@ -59,20 +59,19 @@ def gen_metadata(file_path):
     for i in range(1, 5):
         temp = insts.pred_classes==i
         selector += temp.cumsum(axis=0).cumsum(axis=0) == 1
-    try:
-        fish = insts[insts.pred_classes==0][0]
+    fish = insts[insts.pred_classes==0]
+    if len(fish):
         results['fish'] = [{}]
-    except:
+    else:
         fish = None
-    results['is_fish'] = bool(fish)
+    results['has_fish'] = bool(fish)
     try:
         ruler = insts[insts.pred_classes==1][0]
-        print(ruler)
         ruler_bbox = list(ruler.pred_boxes.tensor.cpu().numpy()[0])
         results['ruler_bbox'] = [round(x) for x in ruler_bbox]
     except:
         ruler = None
-    results['is_ruler'] = bool(ruler)
+    results['has_ruler'] = bool(ruler)
     try:
         two = insts[insts.pred_classes==3][0]
     except:
@@ -84,45 +83,66 @@ def gen_metadata(file_path):
     if ruler and two and three:
         scale = calc_scale(two, three)
         results['scale'] = scale
+    visualizer = Visualizer(im[:, :, ::-1], metadata=metadata, scale=1.0)
+    vis = visualizer.draw_instance_predictions(insts[selector].to('cpu'))
+    os.makedirs('images', exist_ok=True)
+    file_name = file_path.split('/')[-1]
+    print(file_name)
+    cv2.imwrite(f'images/gen_mask_prediction_{file_name}',
+            vis.get_image()[:, :, ::-1])
     if fish:
         try:
-            eye = insts[insts.pred_classes==2][0]
+            eyes = insts[insts.pred_classes==2]
         except:
-            eye = None
-        results['fish'][0]['is_eye'] = bool(eye)
-        results['fish_count'] = len(insts[(insts.pred_classes==0).logical_and(
-                insts.scores > 0.3)])
-        visualizer = Visualizer(im[:, :, ::-1], metadata=metadata, scale=1.0)
-        vis = visualizer.draw_instance_predictions(insts[selector].to('cpu'))
-        os.makedirs('images', exist_ok=True)
-        file_name = file_path.split('/')[-1]
-        print(file_name)
-        cv2.imwrite(f'images/gen_mask_prediction_{file_name}',
-                vis.get_image()[:, :, ::-1])
+            eyes = None
+        for i in range(len(fish)):
+            curr_fish = fish[i]
+            if eyes:
+                eye_ols = [overlap(curr_fish, eyes[j]) for j in
+                        range(len(eyes))]
+                max_ind = max(range(len(eye_ols)), key=eye_ols.__getitem__)
+                eye = eyes[max_ind]
+            else:
+                eye = None
+            results['fish'][i]['has_eye'] = bool(eye)
+            results['fish_count'] = len(insts[(insts.pred_classes==0).
+                logical_and(insts.scores > 0.3)])
 
-        bbox, mask = gen_mask(
-                fish.pred_boxes.tensor.cpu().numpy().astype('float64')[0],
-                file_path, file_name)
-        results['fish'][0]['bbox'] = list(bbox)
-        #results['mask'] = mask.astype('uint8').tolist()
-        results['mask'] = '[...]'
+            bbox, mask = gen_mask(
+                    fish.pred_boxes.tensor.cpu().numpy().astype('float64')[i],
+                    file_path, file_name)
+            results['fish'][i]['bbox'] = list(bbox)
+            #results['mask'] = mask.astype('uint8').tolist()
 
-        centroid, evec = pca(mask)
-        results['fish'][0]['centroid'] = list(centroid)
-        if eye:
-            eye_center = eye.pred_boxes.get_centers()[0].cpu().numpy()
-            results['fish'][0]['eye_center'] = list(eye_center)
-            dist1 = distance(centroid, eye_center + evec)
-            dist2 = distance(centroid, eye_center - evec)
-            if dist2 > dist1:
-                evec *= -1
-        results['fish'][0]['primary_axis'] = list(evec)
-        if evec[0] <= 0.0:
-            results['fish'][0]['side'] = 'left'
-        else:
-            results['fish'][0]['side'] = 'right'
+            centroid, evec = pca(mask)
+            results['fish'][i]['centroid'] = list(centroid)
+            if eye:
+                #print(fish)
+                #print(overlap(fish[i], eye))
+                #exit(0)
+                eye_center = eye.pred_boxes.get_centers()[i].cpu().numpy()
+                results['fish'][i]['eye_center'] = list(eye_center)
+                dist1 = distance(centroid, eye_center + evec)
+                dist2 = distance(centroid, eye_center - evec)
+                if dist2 > dist1:
+                    evec *= -1
+                if evec[0] <= 0.0:
+                    results['fish'][i]['side'] = 'left'
+                else:
+                    results['fish'][i]['side'] = 'right'
+            results['fish'][i]['primary_axis'] = list(evec)
     pprint.pprint(results)
 
+def overlap(fish, eye):
+    fish = list(fish.pred_boxes.tensor.cpu().numpy()[0])
+    eye = list(eye.pred_boxes.tensor.cpu().numpy()[0])
+    if not (fish[0] < eye[2] and eye[0] < fish[2] and fish[1] < eye[3]
+            and eye[1] < eye[3]):
+        return 0
+    pairs = list(zip(fish, eye))
+    ol_area = (max(pairs[0]) - min(pairs[2])) * (max(pairs[1]) - min(pairs[3]))
+    ol_pct = ol_area / ((eye[0] - eye[2]) * (eye[1] - eye[3]))
+    return ol_pct
 
 def pca(img):
     moments = cv2.moments(img)
