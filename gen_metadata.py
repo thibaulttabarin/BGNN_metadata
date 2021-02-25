@@ -101,6 +101,8 @@ def gen_metadata(file_path):
             if eyes:
                 eye_ols = [overlap(curr_fish, eyes[j]) for j in
                         range(len(eyes))]
+                # TODO: Add pred score as a secondary key in event there are
+                #       more than one 1.0 overlap eyes
                 max_ind = max(range(len(eye_ols)), key=eye_ols.__getitem__)
                 eye = eyes[max_ind]
             else:
@@ -117,9 +119,6 @@ def gen_metadata(file_path):
             fground = im_crop.reshape(-1)[f_bbox_crop.reshape(-1)]
             bground = im_crop.reshape(-1)[np.invert(f_bbox_crop.reshape(-1))]
             sign = -1 if np.mean(bground) > np.mean(fground) else 1
-            #print(np.mean(fground))
-            #print(np.mean(bground))
-            #print(len(curr_fish.pred_masks[0].cpu().numpy().reshape(-1)))
             bbox, mask = gen_mask(bbox_d, file_path, file_name,
                     val=np.mean(bground) + sign * np.std(bground) * 2)
             bbox_d = bbox
@@ -128,16 +127,6 @@ def gen_metadata(file_path):
                     [bbox_d[1]:bbox_d[3],bbox_d[0]:bbox_d[2]]
             fground = im_crop.reshape(-1)[f_bbox_crop.reshape(-1)]
             bground = im_crop.reshape(-1)[np.invert(f_bbox_crop.reshape(-1))]
-            sign = -1 if np.mean(bground) > np.mean(fground) else 1
-            #print(np.mean(fground))
-            #print(np.mean(bground))
-            #im_crop = im_gray[bbox[1]:bbox[3],bbox[0]:bbox[2]]
-            #mask_crop = mask[bbox[1]:bbox[3],bbox[0]:bbox[2]]
-            #print(im_gray)
-            #print(mask_crop)
-            #exit(0)
-            #fground = im_crop.reshape(-1)[mask_crop.reshape(-1)]
-            #bground = im_crop.reshape(-1)[np.invert(mask_crop.reshape(-1))]
             results['fish'][i]['foreground'] = {}
             results['fish'][i]['foreground']['mean'] = np.mean(fground)
             results['fish'][i]['foreground']['std'] = np.std(fground)
@@ -145,15 +134,20 @@ def gen_metadata(file_path):
             results['fish'][i]['background']['mean'] = np.mean(bground)
             results['fish'][i]['background']['std'] = np.std(bground)
             results['fish'][i]['bbox'] = list(bbox)
-            #results['mask'] = mask.astype('uint8').tolist()
+            #results['fish'][i]['mask'] = mask.astype('uint8').tolist()
+            results['fish'][i]['mask'] = '[...]'
 
             centroid, evec = pca(mask)
+            if scale:
+                results['fish'][i]['length'] = fish_length(mask, centroid,
+                        evec, scale)
             results['fish'][i]['centroid'] = list(centroid)
             if eye:
                 #print(fish)
                 #print(overlap(fish[i], eye))
                 #exit(0)
-                eye_center = eye.pred_boxes.get_centers()[i].cpu().numpy()
+                eye_center = [round(x) for x in
+                        eye.pred_boxes.get_centers()[i].cpu().numpy()]
                 results['fish'][i]['eye_center'] = list(eye_center)
                 dist1 = distance(centroid, eye_center + evec)
                 dist2 = distance(centroid, eye_center - evec)
@@ -165,6 +159,28 @@ def gen_metadata(file_path):
                     results['fish'][i]['side'] = 'right'
             results['fish'][i]['primary_axis'] = list(evec)
     pprint.pprint(results)
+
+def fish_length(mask, centroid, evec, scale):
+    m1 = evec[1] / evec[0]
+    m2 = evec[0] / evec[1]
+    x1 = centroid[0]
+    y1 = centroid[1]
+    x_min = centroid[0]
+    x_max = centroid[0]
+    for x in range(mask.shape[1]):
+        for y in range(mask.shape[0]):
+            if mask[y,x]:
+                x2 = x
+                y2 = y
+                x_calc = (-y1+y2+m1*x1-m2*x2)/(m1-m2)
+                y_calc = m1*(x-x1)+y1
+                if x_calc > x_max:
+                    x_max = x_calc
+                    y_max = y_calc
+                elif x_calc < x_min:
+                    x_min = x_calc
+                    y_min = y_calc
+    return distance((x_max, y_max), (x_min, y_min)) / scale
 
 def overlap(fish, eye):
     fish = list(fish.pred_boxes.tensor.cpu().numpy()[0])
