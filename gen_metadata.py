@@ -1,3 +1,5 @@
+import math
+import json
 import sys
 import os
 from multiprocessing import Pool
@@ -88,7 +90,7 @@ def gen_metadata(file_path):
     vis = visualizer.draw_instance_predictions(insts[selector].to('cpu'))
     os.makedirs('images', exist_ok=True)
     file_name = file_path.split('/')[-1]
-    print(file_name)
+    #print(file_name)
     cv2.imwrite(f'images/gen_mask_prediction_{file_name}',
             vis.get_image()[:, :, ::-1])
     if fish:
@@ -157,8 +159,39 @@ def gen_metadata(file_path):
                     results['fish'][i]['side'] = 'left'
                 else:
                     results['fish'][i]['side'] = 'right'
+                results['fish'][i]['clock_value'] = clock_value(evec)
             results['fish'][i]['primary_axis'] = list(evec)
-    pprint.pprint(results)
+    #pprint.pprint(results)
+    return {file_name: results}
+
+def angle(vec1, vec2):
+    return math.acos(vec1.dot(vec2) / (np.linalg.norm(vec1) *
+        np.linalg.norm(vec2)))
+
+def clock_value(evec):
+    if evec[0] < 0:
+        if evec[1] < 0:
+            comp = np.array([0,-1])
+            start = 6
+        else:
+            comp = np.array([-1,0])
+            start = 9
+    else:
+        if evec[1] < 0:
+            comp = np.array([1,0])
+            start = 3
+        else:
+            comp = np.array([0,0])
+            start = 0
+    ang = angle(comp, evec)
+    clock = start + ang
+    if clock > 11.5:
+        clock = 12
+    elif clock < 0.5:
+        clock = 12
+    elif clock >= 0.5 and clock < 1.0:
+        clock = 1
+    return round(clock)
 
 def fish_length(mask, centroid, evec, scale):
     m1 = evec[1] / evec[0]
@@ -302,5 +335,17 @@ def shrink_bbox(mask):
 
     return (cmin, rmin, cmax, rmax)
 
+def main():
+    direct = sys.argv[1]
+    files = [os.path.join(direct, f) for f in direct]
+    with Pool() as p:
+        results = p.map(gen_metadata, files)
+    output = {}
+    for i in results:
+        output[i.keys()[0]]: i.values()[0]
+    with open('metadata.json', 'w') as f:
+        json.dump(output, f)
+
 if __name__ == '__main__':
-    gen_metadata(sys.argv[1])
+    #gen_metadata(sys.argv[1])
+    main()

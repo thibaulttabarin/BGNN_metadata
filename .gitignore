@@ -146,3 +146,4 @@ config/overall_prefix.txt
 *.out
 *.pdf
 *.gz
+*.json
