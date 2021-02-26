@@ -90,7 +90,7 @@ def gen_metadata(file_path):
     vis = visualizer.draw_instance_predictions(insts[selector].to('cpu'))
     os.makedirs('images', exist_ok=True)
     file_name = file_path.split('/')[-1]
-    print(file_name)
+    #print(file_name)
     cv2.imwrite(f'images/gen_mask_prediction_{file_name}',
             vis.get_image()[:, :, ::-1])
     if fish:
@@ -139,18 +139,15 @@ def gen_metadata(file_path):
             results['fish'][i]['background']['mean'] = np.mean(bground)
             results['fish'][i]['background']['std'] = np.std(bground)
             results['fish'][i]['bbox'] = list(bbox)
-            #results['fish'][i]['mask'] = mask.astype('uint8').tolist()
+            results['fish'][i]['mask'] = mask.astype('uint8').tolist()
             results['fish'][i]['mask'] = '[...]'
 
             centroid, evec = pca(mask)
             if scale:
                 results['fish'][i]['length'] = fish_length(mask, centroid,
                         evec, scale)
-            results['fish'][i]['centroid'] = list(centroid)
+            results['fish'][i]['centroid'] = centroid.tolist()
             if eye:
-                #print(fish)
-                #print(overlap(fish[i], eye))
-                #exit(0)
                 eye_center = [round(x) for x in
                         eye.pred_boxes.get_centers()[i].cpu().numpy()]
                 results['fish'][i]['eye_center'] = list(eye_center)
@@ -162,7 +159,7 @@ def gen_metadata(file_path):
                     results['fish'][i]['side'] = 'left'
                 else:
                     results['fish'][i]['side'] = 'right'
-                results['fish'][i]['clock_value'] = clock_value(evec)
+                results['fish'][i]['clock_value'] = clock_value(evec, file_name)
             results['fish'][i]['primary_axis'] = list(evec)
     #pprint.pprint(results)
     return {file_name: results}
@@ -171,9 +168,10 @@ def angle(vec1, vec2):
     return math.acos(vec1.dot(vec2) / (np.linalg.norm(vec1) *
         np.linalg.norm(vec2)))
 
-def clock_value(evec):
+def clock_value(evec, file_name):
     if evec[0] < 0:
         if evec[1] < 0:
+            print(file_name)
             comp = np.array([0,-1])
             start = 6
         else:
@@ -192,8 +190,7 @@ def clock_value(evec):
         clock = 12
     elif clock < 0.5:
         clock = 12
-    elif clock >= 0.5 and clock < 1.0:
-        clock = 1
+    print(clock)
     return round(clock)
 
 def fish_length(mask, centroid, evec, scale):
@@ -340,14 +337,18 @@ def shrink_bbox(mask):
 
 def main():
     direct = sys.argv[1]
-    files = [entry.path for entry in os.scandir(direct)]
+    if os.path.isdir(direct):
+        files = [entry.path for entry in os.scandir(direct)]
+    else:
+        files = [direct]
     print(files)
-    with Pool(2) as p:
+    with Pool(3) as p:
         results = p.map(gen_metadata, files)
     #results = map(gen_metadata, files)
     output = {}
     for i in results:
-        output[list(i.keys())[0]]: list(i.values())[0]
+        output[list(i.keys())[0]] = list(i.values())[0]
+    #print(output)
     with open('metadata.json', 'w') as f:
         json.dump(output, f)
 
