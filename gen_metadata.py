@@ -90,7 +90,7 @@ def gen_metadata(file_path):
     vis = visualizer.draw_instance_predictions(insts[selector].to('cpu'))
     os.makedirs('images', exist_ok=True)
     file_name = file_path.split('/')[-1]
-    #print(file_name)
+    print(file_name)
     cv2.imwrite(f'images/gen_mask_prediction_{file_name}',
             vis.get_image()[:, :, ::-1])
     if fish:
@@ -154,7 +154,10 @@ def gen_metadata(file_path):
                 dist1 = distance(centroid, eye_center + evec)
                 dist2 = distance(centroid, eye_center - evec)
                 if dist2 > dist1:
+                    #print("HERE")
+                    #print(evec)
                     evec *= -1
+                    #print(evec)
                 if evec[0] <= 0.0:
                     results['fish'][i]['side'] = 'left'
                 else:
@@ -171,7 +174,7 @@ def angle(vec1, vec2):
 def clock_value(evec, file_name):
     if evec[0] < 0:
         if evec[1] < 0:
-            print(file_name)
+            #print(file_name)
             comp = np.array([0,-1])
             start = 6
         else:
@@ -190,7 +193,7 @@ def clock_value(evec, file_name):
         clock = 12
     elif clock < 0.5:
         clock = 12
-    print(clock)
+    #print(evec)
     return round(clock)
 
 def fish_length(mask, centroid, evec, scale):
@@ -239,9 +242,14 @@ def pca(img):
 
     cov = np.cov(coords)
     evals, evecs = np.linalg.eig(cov)
+    if evals[0] > evals[1]:
+        evec = evecs[0]
+    else:
+        evec = evecs[1]
 
-    sort_indices = np.argsort(evals)[::-1]
-    return (np.array(centroid), evecs[:, sort_indices[0]])
+    #sort_indices = np.argsort(evals)[::-1]
+    #return (np.array(centroid), evecs[:, sort_indices[0]])
+    return (np.array(centroid), evec)
 
 def distance(pt1, pt2):
     return np.sqrt((pt1[0] - pt2[0])**2 + (pt1[1] - pt2[1])**2)
