@@ -90,7 +90,7 @@ def gen_metadata(file_path):
     vis = visualizer.draw_instance_predictions(insts[selector].to('cpu'))
     os.makedirs('images', exist_ok=True)
     file_name = file_path.split('/')[-1]
-    #print(file_name)
+    print(file_name)
     cv2.imwrite(f'images/gen_mask_prediction_{file_name}',
             vis.get_image()[:, :, ::-1])
     if fish:
@@ -121,8 +121,11 @@ def gen_metadata(file_path):
             fground = im_crop.reshape(-1)[f_bbox_crop.reshape(-1)]
             bground = im_crop.reshape(-1)[np.invert(f_bbox_crop.reshape(-1))]
             sign = -1 if np.mean(bground) > np.mean(fground) else 1
-            bbox, mask = gen_mask(bbox_d, file_path, file_name,
-                    val=np.mean(bground) + sign * np.std(bground) * 2)
+            try:
+                bbox, mask = gen_mask(bbox_d, file_path, file_name,
+                        val=np.mean(bground) + sign * np.std(bground) * 2)
+            except:
+                return {file_name: {'errored': True}}
             bbox_d = bbox
             im_crop = im_gray[bbox_d[1]:bbox_d[3],bbox_d[0]:bbox_d[2]]
             f_bbox_crop = curr_fish.pred_masks[0].cpu().numpy()\
@@ -337,12 +340,14 @@ def shrink_bbox(mask):
 
 def main():
     direct = sys.argv[1]
-    files = [os.path.join(direct, f) for f in direct]
-    with Pool() as p:
+    files = [entry.path for entry in os.scandir(direct)]
+    print(files)
+    with Pool(2) as p:
         results = p.map(gen_metadata, files)
+    #results = map(gen_metadata, files)
     output = {}
     for i in results:
-        output[i.keys()[0]]: i.values()[0]
+        output[list(i.keys())[0]]: list(i.values())[0]
     with open('metadata.json', 'w') as f:
         json.dump(output, f)
 
