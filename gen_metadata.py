@@ -38,6 +38,8 @@ from skimage import filters
 from skimage.morphology import flood_fill
 from random import shuffle
 
+VAL_SCALE_FAC = 0.3
+
 def gen_metadata(file_path):
     cfg = get_cfg()
     cfg.merge_from_file("config/mask_rcnn_R_50_FPN_3x.yaml")
@@ -86,12 +88,14 @@ def gen_metadata(file_path):
     if ruler and two and three:
         scale = calc_scale(two, three)
         results['scale'] = scale
+    else:
+        scale = None
     visualizer = Visualizer(im[:, :, ::-1], metadata=metadata, scale=1.0)
     vis = visualizer.draw_instance_predictions(insts[selector].to('cpu'))
     os.makedirs('images', exist_ok=True)
     file_name = file_path.split('/')[-1]
     print(file_name)
-    cv2.imwrite(f'images/gen_mask_prediction_{file_name}',
+    cv2.imwrite(f'images/gen_mask_prediction_{file_name}.jpg',
             vis.get_image()[:, :, ::-1])
     if fish:
         try:
@@ -120,75 +124,127 @@ def gen_metadata(file_path):
                     [bbox_d[1]:bbox_d[3],bbox_d[0]:bbox_d[2]]
             fground = im_crop.reshape(-1)[f_bbox_crop.reshape(-1)]
             bground = im_crop.reshape(-1)[np.invert(f_bbox_crop.reshape(-1))]
-            sign = -1 if np.mean(bground) > np.mean(fground) else 1
-            try:
-                bbox, mask = gen_mask(bbox_d, file_path, file_name,
-                        val=np.mean(bground) + sign * np.std(bground) * 2)
-            except:
-                return {file_name: {'errored': True}}
-            bbox_d = bbox
-            im_crop = im_gray[bbox_d[1]:bbox_d[3],bbox_d[0]:bbox_d[2]]
-            f_bbox_crop = curr_fish.pred_masks[0].cpu().numpy()\
-                    [bbox_d[1]:bbox_d[3],bbox_d[0]:bbox_d[2]]
-            fground = im_crop.reshape(-1)[f_bbox_crop.reshape(-1)]
-            bground = im_crop.reshape(-1)[np.invert(f_bbox_crop.reshape(-1))]
-            results['fish'][i]['foreground'] = {}
-            results['fish'][i]['foreground']['mean'] = np.mean(fground)
-            results['fish'][i]['foreground']['std'] = np.std(fground)
-            results['fish'][i]['background'] = {}
-            results['fish'][i]['background']['mean'] = np.mean(bground)
-            results['fish'][i]['background']['std'] = np.std(bground)
-            results['fish'][i]['bbox'] = list(bbox)
-            results['fish'][i]['mask'] = mask.astype('uint8').tolist()
-            results['fish'][i]['mask'] = '[...]'
+            mean_b = np.mean(bground)
+            mean_f = np.mean(fground)
+            flipped = mean_b < mean_f
+            val = (mean_b + mean_f) / 2
+            if flipped:
+                val -= val * VAL_SCALE_FAC
+            else:
+                val += val * VAL_SCALE_FAC
+            val = min(max(1, val), 254)
+            #try:
+            bbox, mask = gen_mask(bbox_d, file_path, file_name,
+                    im_gray, val, flipped=flipped)
+            #except:
+                #return {file_name: {'errored': True}}
+            if not np.count_nonzero(mask):
+                print('Mask failed: {file_name}')
+                results['errored'] = True
+            else:
+                bbox_d = bbox
+                im_crop = im_gray[bbox_d[1]:bbox_d[3],bbox_d[0]:bbox_d[2]]
+                f_bbox_crop = curr_fish.pred_masks[0].cpu().numpy()\
+                        [bbox_d[1]:bbox_d[3],bbox_d[0]:bbox_d[2]]
+                fground = im_crop.reshape(-1)[f_bbox_crop.reshape(-1)]
+                bground = im_crop.reshape(-1)[np.invert(f_bbox_crop.reshape(-1))]
+                results['fish'][i]['foreground'] = {}
+                results['fish'][i]['foreground']['mean'] = np.mean(fground)
+                results['fish'][i]['foreground']['std'] = np.std(fground)
+                results['fish'][i]['background'] = {}
+                results['fish'][i]['background']['mean'] = np.mean(bground)
+                results['fish'][i]['background']['std'] = np.std(bground)
+                results['fish'][i]['bbox'] = list(bbox)
+                results['fish'][i]['mask'] = mask.astype('uint8').tolist()
+                results['fish'][i]['mask'] = '[...]'
 
-            centroid, evec = pca(mask)
-            if scale:
-                results['fish'][i]['length'] = fish_length(mask, centroid,
-                        evec, scale)
-            results['fish'][i]['centroid'] = centroid.tolist()
-            if eye:
-                eye_center = [round(x) for x in
-                        eye.pred_boxes.get_centers()[i].cpu().numpy()]
-                results['fish'][i]['eye_center'] = list(eye_center)
-                dist1 = distance(centroid, eye_center + evec)
-                dist2 = distance(centroid, eye_center - evec)
-                if dist2 > dist1:
-                    #print("HERE")
-                    #print(evec)
-                    evec *= -1
-                    #print(evec)
-                if evec[0] <= 0.0:
-                    results['fish'][i]['side'] = 'left'
-                else:
-                    results['fish'][i]['side'] = 'right'
-                results['fish'][i]['clock_value'] = clock_value(evec, file_name)
-            results['fish'][i]['primary_axis'] = list(evec)
+                centroid, evec = pca(mask)
+                if scale:
+                    results['fish'][i]['length'] = fish_length(mask, centroid,
+                            evec, scale)
+                results['fish'][i]['centroid'] = centroid.tolist()
+                if eye:
+                    eye_center = [round(x) for x in
+                            eye.pred_boxes.get_centers()[i].cpu().numpy()]
+                    results['fish'][i]['eye_center'] = list(eye_center)
+                    dist1 = distance(centroid, eye_center + evec)
+                    dist2 = distance(centroid, eye_center - evec)
+                    if dist2 > dist1:
+                        #print("HERE")
+                        #print(evec)
+                        evec *= -1
+                        #print(evec)
+                    if evec[0] <= 0.0:
+                        results['fish'][i]['side'] = 'left'
+                    else:
+                        results['fish'][i]['side'] = 'right'
+                    x_mid = int(bbox[0] + (bbox[2] - bbox[0]) / 2)
+                    y_mid = int(bbox[1] + (bbox[3] - bbox[1]) / 2)
+                    snout_vec = find_snout_vec(np.array([x_mid, y_mid]), eye_center, mask)
+                    #print(snout_vec)
+                    results['fish'][i]['clock_value'] =\
+                            clock_value(snout_vec,file_name)
+                results['fish'][i]['primary_axis'] = list(evec)
     #pprint.pprint(results)
     return {file_name: results}
 
+def find_snout_vec(centroid, eye_center, mask):
+    eye_dir = eye_center - centroid
+    x1 = centroid[0]
+    y1 = centroid[1]
+    #print(centroid)
+    #print(eye_center)
+    #print(eye_dir)
+    max_len = 0
+    fallback = np.array([-1,0])
+    max_vec = None
+    for x in range(mask.shape[1]):
+        for y in range(mask.shape[0]):
+            #print((x, y))
+            if mask[y,x]:
+                x2 = x
+                y2 = y
+                curr_dir = np.array([x2 - x1, y2 - y1])
+                curr_eye_dir = np.array([x2 - eye_center[0],
+                    y2 - eye_center[1]])
+                curr_len = np.linalg.norm(curr_dir)
+                if curr_len > max_len:
+                    fallback = curr_dir
+                    max_len = curr_len
+                    if curr_len > np.linalg.norm(curr_eye_dir):
+                        max_vec = curr_dir
+    #print(max_vec)
+    if max_len == 0:
+        return np.array([-1,0])
+    if max_vec is None:
+        print(f'Using fallback')
+        max_vec = fallback
+    return max_vec / max_len
+
 def angle(vec1, vec2):
-    return math.acos(vec1.dot(vec2) / (np.linalg.norm(vec1) *
-        np.linalg.norm(vec2)))
+    #print(f'angle: {vec1}, {vec2}')
+    return math.acos(vec1.dot(vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2)))
 
 def clock_value(evec, file_name):
     if evec[0] < 0:
         if evec[1] < 0:
             #print(file_name)
-            comp = np.array([0,-1])
-            start = 6
-        else:
             comp = np.array([-1,0])
             start = 9
+        else:
+            comp = np.array([0,-1])
+            start = 6
     else:
         if evec[1] < 0:
+            comp = np.array([0,1])
+            start = 0
+        else:
             comp = np.array([1,0])
             start = 3
-        else:
-            comp = np.array([0,0])
-            start = 0
     ang = angle(comp, evec)
-    clock = start + ang
+    #print(ang)
+    clock = start + (ang / (2 * math.pi) * 12)
+    #print(clock)
     if clock > 11.5:
         clock = 12
     elif clock < 0.5:
@@ -263,7 +319,12 @@ def calc_scale(two, three):
     #print(f'Pixels/cm: {scale}')
     return scale
 
-def gen_mask(bbox, file_path, file_name, val=None):
+def check(arr, val, flipped):
+    if flipped:
+        return arr > val
+    return arr < val
+
+def gen_mask(bbox, file_path, file_name, im_gray, val, flipped=False):
     l = round(bbox[0])
     r = round(bbox[2])
     t = round(bbox[1])
@@ -273,18 +334,19 @@ def gen_mask(bbox, file_path, file_name, val=None):
     arr2 = np.array(im)
     shape = arr2.shape
     done = False
+    im_crop = im_gray[t:b,l:r]
     while not done:
         done = True
         bbox = (l,t,r,b)
         arr0 = np.array(im.crop(bbox))
         bb_size = arr0.size
 
-        if val is None:
-            val = filters.threshold_otsu(arr0) * 1.19
-            #print(val)
-        #exit(0)
-        #val = filters.threshold_otsu(arr0) * 0.75
-        arr1 = np.where(arr0 < val, 1, 0).astype(np.uint8)
+
+        #if val is None:
+        #print(val)
+        val = filters.threshold_otsu(arr0) * 1.3
+        #print(val)
+        arr1 = np.where(check(arr0, val, flipped), 1, 0).astype(np.uint8)
         #arr1 = np.where(arr0 > val, 1, 0).astype(np.uint8)
         indicies = list(zip(*np.where(arr1 == 1)))
         shuffle(indicies)
@@ -304,18 +366,41 @@ def gen_mask(bbox, file_path, file_name, val=None):
                 arr1 = np.where(temp != 2, 1, 0).astype(np.uint8)
                 break
         arr3 = np.full(shape, 0).astype(np.uint8)
+        #print(arr1.shape)
+        #print(shape)
+        #print(f'{t}:{b},{l}:{r}')
+        #print(np.count_nonzero(arr1))
+        #print('=====')
         arr3[t:b,l:r] = arr1
-        if np.any(arr3[t:b,l] != 0):
+        #im_crop = im_gray[t:b,l:r]
+        #fground = im_crop.reshape(-1)[arr1.reshape(-1)]
+        #bground = im_crop.reshape(-1)[np.invert(arr1.reshape(-1))]
+        #mean_b = np.mean(bground)
+        #mean_f = np.mean(fground)
+        #flipped = mean_b < mean_f
+        #print(val)
+        #val = (mean_b + mean_f) / 2
+        #print(val)
+        #if flipped:
+        #    val -= val * VAL_SCALE_FAC
+        #else:
+        #    val += val * VAL_SCALE_FAC
+        #val = min(max(1, val), 254)
+        if np.any(arr3[t:b,l] != 0) and l > 0:
             l -= 1
+            l = max(0, l)
             done = False
-        if np.any(arr3[t:b,r] != 0):
+        if np.any(arr3[t:b,r] != 0) and r < shape[1] - 1:
             r += 1
+            r = min(shape[1] - 1, r)
             done = False
-        if np.any(arr3[t,l:r] != 0):
+        if np.any(arr3[t,l:r] != 0) and t > 0:
             t -= 1
+            t = max(0, t)
             done = False
-        if np.any(arr3[b,l:r] != 0):
+        if np.any(arr3[b,l:r] != 0) and b < shape[0] - 1:
             b += 1
+            b = min(shape[0] - 1, b)
             done = False
     arr4 = np.where(arr3 == 1, 255, 0).astype(np.uint8)
     (l,t,r,b) = shrink_bbox(arr3)
@@ -335,11 +420,11 @@ def shrink_bbox(mask):
     #print(rows)
     #print(cols)
     #exit(0)
-    try:
-        rmin, rmax = np.where(rows)[0][[0, -1]]
-        cmin, cmax = np.where(cols)[0][[0, -1]]
-    except:
-        return None
+    #try:
+    rmin, rmax = np.where(rows)[0][[0, -1]]
+    cmin, cmax = np.where(cols)[0][[0, -1]]
+    #except:
+        #return None
 
     return (cmin, rmin, cmax, rmax)
 
@@ -349,16 +434,20 @@ def main():
         files = [entry.path for entry in os.scandir(direct)]
     else:
         files = [direct]
-    print(files)
-    with Pool(3) as p:
+    #print(files)
+    with Pool(4) as p:
+        #results = map(gen_metadata, files)
         results = p.map(gen_metadata, files)
     #results = map(gen_metadata, files)
     output = {}
     for i in results:
         output[list(i.keys())[0]] = list(i.values())[0]
     #print(output)
-    with open('metadata.json', 'w') as f:
-        json.dump(output, f)
+    if len(output) > 1:
+        with open('metadata.json', 'w') as f:
+            json.dump(output, f)
+    else:
+        pprint.pprint(output)
 
 if __name__ == '__main__':
     #gen_metadata(sys.argv[1])

@@ -18,6 +18,8 @@ results = json.load(open('metadata.json'))
 
 counter = 0
 right = 0
+no_eye = 0
+no_fish = 0
 errored = 0
 for i in results.keys():
     counter += 1
@@ -27,14 +29,26 @@ for i in results.keys():
         yasin = df[df.image_name == i].iloc[0]
         if me['has_fish']:
             if me['fish'][0]['has_eye']:
-                right += me['fish'][0]['clock_value'] == yasin.specimen_angled
+                val = int(me['fish'][0]['clock_value'])
+                print(yasin)
+                exit(0)
+                right += val >= round(yasin.specimen_angled - 1) and\
+                        val <= round(yasin.specimen_angled + 1)
                 print(f"{i}: {me['fish'][0]['clock_value']}, {yasin.specimen_angled}")
             else:
-                errored += 1
+                no_eye += 1
+                print(f'{i}: No eye')
+        else:
+            no_fish += 1
+            print(f'{i}: No fish')
         #print(me['fish']==)
     else:
         errored += 1
-print(f'Right: {right}')
-print(f'Failed: {errored}')
+        print(f'{i}: Errored out')
+print(f'\nRight: {right}')
+print(f'Errored: {errored}')
+print(f'No eye: {no_eye}')
+print(f'No fish: {no_fish}')
 print(f'Total: {counter}')
-print(f'Percent Right: {right / counter}')
+print(f'Percent right: {right / counter}')
+print(f'Percent right that didn\'t error: {right / (counter - no_eye - no_fish - errored)}')
