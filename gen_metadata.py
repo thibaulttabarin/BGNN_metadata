@@ -117,37 +117,30 @@ def gen_metadata(file_path):
             results['fish_count'] = len(insts[(insts.pred_classes==0).
                 logical_and(insts.scores > 0.3)])
 
-            bbox_d = [round(x) for x in curr_fish.pred_boxes.tensor.cpu().
-                    numpy().astype('float64')[0]]
-            im_crop = im_gray[bbox_d[1]:bbox_d[3],bbox_d[0]:bbox_d[2]]
-            f_bbox_crop = curr_fish.pred_masks[0].cpu().numpy()\
-                    [bbox_d[1]:bbox_d[3],bbox_d[0]:bbox_d[2]]
-            fground = im_crop.reshape(-1)[f_bbox_crop.reshape(-1)]
-            bground = im_crop.reshape(-1)[np.invert(f_bbox_crop.reshape(-1))]
-            mean_b = np.mean(bground)
-            mean_f = np.mean(fground)
-            flipped = mean_b < mean_f
-            val = (mean_b + mean_f) / 2
-            if flipped:
-                val -= val * VAL_SCALE_FAC
-            else:
-                val += val * VAL_SCALE_FAC
-            val = min(max(1, val), 254)
             #try:
-            bbox, mask = gen_mask(bbox_d, file_path, file_name,
-                    im_gray, val, flipped=flipped)
+            bbox = [round(x) for x in curr_fish.pred_boxes.tensor.cpu().
+                      numpy().astype('float64')[0]]
+            im_crop = im_gray[bbox[1]:bbox[3],bbox[0]:bbox[2]]
+            detectron_mask = curr_fish.pred_masks[0].cpu().numpy()\
+                    [bbox[1]:bbox[3],bbox[0]:bbox[2]]
+            val = adaptive_threshold(bbox, im_gray, detectron_mask)
+            bbox, mask = gen_mask(bbox, file_path, file_name, im_gray, val)
             #except:
                 #return {file_name: {'errored': True}}
             if not np.count_nonzero(mask):
                 print('Mask failed: {file_name}')
                 results['errored'] = True
             else:
-                bbox_d = bbox
-                im_crop = im_gray[bbox_d[1]:bbox_d[3],bbox_d[0]:bbox_d[2]]
-                f_bbox_crop = curr_fish.pred_masks[0].cpu().numpy()\
-                        [bbox_d[1]:bbox_d[3],bbox_d[0]:bbox_d[2]]
-                fground = im_crop.reshape(-1)[f_bbox_crop.reshape(-1)]
-                bground = im_crop.reshape(-1)[np.invert(f_bbox_crop.reshape(-1))]
+                #print(mask)
+                im_crop = im_gray[bbox[1]:bbox[3],bbox[0]:bbox[2]].reshape(-1)
+                mask_crop = mask[bbox[1]:bbox[3],bbox[0]:bbox[2]].reshape(-1)
+                #print(list(zip(list(im_crop),list(mask_crop))))
+                #print(np.count_nonzero(mask_crop))
+                fground = im_crop[np.where(mask_crop)]
+                bground = im_crop[np.where(np.logical_not(mask_crop))]
+                #print(im_crop.shape)
+                #print(fground.shape)
+                #print(bground.shape)
                 results['fish'][i]['foreground'] = {}
                 results['fish'][i]['foreground']['mean'] = np.mean(fground)
                 results['fish'][i]['foreground']['std'] = np.std(fground)
@@ -187,6 +180,26 @@ def gen_metadata(file_path):
                 results['fish'][i]['primary_axis'] = list(evec)
     #pprint.pprint(results)
     return {file_name: results}
+
+def adaptive_threshold(bbox, im_gray, mask):
+    #bbox_d = [round(x) for x in curr_fish.pred_boxes.tensor.cpu().
+            #numpy().astype('float64')[0]]
+    im_crop = im_gray[bbox[1]:bbox[3],bbox[0]:bbox[2]]
+    #f_bbox_crop = curr_fish.pred_masks[0].cpu().numpy()\
+            #[bbox_d[1]:bbox_d[3],bbox_d[0]:bbox_d[2]]
+    flat_mask = mask.reshape(-1)
+    fground = im_crop.reshape(-1)[flat_mask]
+    bground = im_crop.reshape(-1)[np.invert(flat_mask)]
+    mean_b = np.mean(bground)
+    mean_f = np.mean(fground)
+    flipped = mean_b < mean_f
+    val = (mean_b + mean_f) / 2
+    if flipped:
+        val -= val * VAL_SCALE_FAC
+    else:
+        val += val * VAL_SCALE_FAC
+    val = min(max(1, val), 254)
+    return val
 
 def find_snout_vec(centroid, eye_center, mask):
     eye_dir = eye_center - centroid
@@ -329,6 +342,7 @@ def gen_mask(bbox, file_path, file_name, im_gray, val, flipped=False):
     r = round(bbox[2])
     t = round(bbox[1])
     b = round(bbox[3])
+    bbox = (l,t,r,b)
 
     im = Image.open(file_path).convert('L')
     arr2 = np.array(im)
@@ -337,14 +351,13 @@ def gen_mask(bbox, file_path, file_name, im_gray, val, flipped=False):
     im_crop = im_gray[t:b,l:r]
     while not done:
         done = True
-        bbox = (l,t,r,b)
         arr0 = np.array(im.crop(bbox))
         bb_size = arr0.size
 
 
         #if val is None:
-        #print(val)
-        val = filters.threshold_otsu(arr0) * 1.3
+        print(val)
+        #val = filters.threshold_otsu(arr0) * 1.3
         #print(val)
         arr1 = np.where(check(arr0, val, flipped), 1, 0).astype(np.uint8)
         #arr1 = np.where(arr0 > val, 1, 0).astype(np.uint8)
@@ -402,6 +415,8 @@ def gen_mask(bbox, file_path, file_name, im_gray, val, flipped=False):
             b += 1
             b = min(shape[0] - 1, b)
             done = False
+        bbox = (l,t,r,b)
+        val = adaptive_threshold(bbox, im_gray, arr1)
     arr4 = np.where(arr3 == 1, 255, 0).astype(np.uint8)
     (l,t,r,b) = shrink_bbox(arr3)
     arr4[t:b,l] = 175
