@@ -1,7 +1,7 @@
 %\documentclass[acmsmall,screen,review]{acmart}
 \documentclass[acmconf,screen,review]{acmart}
 \usepackage{todonotes}
-
+\usepackage{comment}
 %%
 %% \BibTeX command to typeset BibTeX logo in the docs
 \AtBeginDocument{%
@@ -142,12 +142,12 @@ Text
 \section{Data Analysis}
 Text
 \section{Discussion}
-Text \textit{texty text}~\cite{Lamport:LaTeX}
+Text \textit{texty text}%~\cite{Lamport:LaTeX}
 \section{Conclusion}
 Text \textbf{text}
 
+\begin{comment}
 \pagebreak{}
-
 \section{Introduction}~\label{demo-intro}
 ACM's consolidated article template, introduced in 2017, provides a
 consistent \LaTeX\ style for use across ACM publications, and
@@ -639,9 +639,11 @@ To Robert, for the bagels and explaining CMYK and color spaces.
 %%
 %% The next two lines define the bibliography style to be used, and
 %% the bibliography file.
+\end{comment}
 \bibliographystyle{ACM-Reference-Format}
-\bibliography{sample-base}
+\bibliography{paper}
 
+\begin{comment}
 %%
 %% If your work has an appendix, this is the place to put it.
 \appendix
@@ -675,6 +677,8 @@ dui. Etiam sagittis eleifend elementum.
 Nam interdum magna at lectus dignissim, ac dignissim lorem
 rhoncus. Maecenas eu arcu ac neque placerat aliquam. Nunc pulvinar
 massa et mattis lacinia.
+
+\end{comment}
 
 \end{document}
 \endinput
