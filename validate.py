@@ -26,15 +26,26 @@ for i in results.keys():
     me = results[i]
     #print(me)
     if not 'errored' in me.keys():
-        yasin = df[df.image_name == i].iloc[0]
+        all_yasin = df[df.image_name == i]
+        all_yasin = all_yasin[~all_yasin['specimen_angled'].isnull()]
+        #all_yasin = all_yasin[not all_yasin.specimen_angled.isnull()]
+        #print(all_yasin.specimen_angled)
+        #yasin = df[df.image_name == i].iloc[0]
+        angle = np.mean(all_yasin['specimen_angled'])
+        #print(angle)
+        angle = round(angle)
         if me['has_fish']:
             if me['fish'][0]['has_eye']:
                 val = int(me['fish'][0]['clock_value'])
-                print(yasin)
-                exit(0)
-                right += val >= round(yasin.specimen_angled - 1) and\
-                        val <= round(yasin.specimen_angled + 1)
-                print(f"{i}: {me['fish'][0]['clock_value']}, {yasin.specimen_angled}")
+                #print(yasin)
+                #exit(0)
+                right += val >= (angle - 1) and\
+                        val <= (angle + 1)
+                #right += val >= round(yasin.specimen_angled - 1) and\
+                #        val <= round(yasin.specimen_angled + 1)
+                if not (val >= (angle - 1) and val <= (angle + 1)):
+                    #print(f"{i}: {me['fish'][0]['clock_value']}, {yasin.specimen_angled}")
+                    print(f"{i}: {me['fish'][0]['clock_value']}, {angle}")
             else:
                 no_eye += 1
                 print(f'{i}: No eye')

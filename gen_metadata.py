@@ -10,8 +10,10 @@ from PIL import Image
 from functools import partial
 import matplotlib.pyplot as plt
 import pprint
+from copy import copy
 
 import torch
+#torch.multiprocessing.set_start_method('forkserver')
 
 import pycocotools
 import detectron2.structures as structures
@@ -38,15 +40,19 @@ from skimage import filters
 from skimage.morphology import flood_fill
 from random import shuffle
 
-VAL_SCALE_FAC = 0.3
+VAL_SCALE_FAC = 0.0
 
-def gen_metadata(file_path):
+def init_model():
     cfg = get_cfg()
     cfg.merge_from_file("config/mask_rcnn_R_50_FPN_3x.yaml")
     cfg.MODEL.ROI_HEADS.NUM_CLASSES = 5
     cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")
     cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.3
     predictor = DefaultPredictor(cfg)
+    return predictor
+
+def gen_metadata(file_path):
+    predictor = init_model()
     im = cv2.imread(file_path)
     im_gray = cv2.imread(file_path, cv2.IMREAD_GRAYSCALE)
     metadata = Metadata(evaluator_type='coco', image_root='.',
@@ -65,8 +71,11 @@ def gen_metadata(file_path):
         temp = insts.pred_classes==i
         selector += temp.cumsum(axis=0).cumsum(axis=0) == 1
     fish = insts[insts.pred_classes==0]
+    #print(fish)
     if len(fish):
-        results['fish'] = [{}]
+        results['fish'] = []
+        for _ in range(len(fish)):
+            results['fish'].append({})
     else:
         fish = None
     results['has_fish'] = bool(fish)
@@ -95,7 +104,7 @@ def gen_metadata(file_path):
     os.makedirs('images', exist_ok=True)
     file_name = file_path.split('/')[-1]
     print(file_name)
-    cv2.imwrite(f'images/gen_mask_prediction_{file_name}.jpg',
+    cv2.imwrite(f'images/gen_mask_prediction_{file_name}.png',
             vis.get_image()[:, :, ::-1])
     if fish:
         try:
@@ -121,10 +130,10 @@ def gen_metadata(file_path):
             bbox = [round(x) for x in curr_fish.pred_boxes.tensor.cpu().
                       numpy().astype('float64')[0]]
             im_crop = im_gray[bbox[1]:bbox[3],bbox[0]:bbox[2]]
-            detectron_mask = curr_fish.pred_masks[0].cpu().numpy()\
-                    [bbox[1]:bbox[3],bbox[0]:bbox[2]]
-            val = adaptive_threshold(bbox, im_gray, detectron_mask)
-            bbox, mask = gen_mask(bbox, file_path, file_name, im_gray, val)
+            detectron_mask = curr_fish.pred_masks[0].cpu().numpy()
+            val = adaptive_threshold(bbox, im_gray)
+            bbox, mask = gen_mask(bbox, file_path, file_name, im_gray, val,
+                    detectron_mask, index=i)
             #except:
                 #return {file_name: {'errored': True}}
             if not np.count_nonzero(mask):
@@ -157,8 +166,9 @@ def gen_metadata(file_path):
                             evec, scale)
                 results['fish'][i]['centroid'] = centroid.tolist()
                 if eye:
+                    #print(eye.pred_boxes.get_centers())
                     eye_center = [round(x) for x in
-                            eye.pred_boxes.get_centers()[i].cpu().numpy()]
+                            eye.pred_boxes.get_centers()[0].cpu().numpy()]
                     results['fish'][i]['eye_center'] = list(eye_center)
                     dist1 = distance(centroid, eye_center + evec)
                     dist2 = distance(centroid, eye_center - evec)
@@ -174,30 +184,42 @@ def gen_metadata(file_path):
                     x_mid = int(bbox[0] + (bbox[2] - bbox[0]) / 2)
                     y_mid = int(bbox[1] + (bbox[3] - bbox[1]) / 2)
                     snout_vec = find_snout_vec(np.array([x_mid, y_mid]), eye_center, mask)
-                    #print(snout_vec)
-                    results['fish'][i]['clock_value'] =\
-                            clock_value(snout_vec,file_name)
+                    if snout_vec is None:
+                        results['fish'][i]['clock_value'] =\
+                                clock_value(evec,file_name)
+                    else:
+                        results['fish'][i]['clock_value'] =\
+                                clock_value(snout_vec,file_name)
                 results['fish'][i]['primary_axis'] = list(evec)
+                #print(curr_fish)
+                results['fish'][i]['score'] = float(curr_fish.scores[0].cpu())
+                #print(results['fish'][i]['score'])
     #pprint.pprint(results)
     return {file_name: results}
 
-def adaptive_threshold(bbox, im_gray, mask):
+def adaptive_threshold(bbox, im_gray):
     #bbox_d = [round(x) for x in curr_fish.pred_boxes.tensor.cpu().
             #numpy().astype('float64')[0]]
     im_crop = im_gray[bbox[1]:bbox[3],bbox[0]:bbox[2]]
+    val = filters.threshold_otsu(im_crop) * 1.13
+    mask = np.where(im_crop > val, 1, 0).astype(np.uint8)
     #f_bbox_crop = curr_fish.pred_masks[0].cpu().numpy()\
             #[bbox_d[1]:bbox_d[3],bbox_d[0]:bbox_d[2]]
     flat_mask = mask.reshape(-1)
-    fground = im_crop.reshape(-1)[flat_mask]
-    bground = im_crop.reshape(-1)[np.invert(flat_mask)]
+    fground = im_crop.reshape(-1)[np.where(flat_mask)]
+    bground = im_crop.reshape(-1)[np.where(np.logical_not(flat_mask))]
     mean_b = np.mean(bground)
     mean_f = np.mean(fground)
-    flipped = mean_b < mean_f
-    val = (mean_b + mean_f) / 2
+    #print(f'b: {mean_b} | f: {mean_f}')
+    #flipped = mean_b < mean_f
+    flipped = False
+    diff = abs(mean_b - mean_f)
+    #print(diff)
+    #val = (mean_b + mean_f) / 2
     if flipped:
-        val -= val * VAL_SCALE_FAC
+        val -= diff * VAL_SCALE_FAC
     else:
-        val += val * VAL_SCALE_FAC
+        val += diff * VAL_SCALE_FAC
     val = min(max(1, val), 254)
     return val
 
@@ -209,7 +231,7 @@ def find_snout_vec(centroid, eye_center, mask):
     #print(eye_center)
     #print(eye_dir)
     max_len = 0
-    fallback = np.array([-1,0])
+    #fallback = np.array([-1,0])
     max_vec = None
     for x in range(mask.shape[1]):
         for y in range(mask.shape[0]):
@@ -228,10 +250,12 @@ def find_snout_vec(centroid, eye_center, mask):
                         max_vec = curr_dir
     #print(max_vec)
     if max_len == 0:
-        return np.array([-1,0])
+        #return np.array([-1,0])
+        return None
     if max_vec is None:
-        print(f'Using fallback')
-        max_vec = fallback
+        print(f'Failed snout')
+        #max_vec = fallback
+        return None
     return max_vec / max_len
 
 def angle(vec1, vec2):
@@ -249,11 +273,11 @@ def clock_value(evec, file_name):
             start = 6
     else:
         if evec[1] < 0:
-            comp = np.array([0,1])
-            start = 0
-        else:
             comp = np.array([1,0])
             start = 3
+        else:
+            comp = np.array([0,1])
+            start = 0
     ang = angle(comp, evec)
     #print(ang)
     clock = start + (ang / (2 * math.pi) * 12)
@@ -299,6 +323,7 @@ def overlap(fish, eye):
     return ol_pct
 
 def pca(img):
+    #print(np.count_nonzero(img))
     moments = cv2.moments(img)
     centroid = (int(moments["m10"] / moments["m00"]),
             int(moments["m01"] / moments["m00"]))
@@ -337,11 +362,13 @@ def check(arr, val, flipped):
         return arr > val
     return arr < val
 
-def gen_mask(bbox, file_path, file_name, im_gray, val, flipped=False):
+def gen_mask(bbox, file_path, file_name, im_gray, val, detectron_mask,
+        index=0, flipped=False):
     l = round(bbox[0])
     r = round(bbox[2])
     t = round(bbox[1])
     b = round(bbox[3])
+    bbox_orig = bbox
     bbox = (l,t,r,b)
 
     im = Image.open(file_path).convert('L')
@@ -350,17 +377,18 @@ def gen_mask(bbox, file_path, file_name, im_gray, val, flipped=False):
     done = False
     im_crop = im_gray[t:b,l:r]
     while not done:
+        #print(f'val: {val}')
         done = True
         arr0 = np.array(im.crop(bbox))
         bb_size = arr0.size
 
 
         #if val is None:
-        print(val)
-        #val = filters.threshold_otsu(arr0) * 1.3
         #print(val)
-        arr1 = np.where(check(arr0, val, flipped), 1, 0).astype(np.uint8)
-        #arr1 = np.where(arr0 > val, 1, 0).astype(np.uint8)
+        val = filters.threshold_otsu(arr0)
+        #print(val)
+        #arr1 = np.where(check(arr0, val, flipped), 1, 0).astype(np.uint8)
+        arr1 = np.where(arr0 < val, 1, 0).astype(np.uint8)
         indicies = list(zip(*np.where(arr1 == 1)))
         shuffle(indicies)
         count = 0
@@ -378,6 +406,7 @@ def gen_mask(bbox, file_path, file_name, im_gray, val, flipped=False):
                         temp = flood_fill(temp, (i, j), 2)
                 arr1 = np.where(temp != 2, 1, 0).astype(np.uint8)
                 break
+        #print(np.count_nonzero(arr1))
         arr3 = np.full(shape, 0).astype(np.uint8)
         #print(arr1.shape)
         #print(shape)
@@ -399,24 +428,33 @@ def gen_mask(bbox, file_path, file_name, im_gray, val, flipped=False):
         #else:
         #    val += val * VAL_SCALE_FAC
         #val = min(max(1, val), 254)
-        if np.any(arr3[t:b,l] != 0) and l > 0:
-            l -= 1
-            l = max(0, l)
-            done = False
-        if np.any(arr3[t:b,r] != 0) and r < shape[1] - 1:
-            r += 1
-            r = min(shape[1] - 1, r)
-            done = False
-        if np.any(arr3[t,l:r] != 0) and t > 0:
-            t -= 1
-            t = max(0, t)
-            done = False
-        if np.any(arr3[b,l:r] != 0) and b < shape[0] - 1:
-            b += 1
-            b = min(shape[0] - 1, b)
-            done = False
+        try:
+            if np.any(arr3[t:b,l] != 0) and l > 0:
+                l -= 1
+                l = max(0, l)
+                done = False
+            if np.any(arr3[t:b,r] != 0) and r < shape[1] - 1:
+                r += 1
+                r = min(shape[1] - 1, r)
+                done = False
+            if np.any(arr3[t,l:r] != 0) and t > 0:
+                t -= 1
+                t = max(0, t)
+                done = False
+            if np.any(arr3[b,l:r] != 0) and b < shape[0] - 1:
+                b += 1
+                b = min(shape[0] - 1, b)
+                done = False
+        except:
+            print(f'{file_name}: Error expanding bounding box')
+            done = True
         bbox = (l,t,r,b)
-        val = adaptive_threshold(bbox, im_gray, arr1)
+        #val = adaptive_threshold(bbox, im_gray)
+    #print(list(arr1.reshape(-1)))
+    if np.count_nonzero(arr1) / bb_size < .1:
+        print(f'{file_name}: Using detectron mask and bbox')
+        arr3 = detectron_mask.astype('uint8')
+        bbox = bbox_orig
     arr4 = np.where(arr3 == 1, 255, 0).astype(np.uint8)
     (l,t,r,b) = shrink_bbox(arr3)
     arr4[t:b,l] = 175
@@ -424,7 +462,7 @@ def gen_mask(bbox, file_path, file_name, im_gray, val, flipped=False):
     arr4[t,l:r] = 175
     arr4[b,l:r] = 175
     im2 = Image.fromarray(arr4, 'L')
-    im2.save(f'images/gen_mask_mask_{file_name}')
+    im2.save(f'images/gen_mask_mask_{file_name}_{index}.png')
     return (bbox, arr3)
 
 #https://stackoverflow.com/questions/31400769/bounding-box-of-numpy-array
@@ -436,6 +474,8 @@ def shrink_bbox(mask):
     #print(cols)
     #exit(0)
     #try:
+    #print(np.where(cols))
+    #print()
     rmin, rmax = np.where(rows)[0][[0, -1]]
     cmin, cmax = np.where(cols)[0][[0, -1]]
     #except:
@@ -446,10 +486,12 @@ def shrink_bbox(mask):
 def main():
     direct = sys.argv[1]
     if os.path.isdir(direct):
-        files = [entry.path for entry in os.scandir(direct)]
+        files = [entry.path for entry in os.scandir(direct)][:1000]
     else:
         files = [direct]
     #print(files)
+    #predictor = init_model()
+    #f = partial(gen_metadata, predictor)
     with Pool(4) as p:
         #results = map(gen_metadata, files)
         results = p.map(gen_metadata, files)

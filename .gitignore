@@ -147,3 +147,5 @@ config/overall_prefix.txt
 *.pdf
 *.gz
 *.json
+*.bak*
+*.txt
