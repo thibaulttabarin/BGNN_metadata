@@ -133,11 +133,25 @@
 \maketitle
 
 \section{Introduction}
-Text~\ref{demo-intro}~\todo{Liney}
+
+\ref{demo-intro}~\todo{Sentences I didn't use: Over the last few decades, cyberinfrastructure development, advances in digitization, and the open science tenor, have helped support global access to natural history. OR
+Global access to natural history collections has accelerated over the last few decades to advances in cyberinfrastructure, digitization, and the general open science tenor}
+
+Over the last several decades advances in computing, imaging, and cyberinfrastructure have supported the growth of digital natural history collection. In the U.S., programs, such as the National Science Foundation’s initial Advancing Digitization of Biodiversity Collections (ADBC) program, which ran for well over [nearly?] a decade, and the current Infrastructure Capacity for Biological Research program have supported the digital transformation of data and images for millions of biological specimens. These resources are globally available through a wide range of portals and digital libraries for researchers, educators, students, and the general public to examine and compare in ways previously unimaginable. Significant challenges surface; however, when researchers seek to apply computational methods, due to both image quality and metadata. (As researchers seek to apply computational methods, and explore AI, significant challenges surface..) 
+
+Unfortunately, potential scientific advances are hindered [by image quality] as well as [more so?] the lack of high-quality and pertinent metadata associated with the image collections. Many specimen collections include Darwin Core metadata, detailing specimen taxon, geographic location, and several other descriptive aspects. Additionally, some digitization efforts record technical metadata, detailing imaging specifications. While these types of metadata are helpful for a human examining several images at a time, they are insufficient for researchers seeking to apply computational methods to examine thousands of images to determine if, for instance, a dorsal fin of a specific fish has a different shape. Since the collections may each contain tens of thousands of images, producing metadata for each image via a manual process is prohibitively labor-intensive and infeasible. Methods for automatically computing metadata from images are therefore needed to fully exploit biological image repositories for scientific discovery.
+
+As a step towards improving metadata in specimen research image collections, members of the Metadata Research Center, Drexel University, have been developing methods to automatically analyze fish images and extract a set of important features [metadata]. The research is being conducted as part of Biology Guided Neural Networks (BGNN) project, which aims to develop a novel class of artificial neural networks that exploits machine readable and predictive knowledge associated with specimen images, phylogenies and anatomy ontologies. Using a combination of machine learning and image informatics tools and techniques, we can accurately determine general image quality and metadata such as fish quantity and location within images, fish orientation and other quantitative fish features, image scaling based on ruler identification and measurement. This paper reports on our research examining a set of [add numbers] images drawn from the Illinois Natural History Survey (INHS) Collection. The following section of this paper provides contextual background for this work, followed by the research goals and objectives, and a review of our research methods. Next, the results are presented, followed by a discussion. The conclusion highlights key findings and identifies next steps.
 
 \section{Related Work}
 Text~\todo[noline]{Do this}
-\subsection{History of Quality Metadata}
+\subsection{Metadata for Image Collection}
+Metadata development is intertwined with the development of digital technology. A wide range of metadata standards are applicable to metadata supporting image description as well as technical aspects, and have been used in a range of image repositories. Examples of Descriptive schemes include X, y, z... Examples of technical schemes include... The use varies across communities, and application technique is primarily manual. Research evaluating such schemes XXX, show XXX. 
+
+Natural history collections generally use a sub-set of such standards. Darwin Core, a globally adopted standard overseen by the Taxonomic Data Working Group (TDWG).  [Jane continue here on some of this, and then with preservation/image quality less]
+
+\subsection{Metadata genberation?}
+
 \subsection{Fish Image Analysis}
 
 \cite{BockAlexander2018TITE}
