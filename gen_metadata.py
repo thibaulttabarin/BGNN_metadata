@@ -130,7 +130,7 @@ def gen_metadata(file_path):
             bbox = [round(x) for x in curr_fish.pred_boxes.tensor.cpu().
                       numpy().astype('float64')[0]]
             im_crop = im_gray[bbox[1]:bbox[3],bbox[0]:bbox[2]]
-            detectron_mask = curr_fish.pred_masks[0].cpu().numpy()
+            detectron_mask = curr_fish.pred_masks[i].cpu().numpy()
             val = adaptive_threshold(bbox, im_gray)
             bbox, mask = gen_mask(bbox, file_path, file_name, im_gray, val,
                     detectron_mask, index=i)
@@ -277,7 +277,7 @@ def clock_value(evec, file_name):
             start = 3
         else:
             comp = np.array([0,1])
-            start = 0
+            start = 6
     ang = angle(comp, evec)
     #print(ang)
     clock = start + (ang / (2 * math.pi) * 12)
@@ -483,10 +483,18 @@ def shrink_bbox(mask):
 
     return (cmin, rmin, cmax, rmax)
 
+def gen_metadata_safe(file_path):
+    try:
+        return gen_metadata(file_path)
+    except Exception as e:
+        print(f'{file_path}: Errored out ({e})')
+        return {file_path: {'errored': True}}
+
+
 def main():
     direct = sys.argv[1]
     if os.path.isdir(direct):
-        files = [entry.path for entry in os.scandir(direct)][:1000]
+        files = [entry.path for entry in os.scandir(direct)]
     else:
         files = [direct]
     #print(files)
@@ -494,7 +502,7 @@ def main():
     #f = partial(gen_metadata, predictor)
     with Pool(4) as p:
         #results = map(gen_metadata, files)
-        results = p.map(gen_metadata, files)
+        results = p.map(gen_metadata_safe, files)
     #results = map(gen_metadata, files)
     output = {}
     for i in results:

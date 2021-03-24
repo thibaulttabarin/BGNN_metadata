@@ -21,6 +21,7 @@ right = 0
 no_eye = 0
 no_fish = 0
 errored = 0
+wrong_wrong = 0
 for i in results.keys():
     counter += 1
     me = results[i]
@@ -39,8 +40,10 @@ for i in results.keys():
                 val = int(me['fish'][0]['clock_value'])
                 #print(yasin)
                 #exit(0)
-                right += val >= (angle - 1) and\
+                check = val >= (angle - 1) and\
                         val <= (angle + 1)
+                right += check
+                wrong_wrong += 1 if not check else 0
                 #right += val >= round(yasin.specimen_angled - 1) and\
                 #        val <= round(yasin.specimen_angled + 1)
                 if not (val >= (angle - 1) and val <= (angle + 1)):
@@ -60,6 +63,7 @@ print(f'\nRight: {right}')
 print(f'Errored: {errored}')
 print(f'No eye: {no_eye}')
 print(f'No fish: {no_fish}')
+print(f'Wrong wrong: {wrong_wrong}')
 print(f'Total: {counter}')
 print(f'Percent right: {right / counter}')
 print(f'Percent right that didn\'t error: {right / (counter - no_eye - no_fish - errored)}')
