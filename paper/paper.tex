@@ -1,7 +1,9 @@
 %\documentclass[acmsmall,screen,review]{acmart}
-\documentclass[acmconf,screen,review]{acmart}
+%\documentclass[acmconf,screen,review]{acmart}
+\documentclass[screen,review]{acmart}
 \usepackage{todonotes}
 \usepackage{comment}
+%\usepackage{booktabs}
 %%
 %% \BibTeX command to typeset BibTeX logo in the docs
 \AtBeginDocument{%
@@ -134,7 +136,7 @@
 
 \section{Introduction}
 
-\ref{demo-intro}~\todo{Sentences I didn't use: Over the last few decades, cyberinfrastructure development, advances in digitization, and the open science tenor, have helped support global access to natural history. OR
+\todo{Sentences I didn't use: Over the last few decades, cyberinfrastructure development, advances in digitization, and the open science tenor, have helped support global access to natural history. OR
 Global access to natural history collections has accelerated over the last few decades to advances in cyberinfrastructure, digitization, and the general open science tenor}
 
 Over the last several decades advances in computing, imaging, and cyberinfrastructure have supported the growth of digital natural history collection. In the U.S., programs, such as the National Science Foundation’s initial Advancing Digitization of Biodiversity Collections (ADBC) program, which ran for well over [nearly?] a decade, and the current Infrastructure Capacity for Biological Research program have supported the digital transformation of data and images for millions of biological specimens. These resources are globally available through a wide range of portals and digital libraries for researchers, educators, students, and the general public to examine and compare in ways previously unimaginable. Significant challenges surface; however, when researchers seek to apply computational methods, due to both image quality and metadata. (As researchers seek to apply computational methods, and explore AI, significant challenges surface..) 
@@ -174,6 +176,42 @@ To accomplish this, we apply an iterative process of flood filling from all the 
 
 With an accurate mask generated, it is then necessary to check whether the bounding box needs expanded or shrunk along any edges. Expansion is done first, buy checking whether any edge intersects with any of the foreground mask pixels. If one does, it is expanded out by 1 pixel. If any edges are expanded, the whole the process, masking and expansion process is repeated to account for any changes in average intensities. Once no edges contain foreground pixels, the mask is the shrunk. This process is more efficient as all that is required is to shrink each edge by one up until the point they contain one or more foreground pixels. Once the shrinkage step is accomplished, the final mask and bounding box have been generated.
 \subsection{Metadata Generation}
+Including what has already been discussed, the following metadata properties are being currently being generated:
+\begin{table}[H]
+    \centering
+    \caption{Metadata properties}
+    \label{tab:properties}
+    \begin{tabular}{cccp{0.5\linewidth}}
+        \toprule
+        \textbf{Property} & \textbf{Association} & \textbf{Type} & \textbf{Explanation}\\
+        \midrule
+        \verb|has_fish| & Overall & Boolean & Whether a fish was found in the image.\\
+        \verb|fish_count| & Overall & Integer & The quantity of fish present.\\
+        \verb|has_ruler| & Overall & Boolean & Whether a ruler was found in the image.\\
+        \verb|ruler_bbox| & Overall & 4 Tuple & The bounding box of the ruler (if found).\\
+        \verb|scale| & Overall & Float & The scale of the image in \(\frac{\mathrm{pixels}}{\mathrm{cm}}\).\\
+        \verb|background.mean| & Per Fish & Float & The mean intensity of the background within a given fish's bounding box.\\
+        \verb|background.std| & Per Fish & Float & The standard deviation of the background within a given fish's bounding box.\\
+        \verb|foreground.mean| & Per Fish & Float & The mean intensity of the foreground within a given fish's bounding box.\\
+        \verb|foreground.std| & Per Fish & Float & The standard deviation of the foreground within a given fish's bounding box.\\
+        \verb|bbox| & Per Fish & 4 Tuple & The top left and bottom right coordinates of what define the bounding box for a fish.\\
+        \verb|centroid| & Per Fish & 4 Tuple & The centroid of a given fish's bitmask.\\
+        \verb|primary_axis| & Per Fish & 2D Vector & The unit length primary axis (eigenvector) for the bitmask of a given fish.\\
+        \verb|clock_value| & Per Fish & Integer & A fish's primary axis converted into an integer ``clock value'' between 1 and 12.\\
+        \verb|length| & Per Fish & Float & The length of a fish in \(\frac{\mathrm{pixels}}{\mathrm{cm}}\).\\
+        \verb|mask| & Per Fish & 2D Matrix & The bitmask of a fish an 0's and 1's.\\
+        \verb|score| & Per Fish & Float & The percent confidence score output by \verb|detectron| for a given fish.\\
+        \verb|has_eye| & Per Fish & Boolean & Whether an eye was found for a given fish.\\
+        \verb|eye_center| & Per Fish & 2 Tuple & The centroid of a fish's eye.\\
+        \verb|side| & Per Fish & String & The side (i.e.\ \verb|'left'| or \verb|'right'|) of the fish that is facing the camera (dependent on finding its eye).\\
+      \bottomrule
+\end{tabular}
+\end{table}
+\subsection{Consideration}
+Just gonna throw some caveats in here, might be its own section might not
+\begin{itemize}
+    \item Program falls back to using detectron mask and bbox for metadata generation in the event the mask generation/pixel analysis fails. Failure is defined as never finding a cohesive flood filled mask that covers more than 10\% of the detectron bbox initially. Can provide a statistic on how often this occurs.
+\end{itemize}
 \section{Results}
 Text
 \section{Discussion}

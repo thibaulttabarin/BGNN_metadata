@@ -377,17 +377,11 @@ def gen_mask(bbox, file_path, file_name, im_gray, val, detectron_mask,
     done = False
     im_crop = im_gray[t:b,l:r]
     while not done:
-        #print(f'val: {val}')
         done = True
         arr0 = np.array(im.crop(bbox))
         bb_size = arr0.size
 
-
-        #if val is None:
-        #print(val)
         val = filters.threshold_otsu(arr0)
-        #print(val)
-        #arr1 = np.where(check(arr0, val, flipped), 1, 0).astype(np.uint8)
         arr1 = np.where(arr0 < val, 1, 0).astype(np.uint8)
         indicies = list(zip(*np.where(arr1 == 1)))
         shuffle(indicies)
@@ -406,13 +400,7 @@ def gen_mask(bbox, file_path, file_name, im_gray, val, detectron_mask,
                         temp = flood_fill(temp, (i, j), 2)
                 arr1 = np.where(temp != 2, 1, 0).astype(np.uint8)
                 break
-        #print(np.count_nonzero(arr1))
         arr3 = np.full(shape, 0).astype(np.uint8)
-        #print(arr1.shape)
-        #print(shape)
-        #print(f'{t}:{b},{l}:{r}')
-        #print(np.count_nonzero(arr1))
-        #print('=====')
         arr3[t:b,l:r] = arr1
         #im_crop = im_gray[t:b,l:r]
         #fground = im_crop.reshape(-1)[arr1.reshape(-1)]
@@ -450,7 +438,6 @@ def gen_mask(bbox, file_path, file_name, im_gray, val, detectron_mask,
             done = True
         bbox = (l,t,r,b)
         #val = adaptive_threshold(bbox, im_gray)
-    #print(list(arr1.reshape(-1)))
     if np.count_nonzero(arr1) / bb_size < .1:
         print(f'{file_name}: Using detectron mask and bbox')
         arr3 = detectron_mask.astype('uint8')
