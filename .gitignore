@@ -149,3 +149,4 @@ config/overall_prefix.txt
 *.json
 *.bak*
 *.txt
+*.blg
