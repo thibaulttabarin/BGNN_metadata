@@ -277,7 +277,7 @@ def clock_value(evec, file_name):
             start = 3
         else:
             comp = np.array([0,1])
-            start = 6
+            start = 0
     ang = angle(comp, evec)
     #print(ang)
     clock = start + (ang / (2 * math.pi) * 12)

@@ -3,7 +3,6 @@
 \documentclass[screen,review]{acmart}
 \usepackage{todonotes}
 \usepackage{comment}
-%\usepackage{booktabs}
 %%
 %% \BibTeX command to typeset BibTeX logo in the docs
 \AtBeginDocument{%
@@ -18,11 +17,11 @@
 \setcopyright{acmcopyright}
 \copyrightyear{2021}
 \acmYear{2021}
-\acmDOI{???}
+\acmDOI{}
 
 %% These commands are for a PROCEEDINGS abstract or paper.
 \acmConference[JCDL '21]{JCDL '21: Joint Conference on
-  Digital Libraries}{September 27--30, 2021}{????, USA}
+  Digital Libraries}{September 27--30, 2021}{Urbana--Champaign, Illinois, USA}
 %\acmBooktitle{Woodstock '18: ACM Symposium on Neural Gaze Detection,
   %June 03--05, 2018, Woodstock, NY}
 %\acmPrice{15.00}
@@ -177,6 +176,7 @@ To accomplish this, we apply an iterative process of flood filling from all the 
 With an accurate mask generated, it is then necessary to check whether the bounding box needs expanded or shrunk along any edges. Expansion is done first, buy checking whether any edge intersects with any of the foreground mask pixels. If one does, it is expanded out by 1 pixel. If any edges are expanded, the whole the process, masking and expansion process is repeated to account for any changes in average intensities. Once no edges contain foreground pixels, the mask is the shrunk. This process is more efficient as all that is required is to shrink each edge by one up until the point they contain one or more foreground pixels. Once the shrinkage step is accomplished, the final mask and bounding box have been generated.
 \subsection{Metadata Generation}
 Including what has already been discussed, the following metadata properties are being currently being generated:
+
 \begin{table}[H]
     \centering
     \caption{Metadata properties}
@@ -185,21 +185,21 @@ Including what has already been discussed, the following metadata properties are
         \toprule
         \textbf{Property} & \textbf{Association} & \textbf{Type} & \textbf{Explanation}\\
         \midrule
-        \verb|has_fish| & Overall & Boolean & Whether a fish was found in the image.\\
-        \verb|fish_count| & Overall & Integer & The quantity of fish present.\\
-        \verb|has_ruler| & Overall & Boolean & Whether a ruler was found in the image.\\
-        \verb|ruler_bbox| & Overall & 4 Tuple & The bounding box of the ruler (if found).\\
-        \verb|scale| & Overall & Float & The scale of the image in \(\frac{\mathrm{pixels}}{\mathrm{cm}}\).\\
+        \verb|has_fish| & Overall Image & Boolean & Whether a fish was found in the image.\\
+        \verb|fish_count| & Overall Image & Integer & The quantity of fish present.\\
+        \verb|has_ruler| & Overall Image & Boolean & Whether a ruler was found in the image.\\
+        \verb|ruler_bbox| & Overall Image & 4 Tuple & The bounding box of the ruler (if found).\\
+        \verb|scale| & Overall Image & Float & The scale of the image in \(\frac{\mathrm{pixels}}{\mathrm{cm}}\).\\
+        \verb|bbox| & Per Fish & 4 Tuple & The top left and bottom right coordinates of what define the bounding box for a fish.\\
         \verb|background.mean| & Per Fish & Float & The mean intensity of the background within a given fish's bounding box.\\
         \verb|background.std| & Per Fish & Float & The standard deviation of the background within a given fish's bounding box.\\
         \verb|foreground.mean| & Per Fish & Float & The mean intensity of the foreground within a given fish's bounding box.\\
         \verb|foreground.std| & Per Fish & Float & The standard deviation of the foreground within a given fish's bounding box.\\
-        \verb|bbox| & Per Fish & 4 Tuple & The top left and bottom right coordinates of what define the bounding box for a fish.\\
         \verb|centroid| & Per Fish & 4 Tuple & The centroid of a given fish's bitmask.\\
         \verb|primary_axis| & Per Fish & 2D Vector & The unit length primary axis (eigenvector) for the bitmask of a given fish.\\
         \verb|clock_value| & Per Fish & Integer & A fish's primary axis converted into an integer ``clock value'' between 1 and 12.\\
         \verb|length| & Per Fish & Float & The length of a fish in \(\frac{\mathrm{pixels}}{\mathrm{cm}}\).\\
-        \verb|mask| & Per Fish & 2D Matrix & The bitmask of a fish an 0's and 1's.\\
+        \verb|mask| & Per Fish & 2D Matrix & The bitmask of a fish in 0's and 1's.\\
         \verb|score| & Per Fish & Float & The percent confidence score output by \verb|detectron| for a given fish.\\
         \verb|has_eye| & Per Fish & Boolean & Whether an eye was found for a given fish.\\
         \verb|eye_center| & Per Fish & 2 Tuple & The centroid of a fish's eye.\\
@@ -207,6 +207,26 @@ Including what has already been discussed, the following metadata properties are
       \bottomrule
 \end{tabular}
 \end{table}
+
+\verb|has_fish|, \verb|fish_count|, \verb|has_ruler|, \verb|ruler_bbox|, \verb|background.*|, \verb|foreground.*|, \verb|bbox|, \verb|mask|, \verb|score|, and \verb|has_eye| have already been discussed. The remaining properties are determined as follows:
+\subsubsection{centroid and eye\_center}
+Centroids are provided for masks/bounding boxes generated by \verb|detectron|, and since we do not recalculate the mask of fish eyes we can use that value directly for \verb|eye_center|.
+
+Since we recalculate the mask of the fish, we must recalculate its centroid as well. This can be done via
+\begin{equation}
+    (\bar{x}, \bar{y}) = (\mathrm{round}(\frac{M_{10}}{M_{00}}), \mathrm{round}(\frac{M_{01}}{M_{00}}))
+\end{equation}
+where \(M_{00}\) is the pixel area of the fish's blob, \(M_{10}\) is the sum of all the \(x\) values of blob pixels, and \(M_{01}\) is the sum of all the \(y\) values of blob pixels.
+\subsubsection{side}
+Determining which \verb|side| of the fish is visible is predicated on finding its eye. If an eye is found, the sign of the \(x\) component of the vector from the centroid of the fish to the centroid of the eye specifies which side is up: negative for left and positive for right. This assumes the fish was photographed vertically, which is essentially always the case for all image collections our group has worked on.
+\subsubsection{primary\_axis and clock\_value}
+The \verb|primary_axis| of a fish can be calculated by taking the covariance\todo{I could explain this in more detail if necessary} of its blob in \(x\) and \(y\), which yields its principle eigenvector. This can be directly assigned to the property. If an eye is present, we specify this axis in the direction of the eye in relation to the fish's centroid.
+
+Our team encoded this information as a ``clock value'' between 1 and 12 when recording it by hand. To convert \verb|principal_axis| to \verb|clock|, the sign of \(x\) and \(y\) on the principal axis are used to determine which Cartesian quadrant the fish is angles into relative to its centroid. Depending on this quadrant, we then dot product the principal axis with either \([-1,0]\), \([0,-1]\), \([1,0]\) or \([0,1]\) which correspond to 9, 6, 3 and ``0'' o'clock respectively. The resulting radian value is then converted to a polar displacement in clock value space, and added to the comparative clock value used in the dot product. This then gives the fish's clock value from 0 to \(11.\overline{9}\). Before recording as \verb|clock| in the output, the value is rounded to the nearest integer, and in the event of a 0 final result it is replaced with 12.
+\subsubsection{scale and length}
+\(\frac{\mathrm{pixels}}{\mathrm{inch}}\) can be calculated by measuring the distance between the digits 2 and 3 found on the ruler by \verb|detectron|. Converting this to \(\frac{\mathrm{pixels}}{\mathrm{cm}}\) gives the \verb|scale| metadata property as reported in the output.
+
+For the fish \verb|length| property, it is necessary to determine the furthest points from the centroid of the fish in each direction. Since fish are normally measured in a straight line from their snout down the middle of their trunk, we project every pixel onto the major axis of the fish (as a line through its centroid) before checking the distance. This projection is done by intersecting the line through the point along the tangent of the principal axis and the aforementioned centroid--principal axis line. After checking every pixel, measuring the distance between the two furthest projected points gives the length of the fish in pixels. Multiplying this by \verb|scale| gives the fish \verb|length| in centimeters.
 \subsection{Consideration}
 Just gonna throw some caveats in here, might be its own section might not
 \begin{itemize}
