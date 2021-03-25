@@ -40,7 +40,7 @@ from skimage import filters
 from skimage.morphology import flood_fill
 from random import shuffle
 
-VAL_SCALE_FAC = 0.3
+VAL_SCALE_FAC = 0.5
 
 def init_model():
     cfg = get_cfg()
@@ -132,8 +132,8 @@ def gen_metadata(file_path):
             im_crop = im_gray[bbox[1]:bbox[3],bbox[0]:bbox[2]]
             detectron_mask = curr_fish.pred_masks[0].cpu().numpy()
             val = adaptive_threshold(bbox, im_gray)
-            bbox, mask = gen_mask(bbox, file_path, file_name, im_gray, val,
-                    detectron_mask, index=i)
+            bbox, mask, pixel_anal_failed = gen_mask(bbox, file_path,
+                    file_name, im_gray, val, detectron_mask, index=i)
             #except:
                 #return {file_name: {'errored': True}}
             if not np.count_nonzero(mask):
@@ -157,7 +157,8 @@ def gen_metadata(file_path):
                 results['fish'][i]['background']['mean'] = np.mean(bground)
                 results['fish'][i]['background']['std'] = np.std(bground)
                 results['fish'][i]['bbox'] = list(bbox)
-                results['fish'][i]['mask'] = mask.astype('uint8').tolist()
+                results['fish'][i]['pixel_analysis_failed'] = pixel_anal_failed
+                #results['fish'][i]['mask'] = mask.astype('uint8').tolist()
                 results['fish'][i]['mask'] = '[...]'
 
                 centroid, evec = pca(mask)
@@ -183,7 +184,8 @@ def gen_metadata(file_path):
                         results['fish'][i]['side'] = 'right'
                     x_mid = int(bbox[0] + (bbox[2] - bbox[0]) / 2)
                     y_mid = int(bbox[1] + (bbox[3] - bbox[1]) / 2)
-                    snout_vec = find_snout_vec(np.array([x_mid, y_mid]), eye_center, mask)
+                    #snout_vec = find_snout_vec(np.array([x_mid, y_mid]), eye_center, mask)
+                    snout_vec = evec
                     if snout_vec is None:
                         results['fish'][i]['clock_value'] =\
                                 clock_value(evec,file_name)
@@ -263,23 +265,24 @@ def angle(vec1, vec2):
     return math.acos(vec1.dot(vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2)))
 
 def clock_value(evec, file_name):
+    #print(evec)
     if evec[0] < 0:
-        if evec[1] < 0:
-            #print(file_name)
+        if evec[1] > 0:
             comp = np.array([-1,0])
             start = 9
         else:
             comp = np.array([0,-1])
             start = 6
     else:
-        if evec[1] < 0:
+        if evec[1] > 0:
             comp = np.array([1,0])
             start = 3
         else:
             comp = np.array([0,1])
             start = 0
+    #print(comp)
     ang = angle(comp, evec)
-    #print(ang)
+    #print(ang / (2 * math.pi) * 12)
     clock = start + (ang / (2 * math.pi) * 12)
     #print(clock)
     if clock > 11.5:
@@ -364,6 +367,7 @@ def check(arr, val, flipped):
 
 def gen_mask(bbox, file_path, file_name, im_gray, val, detectron_mask,
         index=0, flipped=False):
+    failed = False
     l = round(bbox[0])
     r = round(bbox[2])
     t = round(bbox[1])
@@ -392,8 +396,11 @@ def gen_mask(bbox, file_path, file_name, im_gray, val, detectron_mask,
                 ind = fish_pix
             count += 1
             if count > 10000:
-                print(f'ERROR on flood fill: {name}')
-                return None
+                if fish_pix is not None:
+                    fish_pix = None
+                else:
+                    print(f'ERROR on flood fill: {file_name}')
+                    return (bbox_orig, detectron_mask.astype('uint8'), True)
             temp = flood_fill(arr1, ind, 2)
             temp = np.where(temp == 2, 1, 0)
             percent = np.count_nonzero(temp) / bb_size
@@ -439,13 +446,15 @@ def gen_mask(bbox, file_path, file_name, im_gray, val, detectron_mask,
                 done = False
         except:
             print(f'{file_name}: Error expanding bounding box')
-            done = True
+            #done = True
+            return (bbox_orig, detectron_mask.astype('uint8'), True)
         bbox = (l,t,r,b)
         val = adaptive_threshold(bbox, im_gray)
     if np.count_nonzero(arr1) / bb_size < .1:
         print(f'{file_name}: Using detectron mask and bbox')
         arr3 = detectron_mask.astype('uint8')
         bbox = bbox_orig
+        failed = True
     arr4 = np.where(arr3 == 1, 255, 0).astype(np.uint8)
     (l,t,r,b) = shrink_bbox(arr3)
     arr4[t:b,l] = 175
@@ -454,7 +463,7 @@ def gen_mask(bbox, file_path, file_name, im_gray, val, detectron_mask,
     arr4[b,l:r] = 175
     im2 = Image.fromarray(arr4, 'L')
     im2.save(f'images/gen_mask_mask_{file_name}_{index}.png')
-    return (bbox, arr3)
+    return (bbox, arr3, failed)
 
 #https://stackoverflow.com/questions/31400769/bounding-box-of-numpy-array
 def shrink_bbox(mask):
@@ -475,23 +484,25 @@ def shrink_bbox(mask):
     return (cmin, rmin, cmax, rmax)
 
 def gen_metadata_safe(file_path):
-    #try:
-    return gen_metadata(file_path)
-    #except Exception as e:
-        #print(f'{file_path}: Errored out ({e})')
-        #return {file_path: {'errored': True}}
+    try:
+        return gen_metadata(file_path)
+    except Exception as e:
+        print(f'{file_path}: Errored out ({e})')
+        return {file_path: {'errored': True}}
 
 
 def main():
     direct = sys.argv[1]
     if os.path.isdir(direct):
         files = [entry.path for entry in os.scandir(direct)]
+        if len(sys.argv) > 2:
+            files = files[:int(sys.argv[2])]
     else:
         files = [direct]
     #print(files)
     #predictor = init_model()
     #f = partial(gen_metadata, predictor)
-    with Pool(12) as p:
+    with Pool(4) as p:
         #results = map(gen_metadata, files)
         results = p.map(gen_metadata_safe, files)
     #results = map(gen_metadata, files)

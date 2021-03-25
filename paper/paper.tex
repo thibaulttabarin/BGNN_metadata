@@ -166,6 +166,8 @@ Our process for metadata generation can be broken into 3 steps: object detection
 A prerequisite task to addressing any more advanced metadata property determination is finding specimens (and other relevant objects) within collection images. Object detection has been an incredibly active field of study in recent years,~\cite{zou2019object} and has resulted in a number of well tested purpose built architectures. We elected to use Facebook AI Research's \verb|detectron| tool~\cite{wu2019detectron2}, and specifically its implementation of the Mask R-CNN architecture~\cite{he2018mask}, for object detection in our project.
 
 \verb|detectron| is built on \verb|pytorch|~\cite{NEURIPS2019_9015} and provides a relatively straightforward method for training on COCO~\cite{DBLP:journals/corr/LinMBHPRDZ14} format dataset. It is able to handle an arbitrary number of object classes, and can classify an arbitrary number of object within a given sample. For our project, we are currently using it to identify five object classes: fish, fish eyes, rulers, and the numbers 2 and 3 on rulers.
+
+Placeholder\todo{A paragraph about training will go here}
 \subsection{Pixel Analysis}
 The masks and bounding boxes produced by \verb|detectron| are generally quite good, although they are almost never perfect. They almost always either include additional background as part of the fish, or clip part(s) of the fish outside the bounding box. To solve this shortcoming, we utilize pixel analysis methods commonly found in image informatics.
 
