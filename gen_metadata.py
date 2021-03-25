@@ -2,7 +2,7 @@ import math
 import json
 import sys
 import os
-from multiprocessing import Pool
+from torch.multiprocessing import Pool
 import pandas as pd
 import numpy as np
 import nrrd
@@ -40,7 +40,7 @@ from skimage import filters
 from skimage.morphology import flood_fill
 from random import shuffle
 
-VAL_SCALE_FAC = 0.0
+VAL_SCALE_FAC = 0.3
 
 def init_model():
     cfg = get_cfg()
@@ -130,7 +130,7 @@ def gen_metadata(file_path):
             bbox = [round(x) for x in curr_fish.pred_boxes.tensor.cpu().
                       numpy().astype('float64')[0]]
             im_crop = im_gray[bbox[1]:bbox[3],bbox[0]:bbox[2]]
-            detectron_mask = curr_fish.pred_masks[i].cpu().numpy()
+            detectron_mask = curr_fish.pred_masks[0].cpu().numpy()
             val = adaptive_threshold(bbox, im_gray)
             bbox, mask = gen_mask(bbox, file_path, file_name, im_gray, val,
                     detectron_mask, index=i)
@@ -201,19 +201,19 @@ def adaptive_threshold(bbox, im_gray):
     #bbox_d = [round(x) for x in curr_fish.pred_boxes.tensor.cpu().
             #numpy().astype('float64')[0]]
     im_crop = im_gray[bbox[1]:bbox[3],bbox[0]:bbox[2]]
-    val = filters.threshold_otsu(im_crop) * 1.13
+    val = filters.threshold_otsu(im_crop)
     mask = np.where(im_crop > val, 1, 0).astype(np.uint8)
     #f_bbox_crop = curr_fish.pred_masks[0].cpu().numpy()\
             #[bbox_d[1]:bbox_d[3],bbox_d[0]:bbox_d[2]]
     flat_mask = mask.reshape(-1)
-    fground = im_crop.reshape(-1)[np.where(flat_mask)]
+    #fground = im_crop.reshape(-1)[np.where(flat_mask)]
     bground = im_crop.reshape(-1)[np.where(np.logical_not(flat_mask))]
     mean_b = np.mean(bground)
-    mean_f = np.mean(fground)
+    #mean_f = np.mean(fground)
     #print(f'b: {mean_b} | f: {mean_f}')
     #flipped = mean_b < mean_f
     flipped = False
-    diff = abs(mean_b - mean_f)
+    diff = abs(mean_b - val)
     #print(diff)
     #val = (mean_b + mean_f) / 2
     if flipped:
@@ -376,17 +376,20 @@ def gen_mask(bbox, file_path, file_name, im_gray, val, detectron_mask,
     shape = arr2.shape
     done = False
     im_crop = im_gray[t:b,l:r]
+    fish_pix = None
     while not done:
         done = True
         arr0 = np.array(im.crop(bbox))
         bb_size = arr0.size
 
-        val = filters.threshold_otsu(arr0)
+        #val = filters.threshold_otsu(arr0)
         arr1 = np.where(arr0 < val, 1, 0).astype(np.uint8)
         indicies = list(zip(*np.where(arr1 == 1)))
         shuffle(indicies)
         count = 0
         for ind in indicies:
+            if fish_pix is not None:
+                ind = fish_pix
             count += 1
             if count > 10000:
                 print(f'ERROR on flood fill: {name}')
@@ -395,6 +398,7 @@ def gen_mask(bbox, file_path, file_name, im_gray, val, detectron_mask,
             temp = np.where(temp == 2, 1, 0)
             percent = np.count_nonzero(temp) / bb_size
             if percent > 0.1:
+                fish_pix = ind
                 for i in (0,temp.shape[0]-1):
                     for j in (0,temp.shape[1]-1):
                         temp = flood_fill(temp, (i, j), 2)
@@ -437,7 +441,7 @@ def gen_mask(bbox, file_path, file_name, im_gray, val, detectron_mask,
             print(f'{file_name}: Error expanding bounding box')
             done = True
         bbox = (l,t,r,b)
-        #val = adaptive_threshold(bbox, im_gray)
+        val = adaptive_threshold(bbox, im_gray)
     if np.count_nonzero(arr1) / bb_size < .1:
         print(f'{file_name}: Using detectron mask and bbox')
         arr3 = detectron_mask.astype('uint8')
@@ -471,11 +475,11 @@ def shrink_bbox(mask):
     return (cmin, rmin, cmax, rmax)
 
 def gen_metadata_safe(file_path):
-    try:
-        return gen_metadata(file_path)
-    except Exception as e:
-        print(f'{file_path}: Errored out ({e})')
-        return {file_path: {'errored': True}}
+    #try:
+    return gen_metadata(file_path)
+    #except Exception as e:
+        #print(f'{file_path}: Errored out ({e})')
+        #return {file_path: {'errored': True}}
 
 
 def main():
@@ -487,7 +491,7 @@ def main():
     #print(files)
     #predictor = init_model()
     #f = partial(gen_metadata, predictor)
-    with Pool(4) as p:
+    with Pool(12) as p:
         #results = map(gen_metadata, files)
         results = p.map(gen_metadata_safe, files)
     #results = map(gen_metadata, files)
