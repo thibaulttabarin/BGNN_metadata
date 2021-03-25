@@ -130,6 +130,7 @@ dmypy.json
 
 # CUSTOM
 images/
+images
 output/
 Pipfile.lock
 *.pth
@@ -150,3 +151,4 @@ config/overall_prefix.txt
 *.bak*
 *.txt
 *.blg
+*.bbl
