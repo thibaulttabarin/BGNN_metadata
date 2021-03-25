@@ -21,7 +21,7 @@
 
 %% These commands are for a PROCEEDINGS abstract or paper.
 \acmConference[JCDL '21]{JCDL '21: Joint Conference on
-  Digital Libraries}{September 27--30, 2021}{Urbana--Champaign, Illinois, USA}
+  Digital Libraries, September 27--30, 2021, Urbana--Champaign, Illinois, USA}
 %\acmBooktitle{Woodstock '18: ACM Symposium on Neural Gaze Detection,
   %June 03--05, 2018, Woodstock, NY}
 %\acmPrice{15.00}
@@ -64,7 +64,7 @@
 %% used to denote shared contribution to the research.
 \author{Joel Pepper}
 \email{jcp353@drexel.edu}
-%\orcid{1234-5678-9012}
+\orcid{0002-1601-8729}
 \author{Jane Greenberg}
 \author{David Breen}
 \orcid{0002-1376-5008}
@@ -239,7 +239,63 @@ Just gonna throw some caveats in here, might be its own section might not
     \item Program falls back to using detectron mask and bbox for metadata generation in the event the mask generation/pixel analysis fails. Failure is defined as never finding a cohesive flood filled mask that covers more than 10\% of the detectron bbox initially. Can provide a statistic on how often this occurs.
 \end{itemize}
 \section{Results}
-Text
+\begin{verbatim}
+What I think should be the final results:
+
+Right: 6956
+Errored: 0
+No eye: 246
+No fish: 10
+Wrong wrong: 35
+Total: 7247
+Percent right: 0.959845453291017
+Percent right that didn't error: 0.9949935631526248
+
+-----------------------
+
+My hand checking of the ''wrong wrong'' fish:
+
+INHS_FISH_101109.jpg: 9, 11, I'm wrong although it's fairly curved
+INHS_FISH_56818.jpg: 4, 2, I'm wrong although there's a tag that is likely messing things up
+INHS_FISH_57607.jpg: 3, 9, I'm wrong
+INHS_FISH_57001.jpg: 4, 2, I'm wrong although there's a tag that is likely messing things up
+INHS_FISH_63953.jpg: 3, 9, I'm wrong
+INHS_FISH_51100.jpg: 3, 9, I'm wrong
+INHS_FISH_80528.jpg: 3, 8, I'm wrong
+INHS_FISH_6370.jpg: 3, 9, I'm wrong
+INHS_FISH_54157.jpg: 9, 7, I'm arguably wrong although it's very curved
+INHS_FISH_80987.jpg: 9, 3, I'm wrong although this one is a fairly atypical image
+
+INHS_FISH_58647.jpg: 9, 7, I'm right
+INHS_FISH_8415.jpg: 9, 6, I'm right
+INHS_FISH_5041.jpg: 9, 11, very curved averages to about 9
+INHS_FISH_52821.jpg: 9, 7, I'm arguably right although the fish is damaged and its head points to ~7
+INHS_FISH_6696.jpg: 9, 7, I'm right
+INHS_FISH_75252.jpg: 9, 6, I'm right
+INHS_FISH_79498.jpg: 9, 6, I'm right
+INHS_FISH_45744.jpg: 9, 5, I'm right
+INHS_FISH_47579.jpg: 9, 6, I'm right
+INHS_FISH_64599.jpg: 9, 6, I'm right
+INHS_FISH_74550.jpg: 9, 5, I'm right
+INHS_FISH_101664.jpg: 9, 6, I'm right
+INHS_FISH_100861.jpg: 9, 6, I'm right
+INHS_FISH_60589.jpg: 3, 9, I'm right
+INHS_FISH_53469.jpg: 9, 1, I'm right
+INHS_FISH_44694.jpg: 9, 6, I'm right
+INHS_FISH_54921.jpg: 9, 6, I'm right
+INHS_FISH_44645.jpg: 10, 8, I'm right
+INHS_FISH_50459.jpg: 9, 11, I'm right although the fish is damaged and its head points to ~11
+INHS_FISH_68061.jpg: 9, 6, I'm right
+INHS_FISH_74716.jpg: 9, 6, I'm right
+INHS_FISH_80976.jpg: 9, 6, I'm right
+INHS_FISH_57977.jpg: 9, 6, I'm right
+INHS_FISH_45377.jpg: 9, 6, I'm right
+INHS_FISH_47142.jpg: 9, 6, I'm right
+
+Verdict: For only 10 of the 35 am I actually wrong and all of those are either curved, atypical
+images with tags, or something on the wrong side was detected as an eye (so the clock value is backwards).
+
+\end{verbatim}
 \section{Discussion}
 Text \textit{texty text}%~\cite{Lamport:LaTeX}
 \section{Conclusion}
