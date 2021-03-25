@@ -147,6 +147,7 @@ As a step towards improving metadata in specimen research image collections, mem
 \section{Related Work}
 Text~\todo[noline]{Do this}
 \subsection{Metadata for Image Collection}
+\todo{Wasn't looking for a citation but stumbled upon this paper: \url{https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0207636}, might be worth a skim}
 Metadata development is intertwined with the development of digital technology. A wide range of metadata standards are applicable to metadata supporting image description as well as technical aspects, and have been used in a range of image repositories. Examples of Descriptive schemes include X, y, z... Examples of technical schemes include... The use varies across communities, and application technique is primarily manual. Research evaluating such schemes XXX, show XXX. 
 
 Natural history collections generally use a sub-set of such standards. Darwin Core, a globally adopted standard overseen by the Taxonomic Data Working Group (TDWG).  [Jane continue here on some of this, and then with preservation/image quality less]
@@ -169,6 +170,28 @@ A prerequisite task to addressing any more advanced metadata property determinat
 
 \verb|detectron| is built on \verb|pytorch|~\cite{NEURIPS2019_9015} and provides a relatively straightforward method for training on COCO~\cite{DBLP:journals/corr/LinMBHPRDZ14} format dataset. It is able to handle an arbitrary number of object classes, and can classify an arbitrary number of object within a given sample. For our project, we are currently using it to identify five object classes: fish, fish eyes, rulers, and the numbers 2 and 3 on rulers.
 
+Our training dataset consisted of the following number of instances for each class:
+
+\begin{table}[H]
+    \centering
+    \caption{Training dataset}
+    \label{tab:dataset}
+    \begin{tabular}{cc}
+        \toprule
+        \textbf{Class} & \textbf{Number of Instances}\\
+        \midrule
+        Fish & 297\\
+        Ruler & 1496\\
+        Eye & 456\\
+        Two & 100\\
+        Three & 100\\
+      \bottomrule
+\end{tabular}
+\end{table}
+
+All of the training data was labeled by hand using \verb|makesense.ai|.~\cite{make-sense} While the ultimate goal of the project is to generalize to images from a variety of specimen collections, we have thus far focused only on images from the INHS\ Fish Collection.~\cite{INHS} Using \verb|detectron|'s default training scheme, the model was trained for \(100,000\) epochs. All instance types were included in a single object detection model. The total loss\todo{Find and specify which loss function was used} began at \(2.948\) and ended at \(0.158\) for the training data.
+
+\begin{comment}
 \begin{verbatim}
 |  category  | #instances   |  category  | #instances   |  category  | #instances   |
 |:----------:|:-------------|:----------:|:-------------|:----------:|:-------------|
@@ -195,7 +218,8 @@ Final: {"data_time": 0.006645713496254757, "eta_seconds": 0.0, "fast_rcnn/cls_ac
 "mask_rcnn/false_positive": 0.05609636495338312, "roi_head/num_bg_samples": 115.75,
 "roi_head/num_fg_samples": 12.25, "rpn/num_neg_anchors": 246.5, "rpn/num_pos_anchors": 9.5,
 "time": 0.3563086399990425, "total_loss": 0.15775199318886735}
-\end{verbatim}\todo{Training details, will turn this into a paragraph on how model is created}
+\end{verbatim}
+\end{comment}
 \subsection{Pixel Analysis}
 The masks and bounding boxes produced by \verb|detectron| are generally quite good, although they are almost never perfect. They almost always either include additional background as part of the fish, or clip part(s) of the fish outside the bounding box. To solve this shortcoming, we utilize pixel analysis methods commonly found in image informatics.
 
