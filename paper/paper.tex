@@ -108,36 +108,47 @@
 %% The abstract is a short summary of the work to be presented in the
 %% article.
 \begin{abstract}
-    \todo{Just throwing the Hank conference abstract in here for us to work off of and pare down. Also, we need to decide what to do for the ``teaser image''.} 
-    Over the last several decades advances in computing, imaging, and cyberinfrastructure have had a major impact on scientific research and discovery. One area of considerable activity is the digitization of the biological specimens that have been collected worldwide by museums and other research institutions. The scanning of these specimen collections and the placement of the resulting images into easily accessible repositories on the Internet is enabling new scientific studies based on the previously unavailable data. Unfortunately, potential scientific advances are hindered by the lack of high-quality and pertinent metadata associated with the image collections. Metadata is required to search the repositories for the imaged specimens needed for a particular study. Since the collections may each contain tens of thousands of images, producing metadata for each image via a manual process is prohibitively labor-intensive and infeasible.  Methods for automatically computing metadata from images are therefore needed to fully exploit biological image repositories for scientific discovery.
+%%    \todo{Just throwing the Hank conference abstract in here for us to work off of and pare down. Also, we need to decide what to do for the ``teaser image''.} 
+%    Over the last several decades advances in computing, imaging, and cyberinfrastructure have had a major impact on scientific research and discovery. One area of considerable activity is the digitization of the biological specimens that have been collected worldwide by museums and other research institutions. The scanning of these specimen collections and the placement of the resulting images into easily accessible repositories on the Internet is enabling new scientific studies based on the previously unavailable data. Unfortunately, potential scientific advances are hindered by the lack of high-quality and pertinent metadata associated with the image collections. Metadata is required to search the repositories for the imaged specimens needed for a particular study. Since the collections may each contain tens of thousands of images, producing metadata for each image via a manual process is prohibitively labor-intensive and infeasible.  Methods for automatically computing metadata from images are therefore needed to fully exploit biological image repositories for scientific discovery.
     
- Over the last several decades advances in computing, imaging, and cyberinfrastructure have had a major impact on scientific research and discovery. One area of considerable activity is the digitization of the biological specimens that have been acquired worldwide by museums and other research institutions; thus producing large image collections. 
-Metadata is often unavailable, sparse or incorrect within these specimen image repositories, but is vital for subsequent machine learning, analysis and scientific discovery. As a step towards improving metadata in specimen research image collections, our team has been developing methods for automatically analyzing fish images to extract a variety of important features. These fish specimens are being studied for a larger project titled Biology Guided Neural Networks (BGNN), which is developing a novel class of artificial neural networks that can exploit the machine readable and predictive knowledge about biology that is available in the form of specimen images, phylogenies and anatomy ontologies. Using a combination of machine learning and image informatics tools and techniques, we can accurately determine metadata such as fish quantity and location within images, fish orientation and other quantitative fish features, image scaling based on ruler identification and measurement, and general image quality metrics for a substantial number of the images being used in the BGNN project. 
-Our goal is to develop image metadata generation methods that both support the novel machine learning research underway within the BGNN project, and provide a framework for future technology developments that can be deployed by repository curators to improve and bolster the metadata they provide with their specimen images. A longer term goal is to extend the image analysis methods for computing specific quantitative features in support of specific biological investigations.
+ Over the last several decades advances in computing, imaging, and cyberinfrastructure have had a major impact on scientific research and discovery. One area of considerable activity is the digitization of the biological specimens that have been acquired worldwide by museums and other research institutions, undertakings that have produced large image collections. 
+The metadata that is vital for subsequent machine learning, analysis and
+scientific discovery based on these specimen image repositories
+is often unavailable, sparse or incorrect.
+As a step towards improving metadata in specimen research image collections, our team is developing methods for automatically analyzing fish images to extract a variety of important features. These fish specimens are being studied for a larger project entitled Biology Guided Neural Networks (BGNN), which is developing a novel class of artificial neural networks that can exploit the machine readable and predictive knowledge about biology that is available in specimen images, phylogenies and anatomy ontologies. Using a combination of machine learning and image informatics tools and techniques, we can accurately determine metadata such as fish quantity and location within images, fish orientation and other quantitative fish features, image scaling based on ruler identification and measurement, and general image quality metrics for a substantial number of the images being used in the BGNN project. 
+Our goal is to develop image metadata generation methods that both support
+the research underway within the BGNN project, and provide a framework for future technology developments that can be deployed by repository curators to improve and bolster the metadata they provide with their specimen images. A longer term goal is to extend the image analysis methods for computing quantitative features in support of specific biological investigations.
 
-Metadata is often unavailable, sparse or incorrect within specimen image repositories, but is vital for subsequent machine learning, analysis and scientific discovery. Our goal is to develop image metadata generation methods that both support the novel machine learning research underway within the BGNN project, and provide a framework for future technology developments that can be deployed by repository curators to improve and bolster the metadata they provide with their specimen images. A longer term goal is to extend the image analysis methods for computing specific quantitative features in support of specific biological investigations. For example, we are able to automatically measure the length of a fish specimen.  Associating these measurements with location and acquisition date may provide insights into the influence of habitat factors on fish development/health. Since it is prohibitively expensive for scientists to manually gather this data, we are also interested in applying our tools to images of other species stored in a variety of repositories (e.g. iDigBio). The technical challenges in achieving a broader usage of our approach mostly involve training new classifiers for different types of species, learning to segment and read annotation tags, and generalizing our classifier to find and interpret different types of rulers. This presentation will report on our current efforts to automatically generate metadata for fish specimen images and offer thoughts on how to extend these techniques for other specimen image collections.\todo{Need to figure out what to actually do for this CCS stuff (\url{http://dl.acm.org/ccs.cfm}) and also the key words}
+% Metadata is often unavailable, sparse or incorrect within specimen image repositories, but is vital for subsequent machine learning, analysis and scientific discovery. Our goal is to develop image metadata generation methods that both support the novel machine learning research underway within the BGNN project, and provide a framework for future technology developments that can be deployed by repository curators to improve and bolster the metadata they provide with their specimen images. A longer term goal is to extend the image analysis methods for computing specific quantitative features in support of specific biological investigations. For example, we are able to automatically measure the length of a fish specimen.  Associating these measurements with location and acquisition date may provide insights into the influence of habitat factors on fish development/health. Since it is prohibitively expensive for scientists to manually gather this data, we are also interested in applying our tools to images of other species stored in a variety of repositories (e.g. iDigBio). The technical challenges in achieving a broader usage of our approach mostly involve training new classifiers for different types of species, learning to segment and read annotation tags, and generalizing our classifier to find and interpret different types of rulers. This presentation will report on our current efforts to automatically generate metadata for fish specimen images and offer thoughts on how to extend these techniques for other specimen image collections.
 \end{abstract}
 
 %%
 %% The code below is generated by the tool at http://dl.acm.org/ccs.cfm.
 %% Please copy and paste the code instead of the example below.
 %%
+% \todo{Need to figure out what to actually do for this CCS stuff (\url{http://dl.acm.org/ccs.cfm}) and also the key words}
 \begin{CCSXML}
 <ccs2012>
    <concept>
        <concept_id>10002951.10002952.10003219.10003215</concept_id>
        <concept_desc>Information systems~Extraction, transformation and loading</concept_desc>
        <concept_significance>500</concept_significance>
-       </concept>
- </ccs2012>
+   </concept>
+   <concept>
+        <concept_id>10010147.10010178</concept_id>
+	<concept_desc>Computing methodologies~Artificial intelligence~Computer Vision</concept_desc>
+	<concept_significance>500</concept_significance>
+    </concept>
+</ccs2012>
 \end{CCSXML}
 
 \ccsdesc[500]{Information systems~Extraction, transformation and loading}
+\ccsdesc[500]{Computing methodologies~Artificial intelligence}
 
 %%
 %% Keywords. The author(s) should pick words that accurately describe
 %% the work being presented. Separate the keywords with commas.
-\keywords{bioinformatics, metadata}
+\keywords{bioinformatics, metadata, image analysis, applied machine learning}
 
 %% A "teaser" image appears between the author and affiliation
 %% information and the body of the document, and typically spans the
@@ -159,11 +170,44 @@ Metadata is often unavailable, sparse or incorrect within specimen image reposit
 \todo{Sentences I didn't use: Over the last few decades, cyberinfrastructure development, advances in digitization, and the open science tenor, have helped support global access to natural history. OR
 Global access to natural history collections has accelerated over the last few decades to advances in cyberinfrastructure, digitization, and the general open science tenor}
 
-Over the last several decades advances in computing, imaging, and cyberinfrastructure have supported the growth of digital natural history collection. In the U.S., programs, such as the National Science Foundation’s initial Advancing Digitization of Biodiversity Collections (ADBC) program, which ran for well over [nearly?] a decade, and the current Infrastructure Capacity for Biological Research program have supported the digital transformation of data and images for millions of biological specimens. These resources are globally available through a wide range of portals and digital libraries for researchers, educators, students, and the general public to examine and compare in ways previously unimaginable. Significant challenges surface; however, when researchers seek to apply computational methods, due to both image quality and metadata. (As researchers seek to apply computational methods, and explore AI, significant challenges surface..) 
+Over the last several decades, given the trends towards open science,
+advances in computing, imaging, and cyberinfrastructure have supported the growth of digital natural history collections.
+In the U.S., programs, such as the National Science Foundation’s former
+Advancing Digitization of Biodiversity Collections (ADBC) program, which ran for
+nearly a decade, and the current Infrastructure Capacity for Biological Research program have supported the digital acquisition and dissemination of
+data and images for millions of biological specimens. These resources are globally available through a wide range of portals and digital libraries for researchers, educators, students, and the general public to examine and compare in ways previously unimaginable. Significant challenges surface, however, when researchers seek to apply computational methods to these data items,
+due to both image quality and metadata issues.
+% (As researchers seek to apply computational methods, and explore AI, significant challenges surface..) 
 
-Unfortunately, potential scientific advances are hindered [by image quality] as well as [more so?] the lack of high-quality and pertinent metadata associated with the image collections. Many specimen collections include Darwin Core metadata, detailing specimen taxon, geographic location, and several other descriptive aspects. Additionally, some digitization efforts record technical metadata, detailing imaging specifications. While these types of metadata are helpful for a human examining several images at a time, they are insufficient for researchers seeking to apply computational methods to examine thousands of images to determine if, for instance, a dorsal fin of a specific fish has a different shape. Since the collections may each contain tens of thousands of images, producing metadata for each image via a manual process is prohibitively labor-intensive and infeasible. Methods for automatically computing metadata from images are therefore needed to fully exploit biological image repositories for scientific discovery.
+Unfortunately, potential scientific advances are hindered by image quality
+problems and the lack of accurate and pertinent metadata
+associated with the image collections.
+Poor quality images, e.g. with low contrast, inadequate lighting, out of
+focus, cluttered visual arrangements, provide inadequate input for automated
+image analysis and machine learning algorithms and lead to inferior
+computational results.
+In order to perform quantitative morphometric analysis of the specimens,
+the physical scale of the images (pixels/inch) is needed; thus
+requiring the ability to identify and measure rulers in the images.
+Many specimen collections do include Darwin Core metadata, detailing
+specimen taxon, geographic location, and several other descriptive aspects.
+Additionally, some digitization efforts record technical metadata, detailing imaging specifications. While these types of metadata are helpful for a
+human examining several images at a time, they are insufficient for researchers seeking to apply computational methods to examine thousands of images
+to determine if, for instance, a specific fish grows to different lengths
+in different ecosystems.
 
-As a step towards improving metadata in specimen research image collections, members of the Metadata Research Center, Drexel University, have been developing methods to automatically analyze fish images and extract a set of important features [metadata]. The research is being conducted as part of Biology Guided Neural Networks (BGNN) project, which aims to develop a novel class of artificial neural networks that exploits machine readable and predictive knowledge associated with specimen images, phylogenies and anatomy ontologies. Using a combination of machine learning and image informatics tools and techniques, we can accurately determine general image quality and metadata such as fish quantity and location within images, fish orientation and other quantitative fish features, image scaling based on ruler identification and measurement. This paper reports on our research examining a set of [add numbers] images drawn from the Illinois Natural History Survey (INHS) Collection. The following section of this paper provides contextual background for this work, followed by the research goals and objectives, and a review of our research methods. Next, the results are presented, followed by a discussion. The conclusion highlights key findings and identifies next steps.
+Since the digital collections may each contain tens of thousands of images, producing metadata for each image via a manual process is prohibitively labor-intensive and infeasible. Methods for automatically computing metadata from images are therefore needed to fully exploit biological image repositories for scientific discovery.
+As a step towards improving metadata in specimen research image collections, members of the Drexel University's Metadata Research Center are developing methods to automatically analyze fish images and
+extract a set of data features that provide important metadata about the
+digital specimen.
+The research is being conducted as part of the Biology Guided Neural Networks (BGNN) project, which aims to develop a novel class of artificial neural networks that exploit machine readable and predictive knowledge associated with specimen images, phylogenies and anatomy ontologies.
+Using a combination of machine learning and image informatics tools and techniques, we can accurately determine general image quality and metadata such as fish quantity and location within images, fish orientation, and
+image scaling based on ruler identification and measurement. Image scaling
+allows us to compute quantitative features about the fish specimens, such
+as their length and area.
+In order to test and validate our methods, we applied them to a set of 7,247
+images drawn from the Illinois Natural History Survey (INHS) Collection.
+The following section of the paper provides contextual background for this work, followed by the research goals and objectives, and a review of our research methods. Next, the results are presented, followed by a discussion. The conclusion highlights key findings and identifies next steps.
 
 \section{Related Work}
 \textbf{Todo}
