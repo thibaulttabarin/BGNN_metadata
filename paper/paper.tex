@@ -66,6 +66,25 @@
 \email{jcp353@drexel.edu}
 \orcid{0002-1601-8729}
 \author{Jane Greenberg}
+\orcid{0001-7819-5360}
+\affiliation{%
+  \institution{Drexel University}
+  \streetaddress{3675 Market St}
+  \city{Philadelphia}
+  \state{Pennsylvania}
+  \country{USA}
+  \postcode{19104}
+}
+\author{Yasin Bakis}
+\orcid{0001-6144-9440}
+\author{Henry Bart Jr.}
+\orcid{0002-5662-9444}
+\affiliation{
+  \institution{Tulane University}
+  \city{New Orleans}
+  \state{Louisiana}
+  \country{USA}
+}
 \author{David Breen}
 \orcid{0002-1376-5008}
 \affiliation{%
@@ -83,7 +102,7 @@
 %% other information printed in the page headers. This command allows
 %% the author to define a more concise list
 %% of authors' names for this purpose.
-\renewcommand{\shortauthors}{Pepper, Greenberg and Breen}
+\renewcommand{\shortauthors}{Pepper, Greenberg, Bakis, Bart and Breen}
 
 %%
 %% The abstract is a short summary of the work to be presented in the
@@ -359,6 +378,13 @@ images with tags, or something on the wrong side was detected as an eye (so the 
 \section{Discussion}
 Text \textit{texty text}%~\cite{Lamport:LaTeX}
 \subsection{Future Work}
+\begin{itemize}
+    \item Further fine tuning of pixel analysis (e.g.\ thresholding on different regions of the bbox)
+    \item Generalizing ruler reading
+    \item Training on a progressively larger number of image collections to hopefully gain reasonable generality for the whole class of fish specimen images
+    \item Adding things like seahorses and eels
+    \item Fitting a ``spine'' to specimen
+\end{itemize}
 \section{Conclusion}
 Text \textbf{text}
 
