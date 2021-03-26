@@ -108,12 +108,11 @@
 %% The abstract is a short summary of the work to be presented in the
 %% article.
 \begin{abstract}
-  A clear\todo{test} and well-documented \LaTeX\ document is presented as an
-  article formatted for publication by ACM in a conference proceedings
-  or journal publication. Based on the ``acmart'' document class, this
-  article presents and explains many of the common variations, as well
-  as many of the formatting elements an author may use in the
-  preparation of the documentation of their work.
+    \todo{Just throwing the Hank conference abstract in here for us to work off of and pare down} Over the last several decades advances in computing, imaging, and cyberinfrastructure have had a major impact on scientific research and discovery. One area of considerable activity is the digitization of the biological specimens that have been collected worldwide by museums and other research institutions. The scanning of these specimen collections and the placement of the resulting images into easily accessible repositories on the Internet is enabling new scientific studies based on the previously unavailable data. Unfortunately, potential scientific advances are hindered by the lack of high-quality and pertinent metadata associated with the image collections. Metadata is required to search the repositories for the imaged specimens needed for a particular study. Since the collections may each contain tens of thousands of images, producing metadata for each image via a manual process is prohibitively labor-intensive and infeasible.  Methods for automatically computing metadata from images are therefore needed to fully exploit biological image repositories for scientific discovery.
+
+As a step towards improving metadata in specimen research image collections, our team has been developing methods for automatically analyzing fish images to extract a variety of important features. These fish specimens are being studied for a larger project titled Biology Guided Neural Networks (BGNN), which is developing a novel class of artificial neural networks that can exploit the machine readable and predictive knowledge about biology that is available in the form of specimen images, phylogenies and anatomy ontologies. Using a combination of machine learning and image informatics tools and techniques, we can accurately determine metadata such as fish quantity and location within images, fish orientation and other quantitative fish features, image scaling based on ruler identification and measurement, and general image quality metrics for a substantial number of the images being used in the BGNN project. 
+
+Metadata is often unavailable, sparse or incorrect within specimen image repositories, but is vital for subsequent machine learning, analysis and scientific discovery. Our goal is to develop image metadata generation methods that both support the novel machine learning research underway within the BGNN project, and provide a framework for future technology developments that can be deployed by repository curators to improve and bolster the metadata they provide with their specimen images. A longer term goal is to extend the image analysis methods for computing specific quantitative features in support of specific biological investigations. For example, we are able to automatically measure the length of a fish specimen.  Associating these measurements with location and acquisition date may provide insights into the influence of habitat factors on fish development/health. Since it is prohibitively expensive for scientists to manually gather this data, we are also interested in applying our tools to images of other species stored in a variety of repositories (e.g. iDigBio). The technical challenges in achieving a broader usage of our approach mostly involve training new classifiers for different types of species, learning to segment and read annotation tags, and generalizing our classifier to find and interpret different types of rulers. This presentation will report on our current efforts to automatically generate metadata for fish specimen images and offer thoughts on how to extend these techniques for other specimen image collections.
 \end{abstract}
 
 %%
@@ -164,7 +163,7 @@ Unfortunately, potential scientific advances are hindered [by image quality] as 
 As a step towards improving metadata in specimen research image collections, members of the Metadata Research Center, Drexel University, have been developing methods to automatically analyze fish images and extract a set of important features [metadata]. The research is being conducted as part of Biology Guided Neural Networks (BGNN) project, which aims to develop a novel class of artificial neural networks that exploits machine readable and predictive knowledge associated with specimen images, phylogenies and anatomy ontologies. Using a combination of machine learning and image informatics tools and techniques, we can accurately determine general image quality and metadata such as fish quantity and location within images, fish orientation and other quantitative fish features, image scaling based on ruler identification and measurement. This paper reports on our research examining a set of [add numbers] images drawn from the Illinois Natural History Survey (INHS) Collection. The following section of this paper provides contextual background for this work, followed by the research goals and objectives, and a review of our research methods. Next, the results are presented, followed by a discussion. The conclusion highlights key findings and identifies next steps.
 
 \section{Related Work}
-Text~\todo[noline]{Do this}
+\textbf{Todo}
 \subsection{Metadata for Image Collection}
 \todo{Wasn't looking for a citation but stumbled upon this paper: \url{https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0207636}, might be worth a skim}
 Metadata development is intertwined with the development of digital technology. A wide range of metadata standards are applicable to metadata supporting image description as well as technical aspects, and have been used in a range of image repositories. Examples of Descriptive schemes include X, y, z... Examples of technical schemes include... The use varies across communities, and application technique is primarily manual. Research evaluating such schemes XXX, show XXX. 
@@ -182,7 +181,7 @@ Natural history collections generally use a sub-set of such standards. Darwin Co
 \section{Goal and Objectives}
 
 \section{Methods}
-Our process for metadata generation can be broken into 3 steps: object detection with Facebook's Detectron2 machine learning library (subsequently referred to as \verb|detectron|), image informatics analysis at the pixel level, and calculations on the results of the previous steps to determine higher level metadata properties.
+Our process for metadata generation can be broken into 3 steps: object detection with Facebook's Detectron2 machine learning library (subsequently referred to as \verb|detectron|), image informatics analysis at the pixel level, and calculations on the results of the previous steps to determine higher level metadata properties.\todo{Definitely need to explain somewhere in more detail about our current admissibility criteria for images. Not sure where I want to put it yet so just leaving it as a todo}
 
 \subsection{Detectron}
 A prerequisite task to addressing any more advanced metadata property determination is finding specimens (and other relevant objects) within collection images. Object detection has been an incredibly active field of study in recent years,~\cite{zou2019object} and has resulted in a number of well tested purpose built architectures. We elected to use Facebook AI Research's \verb|detectron| tool~\cite{wu2019detectron2}, and specifically its implementation of the Mask R-CNN architecture~\cite{he2018mask}, for object detection in our project.
@@ -311,6 +310,24 @@ Just gonna throw some caveats in here, might be its own section might not
     \item Program falls back to using detectron mask and bbox for metadata generation in the event the mask generation/pixel analysis fails. Failure is defined as never finding a cohesive flood filled mask that covers more than 10\% of the detectron bbox initially. Can provide a statistic on how often this occurs.
 \end{itemize}
 \section{Results}
+Technicians employed by our team have manually generated the 22 metadata properties deemed crucial to the overall BGNN project~\cite{Leipzig2021.01.28.428644} for a large number of INHS images. \(20,699\) total entries were created by 13 technicians that spanned \(8,398\) unique images. Of these \(8,398\) images, \(7,247\) were both not part of the \verb|detectron| training set and meet our current admissibility criteria for what \verb|detectron| and the pixel analysis process can reliably handle. We ran the metadata extraction program on these \(7,247\) images.
+
+Our automated process currently generates 7 of the 22 core metadata properties: \verb|if_fish| (\verb|has_fish|), \verb|fish_number| (\verb|fish_count|), \verb|if_ruler| (\verb|has_ruler|), \verb|specimen_angled| (\verb|clock_value|), \verb|specimen_view| (\verb|side|), \verb|brightness| (derived from \verb|background.mean| and \verb|foreground.mean|), and \verb|if_background_uniform| (\verb|background.std|). In addition, our process also calculates bounding boxes and fish lengths in centimeters.\todo{Talk more about what we can and can't verify and how}
+
+All images in the INHS dataset contain exactly one fish. \textbf{Todo}: if\_fish and fish\_count results
+
+\textbf{Todo}: Ruler results
+
+\textbf{Todo}: Side results
+
+\textbf{Todo}: Clock value results
+
+\textbf{Todo}: Brightness/uniformity results? I can try to do this but I need to set up the infrastructure, we probably need to discuss a plan of action for this.
+
+\textbf{Todo}: Bounding box results
+
+\textbf{Todo}: Scale results
+\begin{comment}
 \begin{verbatim}
 What I think should be the final results:
 
@@ -372,11 +389,10 @@ Verdict: For only 10 of the 35 am I actually wrong and all of those are either c
 images with tags, or something on the wrong side was detected as an eye (so the clock value is backwards).
 
 \end{verbatim}
-
-\todo{Randomly verify a sampling of length values}
+\end{comment}
 
 \section{Discussion}
-Text \textit{texty text}%~\cite{Lamport:LaTeX}
+\textbf{Todo}
 \subsection{Future Work}
 \begin{itemize}
     \item Further fine tuning of pixel analysis (e.g.\ thresholding on different regions of the bbox)
@@ -386,7 +402,7 @@ Text \textit{texty text}%~\cite{Lamport:LaTeX}
     \item Fitting a ``spine'' to specimen
 \end{itemize}
 \section{Conclusion}
-Text \textbf{text}
+\textbf{Todo}
 
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{paper}
