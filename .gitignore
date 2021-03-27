@@ -152,3 +152,4 @@ config/overall_prefix.txt
 *.txt
 *.blg
 *.bbl
+*.swp
