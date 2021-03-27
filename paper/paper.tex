@@ -154,9 +154,15 @@ the research underway within the BGNN project, and provide a framework for futur
 %% information and the body of the document, and typically spans the
 %% page.
 \begin{teaserfigure}
-  \includegraphics[width=\textwidth]{fish}
-  \caption{Fish prediction. Not sure such a big image should go here.  I'll think about a more succinct figure.}
-  \Description{Fish prediction}
+  \centering
+  \begin{subfigure}%{.5\linewidth}
+  \includegraphics[width=.49\textwidth]{images/teaser1}
+  \end{subfigure}
+  \begin{subfigure}%{.5\linewidth}
+  \includegraphics[width=.49\textwidth]{images/teaser2}
+  \end{subfigure}
+  \caption{Initial object detection on specimen images using Detectron2~\cite{wu2019detectron2}}
+  \Description{Fish predictions}
   \label{fig:fish}
 \end{teaserfigure}
 
@@ -264,9 +270,9 @@ Banan 2020 \cite{Banan2020DeepLA}
 Our process for metadata generation can be broken into 3 steps: object detection with Facebook's Detectron2 machine learning library (subsequently referred to as \verb|detectron|), image informatics analysis at the pixel level, and calculations on the results of the previous steps to determine higher level metadata properties.\todo{Definitely need to explain somewhere in more detail about our current admissibility criteria for images. Not sure where I want to put it yet so just leaving it as a todo}
 
 \subsection{Detectron}
-A prerequisite task to addressing any more advanced metadata property determination is finding specimens (and other relevant objects) within collection images. Object detection has been an incredibly active field of study in recent years,~\cite{zou2019object} and has resulted in a number of well tested purpose built architectures. We elected to use Facebook AI Research's \verb|detectron| tool~\cite{wu2019detectron2}, and specifically its implementation of the Mask R-CNN architecture~\cite{he2018mask}, for object detection in our project.
+A prerequisite task to addressing any more advanced metadata property determination is finding specimens (and other relevant objects) within collection images. Object detection has been an incredibly active field of study in recent years,~\cite{zou2019object} and has resulted in a number of well tested, purpose built architectures. We elected to use Facebook AI Research's \verb|detectron| tool,~\cite{wu2019detectron2} and specifically its implementation of the Mask R-CNN architecture,~\cite{he2018mask} for object detection in our project.
 
-\verb|detectron| is built on \verb|pytorch|~\cite{NEURIPS2019_9015} and provides a relatively straightforward method for training on COCO~\cite{DBLP:journals/corr/LinMBHPRDZ14} format dataset. It is able to handle an arbitrary number of object classes, and can classify an arbitrary number of object within a given sample. For our project, we are currently using it to identify five object classes: fish, fish eyes, rulers, and the numbers 2 and 3 on rulers.
+\verb|detectron| is built on \verb|pytorch|~\cite{NEURIPS2019_9015} and provides a relatively straightforward method for training on COCO~\cite{DBLP:journals/corr/LinMBHPRDZ14} format datasets. It is able to handle an arbitrary number of object classes, and can classify an arbitrary number of object within a given image. For our project, we are currently using it to identify five object classes: fish, fish eyes, rulers, and the numbers 2 and 3 on rulers.
 
 Our training dataset consisted of the following number of instances for each class:
 
@@ -479,11 +485,12 @@ images with tags, or something on the wrong side was detected as an eye (so the 
 \textbf{Todo}
 \subsection{Future Work}
 \begin{itemize}
-    \item Further fine tuning of pixel analysis (e.g.\ thresholding on different regions of the bbox)
-    \item Generalizing ruler reading
-    \item Training on a progressively larger number of image collections to hopefully gain reasonable generality for the whole class of fish specimen images
-    \item Adding things like seahorses and eels
-    \item Fitting a ``spine'' to specimen
+    \item Further fine tuning of pixel analysis (e.g.\ thresholding on different regions of the bbox).
+    \item Generalizing ruler reading.
+    \item Training on a progressively larger number of image collections to hopefully gain reasonable generality for the whole class of fish specimen images.
+    \item Adding things like seahorses and eels.
+    \item Fitting a ``spine'' to specimen.
+    \item Attempt to address tags that overlap fish? If nothing else could add a ``tag'' class and either try to exclude those pixels from the pixel analysis of the fish, or just use detectron bbox if a tag intersects with a specimen.
 \end{itemize}
 \section{Conclusion}
 \textbf{Todo}
