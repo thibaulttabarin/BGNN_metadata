@@ -155,12 +155,8 @@ the research underway within the BGNN project, and provide a framework for futur
 %% page.
 \begin{teaserfigure}
   \centering
-  \begin{subfigure}%{.5\linewidth}
   \includegraphics[width=.49\textwidth]{images/teaser1}
-  \end{subfigure}
-  \begin{subfigure}%{.5\linewidth}
   \includegraphics[width=.49\textwidth]{images/teaser2}
-  \end{subfigure}
   \caption{Initial object detection on specimen images using Detectron2~\cite{wu2019detectron2}}
   \Description{Fish predictions}
   \label{fig:fish}
@@ -264,7 +260,7 @@ Banan 2020 \cite{Banan2020DeepLA}
 
 
 
-\section{Goal and Objectives}
+\section{Goals and Objectives}
 
 \section{Methods}
 Our process for metadata generation can be broken into 3 steps: object detection with Facebook's Detectron2 machine learning library (subsequently referred to as \verb|detectron|), image informatics analysis at the pixel level, and calculations on the results of the previous steps to determine higher level metadata properties.\todo{Definitely need to explain somewhere in more detail about our current admissibility criteria for images. Not sure where I want to put it yet so just leaving it as a todo}
@@ -400,23 +396,30 @@ Just gonna throw some caveats in here, might be its own section might not
 \end{itemize}
 \end{comment}
 \section{Results}
-Technicians employed by our team have manually generated the 22 metadata properties deemed crucial to the overall BGNN project~\cite{Leipzig2021.01.28.428644} for a large number of INHS images. \(20,699\) total entries were created by 13 technicians that spanned \(8,398\) unique images. Of these \(8,398\) images, \(7,247\) were both not part of the \verb|detectron| training set and meet our current admissibility criteria for what \verb|detectron| and the pixel analysis process can reliably handle. We ran the metadata extraction program on these \(7,247\) images.
+Technicians employed by our team have manually generated the 22 metadata properties deemed crucial to the overall BGNN project~\cite{Leipzig2021.01.28.428644} for a large number of INHS images. \(20,699\) total entries were created by 13 technicians that spanned \(8,398\) unique images. Of these \(8,398\) images, \(7,244\) were both not part of the \verb|detectron| training set and meet our current admissibility criteria for what \verb|detectron| and the pixel analysis process can reliably handle. We ran the metadata extraction program on these \(7,244\) images.
 
-Our automated process currently generates 7 of the 22 core metadata properties: \verb|if_fish| (\verb|has_fish|), \verb|fish_number| (\verb|fish_count|), \verb|if_ruler| (\verb|has_ruler|), \verb|specimen_angled| (\verb|clock_value|), \verb|specimen_view| (\verb|side|), \verb|brightness| (derived from \verb|background.mean| and \verb|foreground.mean|), and \verb|if_background_uniform| (\verb|background.std|). In addition, our process also calculates bounding boxes and fish lengths in centimeters.\todo{Talk more about what we can and can't verify and how. Also, need to fit the percent of the time pixel analysis failed in here somewhere.}
+Our automated process currently generates 7 of the 22 core metadata properties: \verb|if_fish| (\verb|has_fish|), \verb|fish_number| (\verb|fish_count|), \verb|if_ruler| (\verb|has_ruler|), \verb|specimen_angled| (\verb|clock_value|), \verb|specimen_view| (\verb|side|), \verb|brightness| (derived from \verb|background.mean| and \verb|foreground.mean|), and \verb|if_background_uniform| (\verb|background.std|). In addition, our process also calculates bounding boxes and fish lengths in centimeters.\todo{Talk more about what we can and can't verify and how.}
 
-All images in the INHS dataset contain exactly one fish. \textbf{Todo}: if\_fish and fish\_count results
+\subsection{Fish Detection}
+All images in the INHS dataset contain exactly one fish. For \(7,209\) of the specimen images, one fish was detected. For 25 of the images, 2 fish were detected, 3 fish were detected for 3 images, and for 7 images no fish were found. In the case of greater than 1 fish, 9 of the 28 contained tags which overlapped the fish and were themselves labeled as a second fish. Of the remaining 17, \verb|detectron| erroneously labeled the fish as two separate fish objects, or labeled a subsection of the fish a second time.
 
-\textbf{Todo}: Ruler results
+\subsection{Ruler Detection}
+For all but 2 of the \(7,244\) images \verb|detectron| was able to find the ruler.\todo{Not sure if I can phrase it that way or not since I haven't looked at all the images to see if the ruler itself was found or something else was labeled a ruler} For an additional 56 images, the ruler itself was found but the ``2'' and/or the ``3'' on it was not, so a scale calculation could not be performed.
 
-\textbf{Todo}: Side results
+\subsection{Side Detection}
+For 246 of the images \verb|detectron| was unable to find a fish eye. Of the remaining \(6,998\) images where it did, the correct side (\verb|left| or \verb|right|) was detected in all but 6 cases.
 
-\textbf{Todo}: Clock value results
+\subsection{Clock Value}
+Clock position values were successfully generated for \(6,991\) of the images. Of those, all but 10 were within \(\pm{}1\) of the correct result.
 
-\textbf{Todo}: Brightness/uniformity results? I can try to do this but I need to set up the infrastructure, we probably need to discuss a plan of action for this.
+\subsection{Brightness/Uniformity Results?}
+\textbf{Todo}: I can try to do this but I need to set up the infrastructure, we probably need to discuss a plan of action for this.
 
-\textbf{Todo}: Bounding box results
+\subsection{Bounding Box}
+Fish bounding boxes were calculated for all \(7,237\) images in which a fish was found. All but 263 of these were generated via pixel analysis, with those 263 falling back to the original \verb|detectron| bounding box. \textbf{Todo}: Anything more than this is going to need hand checked.
 
-\textbf{Todo}: Scale results
+\subsection{Length}
+Fish lengths were calculated for \(7,179\) of the images. \textbf{Todo}: Anything more than this is going to need hand checked.
 \begin{comment}
 \begin{verbatim}
 What I think should be the final results:

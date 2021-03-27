@@ -22,6 +22,9 @@ no_eye = 0
 no_fish = 0
 errored = 0
 wrong_wrong = 0
+side_wrong = 0
+length_calced = 0
+bbox = 0
 for i in results.keys():
     counter += 1
     me = results[i]
@@ -36,6 +39,10 @@ for i in results.keys():
         #print(angle)
         angle = round(angle)
         if me['has_fish']:
+            if 'bbox' in me['fish'][0].keys():
+                bbox += 1
+            if 'length' in me['fish'][0].keys():
+                length_calced += 1
             if me['fish'][0]['has_eye']:
                 val = int(me['fish'][0]['clock_value'])
                 #print(yasin)
@@ -46,9 +53,14 @@ for i in results.keys():
                 wrong_wrong += 1 if not check else 0
                 #right += val >= round(yasin.specimen_angled - 1) and\
                 #        val <= round(yasin.specimen_angled + 1)
-                if not (val >= (angle - 1) and val <= (angle + 1)):
+                #if not (val >= (angle - 1) and val <= (angle + 1)):
                     #print(f"{i}: {me['fish'][0]['clock_value']}, {yasin.specimen_angled}")
-                    print(f"{i}: {me['fish'][0]['clock_value']}, {angle}")
+                    #print(f"{i}: {me['fish'][0]['clock_value']}, {angle}")
+                mes = me['fish'][0]['side']
+                yasins = all_yasin.iloc[0].specimen_viewing
+                if yasins.find(mes) < 0:
+                    side_wrong += 1
+                    print(f'{i}: Side wrong | {mes} | {yasins}')
             else:
                 no_eye += 1
                 print(f'{i}: No eye')
@@ -67,3 +79,6 @@ print(f'Wrong wrong: {wrong_wrong}')
 print(f'Total: {counter}')
 print(f'Percent right: {right / counter}')
 print(f'Percent right that didn\'t error: {right / (counter - no_eye - no_fish - errored)}')
+print(f'\nSide wrong: {side_wrong}')
+print(f'Length calculated: {length_calced}')
+print(f'Bbox calculated: {bbox}')
