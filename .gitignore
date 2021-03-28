@@ -135,11 +135,11 @@ output/
 Pipfile.lock
 *.pth
 test_images_output/
-*.jpg
-*.JPG
+#*.jpg
+#*.JPG
 temp/
 output.bak/
-*.png
+#*.png
 data/
 config/overall_prefix.txt
 *.cut
@@ -153,3 +153,9 @@ config/overall_prefix.txt
 *.blg
 *.bbl
 *.swp
+/*.jpg
+/*.JPG
+/*.png
+failed/
+test/
+test_images/
