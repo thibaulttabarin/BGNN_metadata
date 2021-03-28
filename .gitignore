@@ -153,9 +153,9 @@ config/overall_prefix.txt
 *.blg
 *.bbl
 *.swp
-/*.jpg
-/*.JPG
-/*.png
+#/*.jpg
+#/*.JPG
+#/*.png
 failed/
 test/
 test_images/
