@@ -254,7 +254,7 @@ Lalabadi 2020 \cite{Lalabadi2020FishFC},
 Bock 2018 \cite{BockAlexander2018TITE},
 
 Computer Vision Overviews Related to Fish\newline
-G{\"u}m{\"u}ş 2011 \cite{Gm2011MachineVA},
+G{\"u}m{\"u}\c{s} 2011 \cite{Gm2011MachineVA},
 
 
 Williams 2020 \cite{Williams:2020:UIF},
@@ -273,7 +273,7 @@ Sharmin 2019 \cite{Sharmin2019MVB},
 Salman 2016 \cite{Salman2016FishSC},
 Sung 2020 \cite{Sung2020AutomaticGF},
 Xu 2021 \cite{Xu2021TransferLA},
-Banan 2020 \cite{Banan2020Deep,LA}
+Banan 2020 \cite{Banan2020DeepLA}
 Ogunlana 2015 \cite{Ogunlana2015FCU},
 Sayed 2018 \cite{SayedGehadIsmail2018AAFS},
 Rodrigues 2015 \cite{RodriguesMarcoT.A2015Ecda},
@@ -433,12 +433,23 @@ For all but 2 of the \(7,244\) images \verb|detectron| was able to find the rule
 For 246 of the images \verb|detectron| was unable to find a fish eye. Of the remaining \(6,998\) images where it did, the correct side (\verb|left| or \verb|right|) was detected in all but 6 cases.
 
 \subsection{Clock Value}
-Clock position values were successfully generated for \(6,991\) of the images. Of those, all but 10 were within \(\pm{}1\) of the correct result.
+Clock position values were successfully generated for \(6,991\) of the images. Of those, all but 8 were within \(\pm{}1\) of the correct result.
 
 \subsection{Brightness/Uniformity Results?}
 \textbf{Todo}: I can try to do this but I need to set up the infrastructure, we probably need to discuss a plan of action for this.
 
-\subsection{Bounding Box}
+\subsection{Mask and Bounding Box}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.49\linewidth]{images/011196_pred}
+  \includegraphics[width=0.49\linewidth]{images/011196_mask}
+  \includegraphics[width=0.49\linewidth]{images/52399_pred}
+  \includegraphics[width=0.49\linewidth]{images/52399_mask}
+  \includegraphics[width=0.49\linewidth]{images/56885_pred}
+  \includegraphics[width=0.49\linewidth]{images/56885_mask}
+  \caption{Examples of masks and bounding boxes from detectron (left) and pixel analysis (right).}
+  \Description{Bounding box and mask examples}
+\end{figure}
 Fish bounding boxes were calculated for all \(7,237\) images in which a fish was found. All but 263 of these were generated via pixel analysis, with those 263 falling back to the original \verb|detectron| bounding box. \textbf{Todo}: Anything more than this is going to need hand checked.
 
 \subsection{Length}
@@ -511,18 +522,42 @@ images with tags, or something on the wrong side was detected as an eye (so the 
 \textbf{Todo}: Will need some sort of intro/framing paragraph
 \subsection{Results}\todo{Just going to put the results discussion in small sections and we can change it later if that doesn't make sense}
 \subsubsection{Object Detection}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.49\linewidth]{images/none1}
+  \includegraphics[width=0.49\linewidth]{images/double1}
+  \caption{An example of a fish that was not detected (left) and a fish that was detected twice (right).}
+  \Description{Mislabeled eye on a catfish}
+\end{figure}
+
 \begin{itemize}
     \item Worked fairly well all things considered
     \item Talk about which fish failed
     \item Talk about which rulers failed
 \end{itemize}
 \subsubsection{Side Detection}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.49\linewidth]{images/wrong_side_orig}
+  \includegraphics[width=0.49\linewidth]{images/wrong_side1}
+  \caption{A fish for which a splotch on its tail fin was labeled the most likely eye.}
+  \Description{Mislabeled eye on a catfish}
+\end{figure}
+For all 6 of the cases where an eye was detected but the \verb|side| value was wrong, a spot on the wrong side of the fish was labeled as the most likely eye within the bounding box of the fish. There were an additional 17 images for which the automated process generated a result that did not match the manually created data. For these remaining cases the manual data was incorrect, giving the automated system an error rate \(2.8\) times lower than than the human error rate.
 
 \subsubsection{Clock Value}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.49\linewidth]{images/curved1}
+  %\includegraphics[width=0.49\linewidth]{images/}
+  \caption{An example of a heavily curved specimen.}
+  \Description{Mislabeled eye on a catfish}
+\end{figure}
+Of the specimens for which clock values were generated, 33 did not match the manually created data (within a tolerance of \(\pm{}1\)).For 25 of those the human generated data was incorrect, giving the automated process a \(3.1\) times lower error rate. Of the remaining 8, 2 specimens were quite curved making it difficult to assign a clear angle value. The other 6 were values of 3 instead of 9 or vice versa that resulted from a mislabeled eye as discussed in the previous section. A small number of images (such as on the right in Figure~\ref{fig:fish}) have tags that overlap with the fish. These tags were light enough that they were correctly labeled as background by the pixel analysis.
+
+\subsubsection{Mask and Bounding Box}
 
 \subsubsection{Brightness?}
-
-\subsubsection{Bounding Box}
 
 \subsubsection{Length}
 
@@ -533,13 +568,19 @@ images with tags, or something on the wrong side was detected as an eye (so the 
     \item Training on a progressively larger number of image collections to hopefully gain reasonable generality for the whole class of fish specimen images.
     \item Adding things like seahorses and eels.
     \item Fitting a ``spine'' to specimen.
-    \item Attempt to address tags that overlap fish? If nothing else could add a ``tag'' class and either try to exclude those pixels from the pixel analysis of the fish, or just use detectron bbox if a tag intersects with a specimen.
 \end{itemize}
 \section{Conclusion}
 \textbf{Todo}
 
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{paper}
+
+%\begin{figure}[H]
+%  \centering
+%  \includegraphics[width=\linewidth]{images/}
+%  \caption{}
+%  \Description{}
+%\end{figure}
 
 \begin{comment}
 \pagebreak{}
