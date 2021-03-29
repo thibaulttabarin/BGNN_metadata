@@ -3,6 +3,7 @@
 \documentclass[screen,review]{acmart}
 \usepackage{todonotes}
 \usepackage{comment}
+\usepackage{wrapfig}
 %%
 %% \BibTeX command to typeset BibTeX logo in the docs
 \AtBeginDocument{%
@@ -348,7 +349,7 @@ A prerequisite task to addressing any more advanced metadata property determinat
 
 Our training dataset consisted of the following number of instances for each class:
 
-\begin{table}[H]
+\begin{wraptable}{r}{5.5cm}
     \centering
       \caption{Training dataset}
     \label{tab:dataset}
@@ -362,8 +363,8 @@ Our training dataset consisted of the following number of instances for each cla
         Two & 100\\
         Three & 100\\
       \bottomrule
-\end{tabular}
-\end{table}
+    \end{tabular}
+\end{wraptable}
 
 All of the training data was labeled by hand using \verb|makesense.ai|.~\cite{make-sense} While the ultimate goal of the project is to generalize to images from a variety of specimen collections, we have thus far focused only on images from the INHS\ Fish Collection.~\cite{INHS} Using \verb|detectron|'s default training scheme, the model was trained for \(100,000\) epochs. All instance types were included in a single object detection model. The total loss\todo{Find and specify which loss function was used} began at \(2.948\) and ended at \(0.158\) for the training data.
 
