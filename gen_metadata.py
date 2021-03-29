@@ -100,7 +100,8 @@ def gen_metadata(file_path):
     else:
         scale = None
     visualizer = Visualizer(im[:, :, ::-1], metadata=metadata, scale=1.0)
-    vis = visualizer.draw_instance_predictions(insts[selector].to('cpu'))
+    #vis = visualizer.draw_instance_predictions(insts[selector].to('cpu'))
+    vis = visualizer.draw_instance_predictions(insts.to('cpu'))
     os.makedirs('images', exist_ok=True)
     file_name = file_path.split('/')[-1]
     print(file_name)
@@ -274,7 +275,7 @@ def clock_value(evec, file_name):
             comp = np.array([0,-1])
             start = 6
     else:
-        if evec[1] > 0:
+        if evec[1] < 0:
             comp = np.array([1,0])
             start = 3
         else:

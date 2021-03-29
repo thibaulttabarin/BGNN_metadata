@@ -301,8 +301,33 @@ Developing new techniques to determine fish freshness and quality can enhance nu
 Taheri-Garavand 2019 \cite{TaheriGaravand2019RealtimeNM},
 In the current research, the potential of a novel method based on the artificial neural network was investigated to diagnose the freshness of common carp (Cyprinus carpio) during ice storage. Fish as an aquaculture product has high nutrients and low-fat content. So, people have consumed it as a safe and high-value foodstuff in their daily diet. Investigation of fish freshness is proposed as a significant issue in the aquaculture industry since fish spoils rapidly. The applied system of this study is comprised of the following steps: First, images of samples were captured and the pre-processing operation was done on the images. Then, particular channels including R, G, B, H, S, I, L*, a*, and b* were computed. Next, feature extraction was performed to obtain 6 types of texture features from each channel. Afterward, the hybrid Artificial Bee Colony-Artificial Neural Network (ABC-ANN) algorithm was applied to select the best features. Finally, the Support Vector Machine (SVM), K-Nearest Neighbor (K-NN) and Artificial Neural Network (ANN) algorithms as the most common methods were used to classify fish images. The best performance of the K-NN classifier was calculated in the k = 8 neighborhood size with the accuracy of 90.48. The best kernel function for the SVM algorithm was polynomial with C, sigma, and accuracy of 1, 2 and 91.52 percent, respectively. In this system, the input layer has consisted of 22 neurons based on the feature selection operation and 4 classes including most fresh, fresh, fairly fresh and spoiled have been used as the number of output layer. At the end, the best results of the MLP networks were achieved by LM learning algorithm and 6 neurons in the hidden layer with the 22–10–4 topology and accuracy of 93.01 percent. The achieved results demonstrate the high performance of the ANN classifier for evaluation of common carp freshness during ice storage as a rapid, accurate, non-destructive, real-time and automated method. It shows the potential of computer vision method in combination with artificial neural networks as an intelligent technique for evaluation of fish freshness.
 
+3D Segmentation from microCT\newline
+Bock 2018 \cite{BockAlexander2018TITE},
+
+Computer Vision Overviews Related to Fish\newline
+G{\"u}m{\"u}\c{s} 2011 \cite{Gm2011MachineVA},
+
+
 Tappi 2017 \cite{Tappi2017ComputerVS},
 The evaluation of fish freshness can be per- formed using chemical, sensory and physical methods. Besides sensory methods, several instrumental techniques have been applied with the objective of replacing sensory assessment. The aim of this study was to set up and test objective physical methods mainly based on computer vision system (CVS) to assess red mullet (Mullus barba- tus) freshness evolution during 10 days of storage, at two different storage temperatures (0 and 4 °C). To check the effectiveness of the purposed physical methods, CVS fea- tures (loss in the epidermis pigmentation, development of gill mucus and eye concavity index) and firmness have been compared with chemical trimethylamine content and sensory (QIM) attribute scores. As expected, fish degrada- tion was faster at the higher temperature. Instrumental tex- ture evaluation of fish by penetration test enabled to detect distinctive firmness changes due to onset and resolution of rigor mortis, and the successive tenderization phenomenon. Among CVS parameters, the epidermis pigmentation loss, and particularly the eye shape modification (eye concavity index) evidenced a high sensibility for the estimation of fresh red mullet quality loss, as a function of the two differ- ent storage conditions, and a good agreement with trimeth- ylamine content and QIM response evolution.
+Taheri-Garavand 2019 \cite{TaheriGaravand2019RealtimeNM},
+Lugatiman 2019 \cite{Lugatiman2019TunaMF},
+Mu{\~n}oz-Benavent 2018 \cite{MuozBenavent2018EnhancedFB},
+Petrov 2020 \cite{Petrov2020Overview},
+Miranda 2017 \cite{MIRANDA201741},
+Zion 2000 \cite{Zion2000InvivoFS},
+Zion 2012 \cite{Zion2012ReviewTU},
+Saitoh 2015 \cite{Saitoh2015ImagebasedFR},
+Sung 2017 \cite{Sung2017VisionBR},
+Sharmin 2019 \cite{Sharmin2019MVB},
+Salman 2016 \cite{Salman2016FishSC},
+Sung 2020 \cite{Sung2020AutomaticGF},
+Xu 2021 \cite{Xu2021TransferLA},
+Banan 2020 \cite{Banan2020DeepLA}
+Ogunlana 2015 \cite{Ogunlana2015FCU},
+Sayed 2018 \cite{SayedGehadIsmail2018AAFS},
+Rodrigues 2015 \cite{RodriguesMarcoT.A2015Ecda},
+Shah 2019 \cite{Shah2019FishPakFS},
 
 
 \textbf{Unbending a Fish}\newline
@@ -325,7 +350,7 @@ Our training dataset consisted of the following number of instances for each cla
 
 \begin{table}[H]
     \centering
-    \caption{Training dataset}
+      \caption{Training dataset}
     \label{tab:dataset}
     \begin{tabular}{cc}
         \toprule
@@ -461,12 +486,23 @@ For all but 2 of the \(7,244\) images \verb|detectron| was able to find the rule
 For 246 of the images \verb|detectron| was unable to find a fish eye. Of the remaining \(6,998\) images where it did, the correct side (\verb|left| or \verb|right|) was detected in all but 6 cases.
 
 \subsection{Clock Value}
-Clock position values were successfully generated for \(6,991\) of the images. Of those, all but 10 were within \(\pm{}1\) of the correct result.
+Clock position values were successfully generated for \(6,991\) of the images. Of those, all but 8 were within \(\pm{}1\) of the correct result.
 
 \subsection{Brightness/Uniformity Results?}
 \textbf{Todo}: I can try to do this but I need to set up the infrastructure, we probably need to discuss a plan of action for this.
 
-\subsection{Bounding Box}
+\subsection{Mask and Bounding Box}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.49\linewidth]{images/011196_pred}
+  \includegraphics[width=0.49\linewidth]{images/011196_mask}
+  \includegraphics[width=0.49\linewidth]{images/52399_pred}
+  \includegraphics[width=0.49\linewidth]{images/52399_mask}
+  \includegraphics[width=0.49\linewidth]{images/56885_pred}
+  \includegraphics[width=0.49\linewidth]{images/56885_mask}
+  \caption{Examples of masks and bounding boxes from detectron (left) and pixel analysis (right).}
+  \Description{Bounding box and mask examples}
+\end{figure}
 Fish bounding boxes were calculated for all \(7,237\) images in which a fish was found. All but 263 of these were generated via pixel analysis, with those 263 falling back to the original \verb|detectron| bounding box. \textbf{Todo}: Anything more than this is going to need hand checked.
 
 \subsection{Length}
@@ -539,18 +575,42 @@ images with tags, or something on the wrong side was detected as an eye (so the 
 \textbf{Todo}: Will need some sort of intro/framing paragraph
 \subsection{Results}\todo{Just going to put the results discussion in small sections and we can change it later if that doesn't make sense}
 \subsubsection{Object Detection}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.49\linewidth]{images/none1}
+  \includegraphics[width=0.49\linewidth]{images/double1}
+  \caption{An example of a fish that was not detected (left) and a fish that was detected twice (right).}
+  \Description{Mislabeled eye on a catfish}
+\end{figure}
+
 \begin{itemize}
     \item Worked fairly well all things considered
     \item Talk about which fish failed
     \item Talk about which rulers failed
 \end{itemize}
 \subsubsection{Side Detection}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.49\linewidth]{images/wrong_side_orig}
+  \includegraphics[width=0.49\linewidth]{images/wrong_side1}
+  \caption{A fish for which a splotch on its tail fin was labeled the most likely eye.}
+  \Description{Mislabeled eye on a catfish}
+\end{figure}
+For all 6 of the cases where an eye was detected but the \verb|side| value was wrong, a spot on the wrong side of the fish was labeled as the most likely eye within the bounding box of the fish. There were an additional 17 images for which the automated process generated a result that did not match the manually created data. For these remaining cases the manual data was incorrect, giving the automated system an error rate \(2.8\) times lower than than the human error rate.
 
 \subsubsection{Clock Value}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.49\linewidth]{images/curved1}
+  %\includegraphics[width=0.49\linewidth]{images/}
+  \caption{An example of a heavily curved specimen.}
+  \Description{Mislabeled eye on a catfish}
+\end{figure}
+Of the specimens for which clock values were generated, 33 did not match the manually created data (within a tolerance of \(\pm{}1\)).For 25 of those the human generated data was incorrect, giving the automated process a \(3.1\) times lower error rate. Of the remaining 8, 2 specimens were quite curved making it difficult to assign a clear angle value. The other 6 were values of 3 instead of 9 or vice versa that resulted from a mislabeled eye as discussed in the previous section. A small number of images (such as on the right in Figure~\ref{fig:fish}) have tags that overlap with the fish. These tags were light enough that they were correctly labeled as background by the pixel analysis.
+
+\subsubsection{Mask and Bounding Box}
 
 \subsubsection{Brightness?}
-
-\subsubsection{Bounding Box}
 
 \subsubsection{Length}
 
@@ -561,13 +621,19 @@ images with tags, or something on the wrong side was detected as an eye (so the 
     \item Training on a progressively larger number of image collections to hopefully gain reasonable generality for the whole class of fish specimen images.
     \item Adding things like seahorses and eels.
     \item Fitting a ``spine'' to specimen.
-    \item Attempt to address tags that overlap fish? If nothing else could add a ``tag'' class and either try to exclude those pixels from the pixel analysis of the fish, or just use detectron bbox if a tag intersects with a specimen.
 \end{itemize}
 \section{Conclusion}
 \textbf{Todo}
 
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{paper}
+
+%\begin{figure}[H]
+%  \centering
+%  \includegraphics[width=\linewidth]{images/}
+%  \caption{}
+%  \Description{}
+%\end{figure}
 
 \begin{comment}
 \pagebreak{}
