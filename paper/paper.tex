@@ -185,8 +185,9 @@ due to both image quality and metadata issues.
 Unfortunately, potential scientific advances are hindered by image quality
 problems and the lack of accurate and pertinent metadata
 associated with the image collections.
-Poor quality images, e.g. with low contrast, inadequate lighting, out of
-focus, cluttered visual arrangements, provide inadequate input for automated
+Poor quality images, e.g. with low contrast, inadequate lighting,
+out-of-focus or cluttered visual arrangements, provide inadequate input
+for automated
 image analysis and machine learning algorithms and lead to inferior
 computational results.
 In order to perform quantitative morphometric analysis of the specimens,
@@ -197,12 +198,12 @@ specimen taxon, geographic location, and several other descriptive aspects.
 Additionally, some digitization efforts record technical metadata, detailing imaging specifications. While these types of metadata are helpful for a
 human examining several images at a time, they are insufficient for researchers seeking to apply computational methods to examine thousands of images
 to determine if, for instance, a specific fish grows to different lengths
-in different ecosystems.
+in different habitats.
 
 Since the digital collections may each contain tens of thousands of images, producing metadata for each image via a manual process is prohibitively labor-intensive and infeasible. Methods for automatically computing metadata from images are therefore needed to fully exploit biological image repositories for scientific discovery.
-As a step towards improving metadata in specimen research image collections, members of the Drexel University's Metadata Research Center are developing methods to automatically analyze fish images and
+As a step towards improving metadata in specimen research image collections, members of Drexel University's Metadata Research Center are developing methods to automatically analyze fish images and
 extract a set of data features that provide important metadata about the
-digital specimen.
+digitized specimen.
 The research is being conducted as part of the Biology Guided Neural Networks (BGNN) project, which aims to develop a novel class of artificial neural networks that exploit machine readable and predictive knowledge associated with specimen images, phylogenies and anatomy ontologies.
 Using a combination of machine learning and image informatics tools and techniques, we can accurately determine general image quality and metadata, such as fish quantity and location within images, fish orientation, and
 image scaling based on ruler identification and measurement. Image scaling
@@ -229,18 +230,18 @@ Fish species dataset in Pakistan Shah 2019 \cite{Shah2019FishPakFS},
 Image analysis has been utilized to examine and process images of fish
 for well over two decades \cite{Zion2000InvivoFS,Saberioon2017ApplicationOM}. It is an important
 application of technology both for marine science, in the study of aquatic
-species, habitats and ecosystems, and for food the industry, in the
+species, habitats and ecosystems, and for the seafood industry, in the
 development of automated fish sorting and grading systems, as well as
 fisheries management. Many of these computational analyses focus on
 the recognition and classification 
 of the fish present in an image.  The computational methods employed for
-fish image analysis followed the general trends in the field.
+fish image analysis have followed the general trends in the AI field.
 Hu et al.~\cite{HuJing2012Fscb} presented a method of classifying species
-of fish based on color and texture features and used a multi-class support
+of fish based on color and texture features and a multi-class support
 vector machine (MSVM) \cite{Vapnik1999AOS}.
 Li and Hong \cite{Li2014IdentificationOF} computed eleven shape and color
 features from fish images that were distilled down to four, using Principal
-Component Analysis, and derived a linear model from these four features
+Component Analysis, and derived a linear model
 that could discriminate between four different fishes.
 %  Kinda unimpressive. Let's leave out.
 % Saitoh \cite{Saitoh2015ImagebasedFR}
@@ -256,7 +257,7 @@ types of fish with a 92\% accuracy.
 Salman et al.~\cite{Salman2016FishSC} employed a deep Convolution Neural
 Networks (CNN) \cite{LeCun2004LMG} together with classification based on
 K-Nearest Neighbor and Support Vector Machines trained on the features
-extracted by the CNN in supervised deep learning. They achieved 90\%
+extracted by the CNN. They achieved 90\%
 accuracy when identifying 15 different fish in challenging underwater
 digital images.
 % Unimpressive. Do not include.
@@ -304,11 +305,11 @@ accuracy.
 % In aquaculture breeding programs where large numbers of fish need to be rapidly phenotyped, the absolute physical dimensions of fish (in millimeters or inches) are often required to be extracted from electronic images in order to measure the size of the fish. While it is possible to infer the length of the fish in pixels, the absolute scale of the image (in pixels-per-millimeter or dots-per- inch) is largely unknown without a reference grid, or requires additional hardware, data collection and/or record-keeping management overheads. One cost and time effective solution is to capture the absolute scale by including a measuring ruler in the photographed scene and from which a computer program can automatically identify the scale of the photo and calculate fish morphometric measurements. To assist such workflow, this study developed an algorithm that automatically detects a ruler in a given image, and automatically extracts its scale as distance (in fractional number of pixels) betw. The algorithm was applied to 445 publicly available images of barramundi or Asian seabass (Lates calcarifer), where a millimeter-graded ruler was included in each image. Convolutional Neural Network (CNN) was trained to segment the images into ruler, background, fish and label sections. Then the distance-extraction algorithm was applied to the ruler section of the images. The false-negative rate was less than 2%, where the ruler graduation distances could not be extracted in only 2-6 (out of 445) images even when the test images were rotated up to 90 degrees. The mean absolute relative error (MARE) of the inferred distances was 1-2%.\newline
 Konovalov et al.~\cite{Konovalov2019AutomaticWE} presented a method for
 accurate automatic weight estimation of fish using a Convolutional Neural
-Network (CNN), data fitting, and ruler detection/measurement
+Network (CNN), data fitting, and a ruler detection/measurement
 method \cite{Konovalov2018AutomaticSO}.
 % Approximately 2,500 weights and corresponding images of harvested Lates calcarifer (Asian seabass or barra- mundi) were collected at three different locations in Queensland, Australia. Two instances of the LinkNet-34 segmentation Convo- lutional Neural Network (CNN) were trained. The first one was trained on 200 manually segmented fish masks with excluded fins and tails. The second was trained on 100 whole-fish masks. The two CNNs were applied to the rest of the images and yielded automatically segmented masks. The one-factor and two-factor simple mathematical weight-from-area models were fitted on 1072 area-weight pairs from the first two locations, where area values were extracted from the automatically segmented masks. When applied to 1,400 test images (from the third location), the one- factor whole-fish mask model achieved the best mean absolute percentage error (MAPE), MAPE = 4.36%. Direct weight-from- image regression CNNs were also trained, where the no-fins based CNN performed best on the test images with MAPE = 4.28%.
 Hao et al.~\cite{Hao2015TheMO} provide an excellent review of fish
-measurement by machine visions efforts.
+measurement efforts that utilize machine vision.
 % This study reviewed the methods of fish size measurement through machine vision. Length and area are important information that can help fishers manage fish scientifically and conveniently. This information could be used to calculate the volume and weight according to their relation; other information could also be calculated. Machine vision is more effective, economical and faster than traditional methods.
 Azarmdel et al.~\cite{Azarmdel2019DevelopingAO} developed a system
 capable of determining the orientation of a trout and segmenting its fins,
@@ -318,7 +319,7 @@ which are used as cutting points, with an accuracy over 99\%.
 Another application of image analysis to fish images is the evaluation
 fish freshness, a computation usually performed on the color features of
 the images.
-Tappi et al.~\cite{Tappi2017ComputerVS} assees the freshness of frozen
+Tappi et al.~\cite{Tappi2017ComputerVS} assess the freshness of frozen
 fish by computing a change of color and an eye concavity index.
 % The evaluation of fish freshness can be per- formed using chemical, sensory and physical methods. Besides sensory methods, several instrumental techniques have been applied with the objective of replacing sensory assessment. The aim of this study was to set up and test objective physical methods mainly based on computer vision system (CVS) to assess red mullet (Mullus barba- tus) freshness evolution during 10 days of storage, at two different storage temperatures (0 and 4 °C). To check the effectiveness of the purposed physical methods, CVS fea- tures (loss in the epidermis pigmentation, development of gill mucus and eye concavity index) and firmness have been compared with chemical trimethylamine content and sensory (QIM) attribute scores. As expected, fish degrada- tion was faster at the higher temperature. Instrumental tex- ture evaluation of fish by penetration test enabled to detect distinctive firmness changes due to onset and resolution of rigor mortis, and the successive tenderization phenomenon. Among CVS parameters, the epidermis pigmentation loss, and particularly the eye shape modification (eye concavity index) evidenced a high sensibility for the estimation of fresh red mullet quality loss, as a function of the two differ- ent storage conditions, and a good agreement with trimeth- ylamine content and QIM response evolution.
 Taheri-Garavand et al.~\cite{TaheriGaravand2019RealtimeNM} diagnosed the 
@@ -356,6 +357,37 @@ Williams 2020 \cite{Williams:2020:UIF})
 
 
 \section{Goals and Objectives}
+
+Digitized specimen collections offer numerous outstanding opportunities
+for new scientific studies and discoveries.
+
+The amount of data is immense, with image collections containing 10,000's
+of entries. These discoveries will only be possible
+with computational techniques that can process this vast amount of data.
+
+These image-based computational techniques are hindered by both poor
+image quality and the lack of high-quality and pertinent metadata.
+
+For example, a study may require images that contain only one fish with a
+given level of lighting and contrast. Additionally, performing quantitative
+investiations into the morphology of the specimens requires knowing
+the physical scale of the images, i.e.~pixels/inch.
+
+Given the many thousands of images that have and will be acquired of
+biological specimens, it is infeasible to generate the needed metadata
+via manual, i.e. via human input, methods.  It is critical to deploy
+computational techniques that will automate the process of generating
+the pertinent metatdata that is essential for downstream analyses and
+studies.
+
+In order to address the need for fish specimen image metadata that can
+support scientific investigations we have begun the deployment of
+both off-the-shelf and custom-written software that automatically
+generates a variety of metadata from a publicly-available biological
+image repository.  The types of metadata being produced are related
+to image quality, content and scale, and should provide the information
+necessary for quantitative studies of the digitized specimens.
+
 
 \section{Methods}
 Our process for metadata generation can be broken into 3 steps: object detection with Facebook's Detectron2 machine learning library (subsequently referred to as \verb|detectron|), image informatics analysis at the pixel level, and calculations on the results of the previous steps to determine higher level metadata properties.\todo{Definitely need to explain somewhere in more detail about our current admissibility criteria for images. Not sure where I want to put it yet so just leaving it as a todo}
