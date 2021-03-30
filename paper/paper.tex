@@ -163,7 +163,7 @@ the research underway within the BGNN project, and provide a framework for futur
   \includegraphics[width=.45\textwidth]{images/teaser2_crop}
   \caption{Initial object detection on specimen images using Detectron2~\cite{wu2019detectron2}}
   \Description{Fish predictions}
-  \label{fig:fish}
+  \label{fig:teaser}
 \end{teaserfigure}
 
 %%
@@ -176,8 +176,8 @@ the research underway within the BGNN project, and provide a framework for futur
 \todo{Sentences I didn't use: Over the last few decades, cyberinfrastructure development, advances in digitization, and the open science tenor, have helped support global access to natural history. OR
 Global access to natural history collections has accelerated over the last few decades to advances in cyberinfrastructure, digitization, and the general open science tenor}
 
-Over the last several decades, given the trends towards open science,
-advances in computing, imaging, and cyberinfrastructure have supported the growth of digital natural history collections.
+Over the last several decades advances in computing, imaging, and
+cyberinfrastructure have supported the growth of digital natural history collections; thus supporting the trends towards open scienc.
 In the U.S., programs, such as the National Science Foundation’s former
 Advancing Digitization of Biodiversity Collections (ADBC) program, which ran for
 nearly a decade, and the current Infrastructure Capacity for Biological Research program have supported the digital acquisition and dissemination of
@@ -368,8 +368,9 @@ The amount of data is immense, with image collections containing 10,000's
 of entries. These discoveries will only be possible
 with computational techniques that can process this vast amount of data.
 
-These image-based computational techniques are hindered by both poor
-image quality and the lack of high-quality and pertinent metadata.
+These image-based computational techniques are hampered by both poor
+image quality and the lack of high-quality and pertinent metadata
+associated with collections.
 
 For example, a study may require images that contain only one fish with a
 given level of lighting and contrast. Additionally, performing quantitative
@@ -388,18 +389,32 @@ both off-the-shelf and custom-written software that automatically
 generates a variety of metadata from a publicly-available biological
 image repository.  The types of metadata being produced are related
 to image quality, content and scale, and should provide the information
-necessary for quantitative studies of the digitized specimens.
+necessary for advanced quantitative studies of the digitized specimens.
+
+The automated metadata generation methods for our project were developed
+to work on a specific set of images, the INHS\ Fish
+Collection~\cite{INHS}.  Most of these images have been configured,
+produced and acquired with a standard procedure.  The images used for
+our study contain one fish placed on a bright, white background and
+contain an information tag and the same ruler.  See 
+Figure \ref{fig:teaser} for two example images from the collection.
+While training and focusing our system on images with very similar
+compositions and visual properties may limit its immediate applicability,
+our efforts do demonstrate the potential that machine learning and
+image informatics techniques have for automatically generating metadata
+for biological specimen image collections.
 
 
 \section{Methods}
-Our process for metadata generation can be broken into 3 steps: object detection with Facebook's Detectron2 machine learning library (subsequently referred to as \verb|detectron|), image informatics analysis at the pixel level, and calculations on the results of the previous steps to determine higher level metadata properties.\todo{Definitely need to explain somewhere in more detail about our current admissibility criteria for images. Not sure where I want to put it yet so just leaving it as a todo}
+Our process for metadata generation can be broken into three steps: object detection with Facebook's Detectron2 machine learning library (subsequently referred to as \verb|detectron|), image informatics analysis at the pixel level, and calculations on the results of the previous steps to determine higher level metadata properties.
+% \todo{Definitely need to explain somewhere in more detail about our current admissibility criteria for images. Not sure where I want to put it yet so just leaving it as a todo}
 
 \subsection{Detectron}
-A prerequisite task to addressing any more advanced metadata property determination is finding specimens (and other relevant objects) within collection images. Object detection has been an incredibly active field of study in recent years,~\cite{zou2019object} and has resulted in a number of well tested, purpose built architectures. We elected to use Facebook AI Research's \verb|detectron| tool,~\cite{wu2019detectron2} and specifically its implementation of the Mask R-CNN architecture,~\cite{he2018mask} for object detection in our project.
-
+A prerequisite task to performing any advanced metadata property generation
+is finding the specimens (and other relevant objects) within the collection
+images. Object detection has been a broadly active field of study in recent
+years \cite{zou2019object}, and has resulted in a number of well-tested, purpose-built architectures. We elected to use Facebook AI Research's \verb|detectron| tool \cite{wu2019detectron2}, and specifically its implementation of the Mask R-CNN architecture \cite{he2018mask}, for object detection in our project.
 \verb|detectron| is built on \verb|pytorch|~\cite{NEURIPS2019_9015} and provides a relatively straightforward method for training on COCO~\cite{DBLP:journals/corr/LinMBHPRDZ14} format datasets. It is able to handle an arbitrary number of object classes, and can classify an arbitrary number of object within a given image. For our project, we are currently using it to identify five object classes: fish, fish eyes, rulers, and the numbers 2 and 3 on rulers.
-
-Our training dataset consisted of the following number of instances for each class:
 
 \begin{wraptable}{r}{5.5cm}
     \centering
@@ -418,7 +433,12 @@ Our training dataset consisted of the following number of instances for each cla
     \end{tabular}
 \end{wraptable}
 
-All of the training data was labeled by hand using \verb|makesense.ai|.~\cite{make-sense} While the ultimate goal of the project is to generalize to images from a variety of specimen collections, we have thus far focused only on images from the INHS\ Fish Collection.~\cite{INHS} Using \verb|detectron|'s default training scheme, the model was trained for \(100,000\) epochs. All instance types were included in a single object detection model. The total loss\todo{Find and specify which loss function was used} began at \(2.948\) and ended at \(0.158\) for the training data.
+Table \ref{tab:dataset} lists the number of instances for each class 
+used in our training dataset.
+All of the training data was labeled by hand using \verb|makesense.ai| \cite{make-sense}
+% While the ultimate goal of the project is to generalize to images from a variety of specimen collections, we have thus far focused only
+on images from the INHS\ Fish Collection \cite{INHS}.
+Using \verb|detectron|'s default training scheme, the model was trained for \(100,000\) epochs. All instance types were included in a single object detection model. The total loss\todo{Find and specify which loss function was used} began at \(2.948\) and ended at \(0.158\) for the training data.
 
 \begin{comment}
 \begin{verbatim}
@@ -450,23 +470,56 @@ Final: {"data_time": 0.006645713496254757, "eta_seconds": 0.0, "fast_rcnn/cls_ac
 \end{verbatim}
 \end{comment}
 \subsection{Pixel Analysis}
-The masks and bounding boxes produced by \verb|detectron| are generally quite good, although they are almost never perfect. They almost always either include additional background as part of the fish, or clip part(s) of the fish outside the bounding box. To solve this shortcoming, we utilize pixel analysis methods commonly found in image informatics.
+The masks and bounding boxes produced by \verb|detectron| are generally quite good, although they almost never completely or tightly enclose the
+detected objects.
+This is problematic for the detected fish objects in our analyzed images,
+where the most accurate segmentation is desired.
+The mask may include additional background as part of the fish, or the
+bounding box may clip away part(s) of the fish. To solve these
+shortcomings, we utilize pixel analysis methods commonly found in image
+informatics to produce more accurate objects masks and bounding boxes.
 
-The first calculation in the pixel analysis process is determining the cutoff intensity between what constitutes the foreground (i.e.\ the fish) and background of the image. Initially, we base this off the bounding box and mask generated by \verb|detectron|. Specimen images are read in as gray scale, and pixels in the image are treated as unsigned integers between 0 and 255. Otsu thresholding is used to get an initial cutoff value between foreground and background. \todo{Put in another sentence or two about Otsu} While this value occasionally generates an accurate mask as is, most of the time the contrast between foreground and background is not great enough and much of the lighter parts of the fish (such as its tail fin) are marked as background.
+\subsubsection{Threshold Adjustment}
+The first calculation in the pixel analysis process determines the cutoff intensity between what constitutes the foreground (i.e.~the fish) and background of the image.
+Initially, the calculation is based on the bounding box and mask generated by
+\verb|detectron|. Specimen images are read in as gray scale, and pixels in the image are treated as unsigned integers between 0 and 255.
+Otsu thresholding, a technique that maximizes the variance between the 
+foreground and background intensities, is used to compute an initial cutoff value between foreground and background. 
+While the Otsu value occasionally generates an accurate mask as is, usually
+the contrast between foreground and background is low and much of the lighter parts of the fish (such as its tail fin) are marked as background.
 
-To overcome this, the threshold value needs either scaled up or down depending on if the background is lighter or darker than the fish. For our current dataset, the background is always lighter (i.e.\ closer to 255), so the threshold value needs scaled up to include more of the image as foreground. Precisely how much to scale this value by is difficult to determine. For optimal results it is dependent on the level of contrast between the background and foreground, which can be affected by both how washed out the image is and how light or dark the pigmentation of the fish is. To take this into account, we measure the mean intensity of the foreground and background, then use these intensity values and the difference between them to scale the threshold value. Even with these values in hand it is not entirely clear how to scale the threshold. We scaled the threshold value by 50\% of the difference between the mean of the background and the original threshold value, which captures most of fish's fins in most cases without also masking parts of the background.
+To overcome this under-segmentation, the threshold value should be
+either adjusted up or down, depending on if the background is lighter or darker than the fish.
+For our current dataset, the background is always lighter (i.e.~closer to 255), so the threshold value needs to be scaled up to include more of the
+foreground image.
+% Precisely how much to scale this value by is difficult to determine.
+For optimal results the scaling should be dependent on the
+contrast between the background and foreground,
+which can be affected by
+% both how washed out the image is and
+the level of pigmentation of the fish.
+% To take this into account, we compute the mean intensity of the foreground and background pixels, then use these intensity values and the difference between them to scale the threshold value.
+% Even with these values in hand it is not entirely clear how to scale the threshold.
+We found that an improved threshold value can be computed as the halfway
+point between the Otsu threshold value and the
+mean of the background intensities.
+This adjusted threshold value
+% by 50\% of the difference between the mean of the background and the original threshold value, which 
+captures most of fish's fins in most cases, without also masking parts of the background.
 
+\subsubsection{Consolidating the Foreground}
 While thresholding has the potential to generate better masks than a neural network (when provided an initial approximate bounding box), it also introduces considerable noise. Single or small groups of errant pixels can be marked as foreground depending on the consistency of the background, and interior pixels of the fish (especially around the fins) can be marked as background. To be useful for generating an accurate bounding box and for subsequent computational analysis, the mask must consist of one single ``blob'' over the fish the contains no holes, and no other pixels disconnected from this blob can be marked as foreground.
 
 To accomplish this, we apply an iterative process of flood filling from all the foreground pixels in the image until a blob is generated that is large enough to constitute the fish. This is another metaparameter, but greater than 10\% of the current bounding box has masked the specimen in all observed cases. Once the fish's blob is found, noise then needs removed. This is done by flood filling from each of the corner of the bounding box where the specimen is not present (all four corners in the overwhelming majority of cases), then taking the inverse of the result. The fish mask is excluded from these corner flood fills, so this process removes all noise from both the background and foreground of the image leaving only a close mask over the fish itself.
 
+\subsubsection{Adjusting the Bounding Box}
 With an accurate mask generated, it is then necessary to check whether the bounding box needs expanded or shrunk along any edges. Expansion is done first, buy checking whether any edge intersects with any of the foreground mask pixels. If one does, it is expanded out by 1 pixel. If any edges are expanded, the whole the process, masking and expansion process is repeated to account for any changes in average intensities. Once no edges contain foreground pixels, the mask is the shrunk. This process is more efficient as all that is required is to shrink each edge by one up until the point they contain one or more foreground pixels. Once the shrinkage step is accomplished, the final mask and bounding box have been generated.
 
 \subsubsection{Fallback} The pixel analysis process occasionally fails. This can occur if certain flood fill operations behave unexpectedly, or if the image is too washed out or otherwise atypical for the thresholding process to work correctly. In the event this happens, the original mask and bounding box generated by \verb|detectron| is used for metadata generation.
 \subsection{Metadata Generation}
 Including what has already been discussed, the following metadata properties are being currently being generated:
 
-\begin{table}[H]
+\begin{table}[t]
     \centering
     \caption{Metadata properties}
     \label{tab:properties}
@@ -659,7 +712,7 @@ For all 6 of the cases where an eye was detected but the \verb|side| value was w
   \caption{An example of a heavily curved specimen.}
   \Description{Mislabeled eye on a catfish}
 \end{figure}
-Of the specimens for which clock values were generated, 33 did not match the manually created data (within a tolerance of \(\pm{}1\)).For 25 of those the human generated data was incorrect, giving the automated process a \(3.1\) times lower error rate. Of the remaining 8, 2 specimens were quite curved making it difficult to assign a clear angle value. The other 6 were values of 3 instead of 9 or vice versa that resulted from a mislabeled eye as discussed in the previous section. A small number of images (such as on the right in Figure~\ref{fig:fish}) have tags that overlap with the fish. These tags were light enough that they were correctly labeled as background by the pixel analysis.
+Of the specimens for which clock values were generated, 33 did not match the manually created data (within a tolerance of \(\pm{}1\)).For 25 of those the human generated data was incorrect, giving the automated process a \(3.1\) times lower error rate. Of the remaining 8, 2 specimens were quite curved making it difficult to assign a clear angle value. The other 6 were values of 3 instead of 9 or vice versa that resulted from a mislabeled eye as discussed in the previous section. A small number of images (such as on the right in Figure~\ref{fig:teaser}) have tags that overlap with the fish. These tags were light enough that they were correctly labeled as background by the pixel analysis.
 
 \subsubsection{Mask and Bounding Box}
 
