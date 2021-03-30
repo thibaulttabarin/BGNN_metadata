@@ -101,7 +101,7 @@ bioinformatics, metadata, image analysis, applied machine learning
   \caption{Initial object detection on specimen images using Detectron2~\cite{wu2019detectron2}}
   \label{fig:teaser}
 \end{figure}
-Over the last several decades advances in computing, imaging, and cyberinfrastructure have supported the growth of digital natural history collections, many of which have specimen images.\cite{beaman2012mass} Additionally, initiatives, such as National Science Foundation’s Advancing Digitization of Biodiversity Collections (ADBC) program, which ran for nearly a decade, have supported the digitization and curation of tens of thousands of biological specimens.\cite{page2015digitization,}. These digital specimen images are globally available through a range of open access repositories; they enable researchers, educators, students, and the general public to examine and compare in ways previously unimaginable. Significant challenges surface, however, when researchers seek to apply computational methods to these data items, due to both image quality and metadata issues.
+Over the last several decades advances in computing, imaging, and cyberinfrastructure have supported the growth of digital natural history collections, many of which have specimen images.~\cite{beaman2012mass} Additionally, initiatives, such as National Science Foundation’s Advancing Digitization of Biodiversity Collections (ADBC) program, which ran for nearly a decade, have supported the digitization and curation of tens of thousands of biological specimens.~\cite{page2015digitization} These digital specimen accessible through global, open access repositories; they enable researchers, educators, students, and the general public to examine and compare in ways previously unimaginable. Significant challenges surface, however, when researchers seek to apply computational methods to these data items, due to both image quality and metadata issues.
 %{jane}should we try to insert machine learning here, last sentence, or computation methods ok?
 
 Unfortunately, potential scientific advances are hindered by image quality
@@ -115,7 +115,7 @@ computational results.
 In order to perform quantitative morphometric analysis of the specimens,
 the physical scale of the images (pixels/inch) is needed; thus
 requiring the ability to identify and measure rulers in the images.
-Many specimen collections do include Darwin Core metadata, detailing
+Many specimen collections do include Darwin Core metadata,~\cite{biodiv_info_standards} detailing
 specimen taxon, geographic location, and several other descriptive aspects.
 Additionally, some digitization efforts record technical metadata, detailing imaging specifications. While these types of metadata are helpful for a
 human examining several images at a time, they are insufficient for researchers seeking to apply computational methods to examine thousands of images
@@ -138,8 +138,7 @@ The following section of the paper provides contextual background for this work,
 \section{Related Work}
 \textbf{Todo}
 \subsection{Metadata for Image Collection}
-\todo{Wasn't looking for a citation but stumbled upon this paper: \url{https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0207636}, might be worth a skim}
-Metadata development is intertwined with the development of digital technology. A wide range of metadata standards are applicable to metadata supporting image description as well as technical aspects, and have been used in a range of image repositories. Examples of Descriptive schemes include X, y, z... Examples of technical schemes include... The use varies across communities, and application technique is primarily manual. Research evaluating such schemes XXX, show XXX. 
+A wide range of metadata standards are applicable to metadata supporting image description as well as technical aspects, and have been used in a range of image repositories. Examples of Descriptive schemes include X, y, z... Examples of technical schemes include... The use varies across communities, and application technique is primarily manual. Research evaluating such schemes XXX, show XXX. 
 
 Natural history collections generally use a sub-set of such standards. Darwin Core, a globally adopted standard overseen by the Taxonomic Data Working Group (TDWG).  [Jane continue here on some of this, and then with preservation/image quality less]
 
