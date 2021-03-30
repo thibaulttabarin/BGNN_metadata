@@ -137,14 +137,16 @@ The following section of the paper provides contextual background for this work,
 
 \section{Related Work}
 \textbf{Todo}
-\subsection{Metadata for Image Collection}
-A wide range of metadata standards are applicable to metadata supporting image description as well as technical aspects, and have been used in a range of image repositories. Examples of Descriptive schemes include X, y, z... Examples of technical schemes include... The use varies across communities, and application technique is primarily manual. Research evaluating such schemes XXX, show XXX. 
+\subsection{Metadata for Natural History Image Collection}
+%question/comment - we need to keep in mind we are deal with digitized specimens, not simply digital, in other words, the artifacts themselves are digital version of physical, not like an x-ray, where the image is digital from the start.  
+A number of different metadata standards have been applied to support the description and access of digitized scientific images. Darwin Core developed specifically for digital museum projects is one of the most frequently used standards. Other popular standards include the Dublin Core, particularly application profiles, drawing from other namespaces such as the Ecological Metadata Language (EML) and ISO-geo [jane add]; and there is also the recent Audubon Core, designed to support the discoverability, dissemination, and use of data relating to biological organisms, including digitized specimens. These descriptive standards include metadata properties for taxon, geographic location, and other important specimen content, and have been developed primarily from the eye of a human curator. In other words, their application anticipates that a curator or data entry staff person will manually enter data from the original acquisition logs, or historical labels. As a result, the metadata associated with each digital rendering seems somewhat limited, particularly to researchers seeking to apply machine learning, and leverage both the image and the metadata.
+%will add cites above, depending on paper length.
 
-Natural history collections generally use a sub-set of such standards. Darwin Core, a globally adopted standard overseen by the Taxonomic Data Working Group (TDWG).  [Jane continue here on some of this, and then with preservation/image quality less]
+%Fish species dataset in Pakistan Shah 2019 \cite{Shah2019FishPakFS},
 
-Fish species dataset in Pakistan Shah 2019 \cite{Shah2019FishPakFS},
-
-\subsection{Metadata generation?}
+\subsection{Automatic Metadata Generation}
+Metadata researchers are aware of challenges posted by manual metadata generation, both in terms of time, 
+%jane working here, i figured out how to scope this, I think! I need to get outside now, but back later.
 
 \subsection{Fish Image Analysis}
 
