@@ -68,13 +68,6 @@ New Orleans, USA\\
 Philadelphia, USA\\
 0000-0002-1376-5008}
 }
-%\and
-%\IEEEauthorblockN{6\textsuperscript{th} Given Name Surname}
-%\IEEEauthorblockA{\textit{dept. name of organization (of Aff.)} \\
-%\textit{name of organization (of Aff.)}\\
-%City, Country \\
-%email address or ORCID}
-%}
 
 \maketitle
 
@@ -491,7 +484,7 @@ Just gonna throw some caveats in here, might be its own section might not
 \end{itemize}
 \end{comment}
 \section{Results}
-Technicians employed by our team have manually generated the 22 metadata properties deemed crucial to the overall BGNN project~\cite{Leipzig2021.01.28.428644} for a large number of INHS images. \(20,699\) total entries were created by 13 technicians that spanned \(8,398\) unique images. Of these \(8,398\) images, \(7,244\) were both not part of the \verb|detectron| training set and meet our current admissibility criteria for what \verb|detectron| and the pixel analysis process can reliably handle. We ran the metadata extraction program on these \(7,244\) images.
+Technicians employed by our team have manually generated the 22 metadata properties deemed crucial to the overall BGNN project~\cite{Leipzig2021.01.28.428644} for a large number of INHS images. \(20,699\) total entries were created by 13 technicians that spanned \(8,398\) unique images. Of these \(8,398\) images, \(7,244\) were both not part of the \verb|detectron| training set and meet our current admissibility criteria for what \verb|detectron| and the pixel analysis process can reliably handle. We ran the metadata extraction program on these \(7,244\) images. These properties did not include information on image scale, fish length, or fish bounding boxes. For these properties, a random sample of 50 specimens from the set of \(7,244\) were analyzed by hand for comparison.
 
 Our automated process currently generates 7 of the 22 core metadata properties: \verb|if_fish| (\verb|has_fish|), \verb|fish_number| (\verb|fish_count|), \verb|if_ruler| (\verb|has_ruler|), \verb|specimen_angled| (\verb|clock_value|), \verb|specimen_view| (\verb|side|), \verb|brightness| (derived from \verb|background.mean| and \verb|foreground.mean|), and \verb|if_background_uniform| (\verb|background.std|). In addition, our process also calculates bounding boxes and fish lengths in centimeters.\todo{Talk more about what we can and can't verify and how.}
 
@@ -521,73 +514,10 @@ Clock position values were successfully generated for \(6,991\) of the images. O
   \includegraphics[width=0.49\linewidth]{images/56885_mask}
   \caption{Examples of masks and bounding boxes from detectron (left) and pixel analysis (right).}
 \end{figure}
-Fish bounding boxes were calculated for all \(7,237\) images in which a fish was found. All but 263 of these were generated via pixel analysis, with those 263 falling back to the original \verb|detectron| bounding box. \textbf{Todo}: Anything more than this is going to need hand checked.
+Fish bounding boxes were calculated for all \(7,237\) images in which a fish was found. All but 263 of these were generated via pixel analysis, with those 263 falling back to the original \verb|detectron| bounding box. Of the 50 images reviewed manually for these properties, all mask and bounding boxes were correctly placed on/around the location of the fish. However, a number of them lacked portions of lightly colored tails and/or fins. Specifically, 22 mask and bounding boxes covered the entire fish, 16 missed some of the tail, and 12 missed most or all of the tail.
 
-\subsection{Length}
-Fish lengths were calculated for \(7,179\) of the images. \textbf{Todo}: Anything more than this is going to need hand checked.
-\begin{comment}
-\begin{verbatim}
-What I think should be the final results:
-
-Right: 6956
-Errored: 0
-No eye: 246
-No fish: 10
-Wrong wrong: 35
-Total: 7247
-Percent right: 0.959845453291017
-Percent right that didn't error: 0.9949935631526248
-
------------------------
-
-Pixel analysis failed: 0.036336004421110804
-
------------------------
-
-My hand checking of the ''wrong wrong'' fish:
-               My guess, Yasin spreadsheet
-INHS_FISH_101109.jpg: 9, 11, I'm wrong although it's fairly curved
-INHS_FISH_56818.jpg: 4, 2, I'm wrong although there's a tag that is likely messing things up
-INHS_FISH_57607.jpg: 3, 9, I'm wrong
-INHS_FISH_57001.jpg: 4, 2, I'm wrong although there's a tag that is likely messing things up
-INHS_FISH_63953.jpg: 3, 9, I'm wrong
-INHS_FISH_51100.jpg: 3, 9, I'm wrong
-INHS_FISH_80528.jpg: 3, 8, I'm wrong
-INHS_FISH_6370.jpg: 3, 9, I'm wrong
-INHS_FISH_54157.jpg: 9, 7, I'm arguably wrong although it's very curved
-INHS_FISH_80987.jpg: 9, 3, I'm wrong although this one is a fairly atypical image
-
-INHS_FISH_58647.jpg: 9, 7, I'm right
-INHS_FISH_8415.jpg: 9, 6, I'm right
-INHS_FISH_5041.jpg: 9, 11, very curved averages to about 9
-INHS_FISH_52821.jpg: 9, 7, I'm arguably right although the fish is damaged and its head points to ~7
-INHS_FISH_6696.jpg: 9, 7, I'm right
-INHS_FISH_75252.jpg: 9, 6, I'm right
-INHS_FISH_79498.jpg: 9, 6, I'm right
-INHS_FISH_45744.jpg: 9, 5, I'm right
-INHS_FISH_47579.jpg: 9, 6, I'm right
-INHS_FISH_64599.jpg: 9, 6, I'm right
-INHS_FISH_74550.jpg: 9, 5, I'm right
-INHS_FISH_101664.jpg: 9, 6, I'm right
-INHS_FISH_100861.jpg: 9, 6, I'm right
-INHS_FISH_60589.jpg: 3, 9, I'm right
-INHS_FISH_53469.jpg: 9, 1, I'm right
-INHS_FISH_44694.jpg: 9, 6, I'm right
-INHS_FISH_54921.jpg: 9, 6, I'm right
-INHS_FISH_44645.jpg: 10, 8, I'm right
-INHS_FISH_50459.jpg: 9, 11, I'm right although the fish is damaged and its head points to ~11
-INHS_FISH_68061.jpg: 9, 6, I'm right
-INHS_FISH_74716.jpg: 9, 6, I'm right
-INHS_FISH_80976.jpg: 9, 6, I'm right
-INHS_FISH_57977.jpg: 9, 6, I'm right
-INHS_FISH_45377.jpg: 9, 6, I'm right
-INHS_FISH_47142.jpg: 9, 6, I'm right
-
-Verdict: For only 10 of the 35 am I actually wrong and all of those are either curved, atypical
-images with tags, or something on the wrong side was detected as an eye (so the clock value is backwards).
-
-\end{verbatim}
-\end{comment}
+\subsection{Scale and Length}
+Image scale and fish lengths were calculated for \(7,179\) of the images. 50 of these images were measured by hand to get \(\frac{\mathrm{pixels}}{\mathrm{cm}}\) and fish length in centimeters with ImageJ.~\cite{imagejCite} The average error for the scale calculation was \(0.911\%\), and the average error for the fish length calculation was \(5.87\%\).
 
 \section{Discussion}
 \textbf{Todo}: Will need some sort of intro/framing paragraph
@@ -624,10 +554,26 @@ For all 6 of the cases where an eye was detected but the \verb|side| value was w
 Of the specimens for which clock values were generated, 33 did not match the manually created data (within a tolerance of \(\pm{}1\)).For 25 of those the human generated data was incorrect, giving the automated process a \(3.1\) times lower error rate. Of the remaining 8, 2 specimens were quite curved making it difficult to assign a clear angle value. The other 6 were values of 3 instead of 9 or vice versa that resulted from a mislabeled eye as discussed in the previous section. A small number of images (such as on the right in Figure~\ref{fig:teaser}) have tags that overlap with the fish. These tags were light enough that they were correctly labeled as background by the pixel analysis.
 
 \subsubsection{Mask and Bounding Box}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.49\linewidth]{images/61631}
+  \includegraphics[width=0.49\linewidth]{images/61631_mask}
+  \caption{An example of a light colored tail being missed during the pixel analysis process.}
+\end{figure}
+Masks and bounding boxes contain the head and trunk of the fish in nearly all cases, but there is still more fine tuning to be done to ensure that light fins and tails are masked consistently and accurately.\todo{Talk about ideas for fixing here, or in future work? Or both?}
 
 \subsubsection{Brightness?}
+\textit{Like I said in slack, the standard deviation of background does not currently correlate with the is\_background\_uniform property. I still have to look into the dark normal bright calculations in the new way we discussed.}
 
-\subsubsection{Length}
+\subsubsection{Scale and Length}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.49\linewidth]{images/54172}
+  \includegraphics[width=0.49\linewidth]{images/54172_mask}
+  \caption{An example of a light colored tail being missed during the pixel analysis process.}
+  \label{fig:scale_len}
+\end{figure}
+Scale calculations using the ``2'' and ``3'' method are nearly identical to those calculated by hand between the tick marks on the ruler. When the tail of the fish is accurately masked and the specimen is fairly straight, the length calculation is highly accurate as well. An example of such a result can be seen in Figure~\ref{fig:scale_len}, for which the difference between the hand measured length and the automatically calculated length was only \(0.6\%\) (\(8.88\) cm vs \(8.82\) cm). Thus, the primary means of lowering the error of the length calculation is to improve tail masking accuracy.
 
 \subsection{Future Work}
 \begin{itemize}
@@ -649,17 +595,6 @@ Vishal? Hank's undergrads? Other team members?
 \bibliography{paper}
 
 \end{document}
-
-%\begin{thebibliography}{00}
-%\bibitem{b1} G. Eason, B. Noble, and I. N. Sneddon, ``On certain integrals of Lipschitz-Hankel type involving products of Bessel functions,'' Phil. Trans. Roy. Soc. London, vol. A247, pp. 529--551, April 1955.
-%\bibitem{b2} J. Clerk Maxwell, A Treatise on Electricity and Magnetism, 3rd ed., vol. 2. Oxford: Clarendon, 1892, pp.68--73.
-%\bibitem{b3} I. S. Jacobs and C. P. Bean, ``Fine particles, thin films and exchange anisotropy,'' in Magnetism, vol. III, G. T. Rado and H. Suhl, Eds. New York: Academic, 1963, pp. 271--350.
-%\bibitem{b4} K. Elissa, ``Title of paper if known,'' unpublished.
-%\bibitem{b5} R. Nicole, ``Title of paper with only first word capitalized,'' J. Name Stand. Abbrev., in press.
-%\bibitem{b6} Y. Yorozu, M. Hirano, K. Oka, and Y. Tagawa, ``Electron spectroscopy studies on magneto-optical media and plastic substrate interface,'' IEEE Transl. J. Magn. Japan, vol. 2, pp. 740--741, August 1987 [Digests 9th Annual Conf. Magnetics Japan, p. 301, 1982].
-%\bibitem{b7} M. Young, The Technical Writer's Handbook. Mill Valley, CA: University Science, 1989.
-%\end{thebibliography}
-%\vspace{12pt}
 
 %\begin{table}[htbp]
 %\caption{Table Type Styles}
