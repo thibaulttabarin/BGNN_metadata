@@ -550,11 +550,11 @@ computation is 96.4\%.
 \todo{Comment on the cases where we were unable to compute clock value. What failed?}
 
 \subsection{Foreground/Background Contrast Results?}
-\textbf{Todo}: It would be great to compute a histogram of foreground.mean -
-bakground.mean for the all our samples.
-Perhaps it would then be obvious how to break the images into low, medium
-and high F/B contrast.  We could show a representative image from each
-group.
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]{images/histo}
+  \caption{Histogram for difference in brightness between foreground an background.}
+\end{figure}
 
 \subsection{Brightness/Uniformity Results?}
 \begin{figure}[H]
@@ -564,23 +564,20 @@ group.
   \includegraphics[width=0.49\linewidth]{images/bright}
   \caption{Examples of low, normal and high contrast fish images.}
 \end{figure}
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=\linewidth]{images/histo}
-  \caption{Histogram for difference in brightness between foreground an background.}
-\end{figure}
 \textbf{Todo}: It looks like we should leave out Uniformity.
 
 \begin{verbatim}
+This is for average foreground intensity
+(i.e. the fish pixels)
 Mean intensity in bounding box | Std
         | Count
 
-dark: 153.94935240158566 |
-        15.526143315470392 | 1800
-normal: 168.2924981358199 |
-        14.214506494349248 | 5186
-bright: 177.68854540643952 |
-        12.401282979349904 | 242
+dark: 75.14548320341247 | 13.491022754871715
+        | 1800
+normal: 93.63755945070938 | 14.781004083081378
+        | 5186
+bright: 108.39315328695254 | 15.210726241270661
+        | 242
 \end{verbatim}
 \begin{verbatim}
 Standard Deviations for:
@@ -614,7 +611,7 @@ Specifically, 22 masks and bounding boxes covered the entire fish,
 Image scale and fish lengths were calculated for \(7,179\) of the images.
 \todo{What happened the excluded images?}
 Image scale ($\frac{\mathrm{pixels}}{\mathrm{cm}}$) and fish length were
-measured, using ImageJ~\cite{imagejCite}, in the same(?) 50 test images.
+measured, using ImageJ,~\cite{imagejCite} in the same(?) 50 test images.
 % 50 of these images \todo{The same 50 as before?} were measured by hand to get \(\frac{\mathrm{pixels}}{\mathrm{cm}}\) and fish length in centimeters with ImageJ.~\cite{imagejCite}
 In this subset of images the average error for the scale calculation
 was \(0.91\%\), and the average error for the fish length calculation was \(5.87\%\).
@@ -673,7 +670,7 @@ A small number of images (such as on the right in Figure~\ref{fig:teaser}) have 
   \centering
   \includegraphics[width=0.49\linewidth]{images/61631}
   \includegraphics[width=0.49\linewidth]{images/61631_mask}
-  \caption{A fish for which the masking and measurement process was highly accurate.}
+  \caption{An example of a light colored tail being missed during the pixel analysis process.}
 \end{figure}
 Masks and bounding boxes contain the head and trunk of the fish in nearly all cases, but there is still more fine tuning to be done to ensure that light fins and tails are masked consistently and accurately.\todo{Talk about ideas for fixing here, or in future work? Or both?}
 
@@ -685,7 +682,7 @@ Masks and bounding boxes contain the head and trunk of the fish in nearly all ca
   \centering
   \includegraphics[width=0.49\linewidth]{images/54172}
   \includegraphics[width=0.49\linewidth]{images/54172_mask}
-  \caption{An example of a light colored tail being missed during the pixel analysis process.}
+  \caption{A fish for which the masking and measurement process was highly accurate.}
   \label{fig:scale_len}
 \end{figure}
 Scale calculations using the ``2'' and ``3'' method are nearly identical to those calculated by hand between the tick marks on the ruler. When the tail of the fish is accurately masked and the specimen is fairly straight, the length calculation is highly accurate as well. An example of such a result can be seen in Figure~\ref{fig:scale_len}, for which the difference between the hand measured length and the automatically calculated length was only \(0.6\%\) (\(8.88\) cm vs \(8.82\) cm). Thus, the primary means of lowering the error of the length calculation is to improve tail masking accuracy.
