@@ -539,7 +539,15 @@ For all but 2 of the \(7,244\) images \verb|detectron| was able to find the rule
 % \todo{Not sure if I can phrase it that way or not since I haven't looked at all the images to see if the ruler itself was found or something else was labeled a ruler}
 In 56 of the images, the ruler itself was found but the ``2'' and/or the ``3'' on it was not, so a scale calculation could not be performed, producing a 99.2\% success rate for
 the \verb|scale| computation.
-\todo{Missed ruler stuff}
+
+Images where one of these three objects were not detected generally had some form of coloration issue. They were either washed out, very dark or yellow in hue. Some of the rulers for which ``2'' and/or ``3'' were not detected were particularly scratched and damaged. Only ``3'' was missed in 45 of the 56 cases, only ``2'' was missed in 2 cases, and both were missed in 9 cases. This may indicate that more training samples for ``3'' are required. Many of the rulers where both numerals were missed were particularly small within the image, which again may be solvable through bolstering the training dataset.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.49\linewidth]{images/no_ruler1}
+  \includegraphics[width=0.49\linewidth]{images/no_ruler2}
+  \caption{The two images where the ruler was not found. The left image exhibits a yellow hue, and the right is quite washed out with poor contrast.}
+\end{figure}
 
 %\begin{itemize}
     %\item Worked fairly well all things considered
