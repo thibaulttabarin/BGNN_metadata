@@ -517,7 +517,7 @@ Just gonna throw some caveats in here, might be its own section might not
     \item Program falls back to using detectron mask and bbox for metadata generation in the event the mask generation/pixel analysis fails. Failure is defined as never finding a cohesive flood filled mask that covers more than 10\% of the detectron bbox initially. Can provide a statistic on how often this occurs.
 \end{itemize}
 \end{comment}
-\section{Results}
+\section{Results and Discussion}
 Technicians employed by our team have manually generated the 22 metadata properties deemed crucial to the overall BGNN project~\cite{leipzig2021biodiversity} for a large number of INHS images. \(20,699\) total entries were created by 13 technicians that spanned \(8,398\) unique images. Of these \(8,398\) images, \(7,244\) were both not part of the \verb|detectron| training set and met our current admissibility criteria for \verb|detectron| and pixel analysis processing. We ran the metadata extraction program on these \(7,244\) images.
 For the properties of image scale, fish length, and fish bounding boxes
 (properties not manually generated),
@@ -530,11 +530,25 @@ Our automated process currently generates 7 of the 22 core metadata properties: 
 All images in the INHS dataset contain exactly one fish. For \(7,209\) of the specimen images, one fish was detected, a 99.5\% correct rate.
 For 25 of the images, 2 fish were detected, 3 fish were detected for 3 images, and for 7 images no fish were found. In the case of greater than 1 fish, 9 of the 28 contained tags which overlapped the fish and were themselves labeled as a second fish. Of the remaining 17, \verb|detectron| erroneously labeled the fish as two separate fish objects, or labeled a subsection of the fish a second time.
 
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.49\linewidth]{images/none1}
+  \includegraphics[width=0.49\linewidth]{images/double1}
+  \caption{An example of a fish that was not detected (left) and a fish that was detected twice (right).}
+\end{figure}
+
 \subsection{Ruler Detection}
 For all but 2 of the \(7,244\) images \verb|detectron| was able to find the ruler, a nearly perfect correct rate.
 % \todo{Not sure if I can phrase it that way or not since I haven't looked at all the images to see if the ruler itself was found or something else was labeled a ruler}
 In 56 of the images, the ruler itself was found but the ``2'' and/or the ``3'' on it was not, so a scale calculation could not be performed, producing a 99.2\% success rate for
 the \verb|scale| computation.
+\todo{Missed ruler stuff}
+
+%\begin{itemize}
+    %\item Worked fairly well all things considered
+    %\item Talk about which fish failed
+    %\item Talk about which rulers failed
+%\end{itemize}
 
 \subsection{Side Detection}
 \verb|detectron| was unable to find a fish eye
@@ -543,11 +557,41 @@ in 246 of the images. Of the remaining \(6,998\) images, the correct side
 a 96.5\% correct rate.
 \todo{Comment on the 6 cases. What failed?}
 
+There were six cases where an eye was detected but the \verb|side| value
+was wrong. Here, a spot on the wrong side of the fish was labeled as the
+most likely eye within the bounding box of the fish, i.e.~eye detection 
+was incorrect.
+There were an additional 17 images for which the automated process generated a result that did not match the manually created data. For these remaining cases the manual data was incorrect, giving the automated system an error rate \(2.8\) times lower than the human error rate.
+This result highlights the additional utility of automated methods to
+double-check and verify human-generated metadata.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.49\linewidth]{images/wrong_side_orig}
+  \includegraphics[width=0.49\linewidth]{images/wrong_side1}
+  \caption{A fish for which a splotch on its tail fin was labeled the most likely eye.}
+\end{figure}
+
 \subsection{Clock Value}
 Clock position values were successfully generated for \(6,991\) of the images. Of those, all but 8 were within \(\pm{}1\) of the correct result,
 our definition of a correct/acceptable result. The correct rate for this
 computation is 96.4\%.
 \todo{Comment on the cases where we were unable to compute clock value. What failed?}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.49\linewidth]{images/curved1}
+  \caption{An example of a heavily curved specimen.}
+  \label{fig:curvedFish}
+\end{figure}
+Of the specimens for which clock values were generated, 33 did not match the manually created data (within a tolerance of \(\pm{}1\)).
+For 25 of those, the human-generated data was incorrect, giving the automated process a \(3.1\) times lower error rate. Of the remaining 8, 2 specimens were quite curved making it difficult to assign a clear angle value, as
+seen in Figure \ref{fig:curvedFish}.
+The other 6 were values of 3 instead of 9 or vice versa, which resulted from
+a mislabeled eye as discussed in the previous section.
+%\todo{Why is the following sentence here? What does it have to do with
+%Clock Value?}
+%A small number of images (such as on the right in Figure~\ref{fig:teaser}) have tags that overlap with the fish. These tags were light enough that they were correctly labeled as background by the pixel analysis.
 
 \subsection{Foreground/Background Contrast Results?}
 \begin{figure}[H]
@@ -572,12 +616,12 @@ This is for average foreground intensity
 Mean intensity in bounding box | Std
         | Count
 
-dark: 75.14548320341247 | 13.491022754871715
-        | 1800
-normal: 93.63755945070938 | 14.781004083081378
-        | 5186
-bright: 108.39315328695254 | 15.210726241270661
-        | 242
+dark: 75.14548320341247 |
+        13.491022754871715 | 1800
+normal: 93.63755945070938 |
+        14.781004083081378 | 5186
+bright: 108.39315328695254 |
+        15.210726241270661 | 242
 \end{verbatim}
 \begin{verbatim}
 Standard Deviations for:
@@ -585,7 +629,9 @@ Standard Deviations for:
     Not Uniform: 11.312181711328828
 \end{verbatim}
 
-\begin{figure}[t]
+\subsection{Mask and Bounding Box}
+
+\begin{figure}[H]
   \centering
   \includegraphics[width=0.49\linewidth]{images/011196_pred}
   \includegraphics[width=0.49\linewidth]{images/011196_mask}
@@ -597,7 +643,6 @@ Standard Deviations for:
   \label{fig:bbox_mask}
 \end{figure}
 
-\subsection{Mask and Bounding Box}
 Fish bounding boxes were calculated for all \(7,237\) images in which a fish was found. All but 263 of these were generated via pixel analysis, with those 263 falling back to the original \verb|detectron| bounding box.
 50 randomly-chosen images were reviewed manually to evaluate the
 calculation, a representative sample are presented in
@@ -606,6 +651,13 @@ All 50 masks and bounding boxes were correctly placed
 on/around the location of the fish. However, a number of them lacked portions of lightly colored tails and/or fins.
 Specifically, 22 masks and bounding boxes covered the entire fish,
 16 missed some of the tail, and 12 missed most or all of the tail.
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.49\linewidth]{images/61631}
+  \includegraphics[width=0.49\linewidth]{images/61631_mask}
+  \caption{An example of a light colored tail being missed during the pixel analysis process.}
+\end{figure}
+Masks and bounding boxes contain the head and trunk of the fish in nearly all cases, but there is still more fine tuning to be done to ensure that light fins and tails are masked consistently and accurately.\todo{Talk about ideas for fixing here, or in future work? Or both?}
 
 \subsection{Scale and Length}
 Image scale and fish lengths were calculated for \(7,179\) of the images.
@@ -615,69 +667,6 @@ measured, using ImageJ,~\cite{imagejCite} in the same(?) 50 test images.
 % 50 of these images \todo{The same 50 as before?} were measured by hand to get \(\frac{\mathrm{pixels}}{\mathrm{cm}}\) and fish length in centimeters with ImageJ.~\cite{imagejCite}
 In this subset of images the average error for the scale calculation
 was \(0.91\%\), and the average error for the fish length calculation was \(5.87\%\).
-
-\section{Discussion}
-\textbf{Todo}: Will need some sort of intro/framing paragraph
-%DRAFT from jg: Our results provide insight into how off-the-shelf software, supplemented by additional XXX [programming?] can support automatic metadata generation. Results are promising in a number of respects, helping us to identify more clearly areas, where more work is needed [e.g., failed fish, failed rulers]
-%Discussion needed to weave in at least a couple of citations. Happy to discuss
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.49\linewidth]{images/none1}
-  \includegraphics[width=0.49\linewidth]{images/double1}
-  \caption{An example of a fish that was not detected (left) and a fish that was detected twice (right).}
-\end{figure}
-\subsection{Results}\todo{Just going to put the results discussion in small sections and we can change it later if that doesn't make sense}
-\subsubsection{Object Detection}
-
-\begin{itemize}
-    \item Worked fairly well all things considered
-    \item Talk about which fish failed
-    \item Talk about which rulers failed
-\end{itemize}
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.49\linewidth]{images/wrong_side_orig}
-  \includegraphics[width=0.49\linewidth]{images/wrong_side1}
-  \caption{A fish for which a splotch on its tail fin was labeled the most likely eye.}
-\end{figure}
-\subsubsection{Side Detection}
-There were six cases where an eye was detected but the \verb|side| value
-was wrong. Here, a spot on the wrong side of the fish was labeled as the
-most likely eye within the bounding box of the fish, i.e.~eye detection 
-was incorrect.
-There were an additional 17 images for which the automated process generated a result that did not match the manually created data. For these remaining cases the manual data was incorrect, giving the automated system an error rate \(2.8\) times lower than the human error rate.
-This result highlights the additional utility of automated methods to
-double-check and verify human-generated metadata.
-
-\subsubsection{Clock Value}
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.49\linewidth]{images/curved1}
-  \caption{An example of a heavily curved specimen.}
-  \label{fig:curvedFish}
-\end{figure}
-Of the specimens for which clock values were generated, 33 did not match the manually created data (within a tolerance of \(\pm{}1\)).
-For 25 of those, the human-generated data was incorrect, giving the automated process a \(3.1\) times lower error rate. Of the remaining 8, 2 specimens were quite curved making it difficult to assign a clear angle value, as
-seen in Figure \ref{fig:curvedFish}.
-The other 6 were values of 3 instead of 9 or vice versa, which resulted from
-a mislabeled eye as discussed in the previous section.
-\todo{Why is the following sentence here? What does it have to do with
-Clock Value?}
-A small number of images (such as on the right in Figure~\ref{fig:teaser}) have tags that overlap with the fish. These tags were light enough that they were correctly labeled as background by the pixel analysis.
-
-\subsubsection{Mask and Bounding Box}
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.49\linewidth]{images/61631}
-  \includegraphics[width=0.49\linewidth]{images/61631_mask}
-  \caption{An example of a light colored tail being missed during the pixel analysis process.}
-\end{figure}
-Masks and bounding boxes contain the head and trunk of the fish in nearly all cases, but there is still more fine tuning to be done to ensure that light fins and tails are masked consistently and accurately.\todo{Talk about ideas for fixing here, or in future work? Or both?}
-
-\subsubsection{Brightness?}
-\textit{Like I said in slack, the standard deviation of background does not currently correlate with the is\_background\_uniform property. Brightness results are are in previous section. Need to think about what is worth noting since it's a fairly trivial result.}
-
-\subsubsection{Scale and Length}
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.49\linewidth]{images/54172}
@@ -687,6 +676,79 @@ Masks and bounding boxes contain the head and trunk of the fish in nearly all ca
 \end{figure}
 Scale calculations using the ``2'' and ``3'' method are nearly identical to those calculated by hand between the tick marks on the ruler. When the tail of the fish is accurately masked and the specimen is fairly straight, the length calculation is highly accurate as well. An example of such a result can be seen in Figure~\ref{fig:scale_len}, for which the difference between the hand measured length and the automatically calculated length was only \(0.6\%\) (\(8.88\) cm vs \(8.82\) cm). Thus, the primary means of lowering the error of the length calculation is to improve tail masking accuracy.
 
+%\section{Discussion}
+%\textbf{Todo}: Will need some sort of intro/framing paragraph
+%DRAFT from jg: Our results provide insight into how off-the-shelf software, supplemented by additional XXX [programming?] can support automatic metadata generation. Results are promising in a number of respects, helping us to identify more clearly areas, where more work is needed [e.g., failed fish, failed rulers]
+%Discussion needed to weave in at least a couple of citations. Happy to discuss
+%\begin{figure}[H]
+  %\centering
+  %\includegraphics[width=0.49\linewidth]{images/none1}
+  %\includegraphics[width=0.49\linewidth]{images/double1}
+  %\caption{An example of a fish that was not detected (left) and a fish that was detected twice (right).}
+%\end{figure}
+%\subsection{Results}\todo{Just going to put the results discussion in small sections and we can change it later if that doesn't make sense}
+%\subsubsection{Object Detection}
+
+%\begin{itemize}
+    %\item Worked fairly well all things considered
+    %\item Talk about which fish failed
+    %\item Talk about which rulers failed
+%\end{itemize}
+%\begin{figure}[H]
+  %\centering
+  %\includegraphics[width=0.49\linewidth]{images/wrong_side_orig}
+  %\includegraphics[width=0.49\linewidth]{images/wrong_side1}
+  %\caption{A fish for which a splotch on its tail fin was labeled the most likely eye.}
+%\end{figure}
+%\subsubsection{Side Detection}
+%There were six cases where an eye was detected but the \verb|side| value
+%was wrong. Here, a spot on the wrong side of the fish was labeled as the
+%most likely eye within the bounding box of the fish, i.e.~eye detection 
+%was incorrect.
+%There were an additional 17 images for which the automated process generated a result that did not match the manually created data. For these remaining cases the manual data was incorrect, giving the automated system an error rate \(2.8\) times lower than the human error rate.
+%This result highlights the additional utility of automated methods to
+%double-check and verify human-generated metadata.
+
+%\subsubsection{Clock Value}
+%\begin{figure}[H]
+  %\centering
+  %\includegraphics[width=0.49\linewidth]{images/curved1}
+  %\caption{An example of a heavily curved specimen.}
+  %\label{fig:curvedFish}
+%\end{figure}
+%Of the specimens for which clock values were generated, 33 did not match the manually created data (within a tolerance of \(\pm{}1\)).
+%For 25 of those, the human-generated data was incorrect, giving the automated process a \(3.1\) times lower error rate. Of the remaining 8, 2 specimens were quite curved making it difficult to assign a clear angle value, as
+%seen in Figure \ref{fig:curvedFish}.
+%The other 6 were values of 3 instead of 9 or vice versa, which resulted from
+%a mislabeled eye as discussed in the previous section.
+%\todo{Why is the following sentence here? What does it have to do with
+%Clock Value?}
+%A small number of images (such as on the right in Figure~\ref{fig:teaser}) have tags that overlap with the fish. These tags were light enough that they were correctly labeled as background by the pixel analysis.
+
+%\subsubsection{Mask and Bounding Box}
+
+%\subsection{Scale and Length}
+%Image scale and fish lengths were calculated for \(7,179\) of the images.
+%\todo{What happened the excluded images?}
+%Image scale ($\frac{\mathrm{pixels}}{\mathrm{cm}}$) and fish length were
+%measured, using ImageJ~\cite{imagejCite}, in the same(?) 50 test images.
+% 50 of these images \todo{The same 50 as before?} were measured by hand to get \(\frac{\mathrm{pixels}}{\mathrm{cm}}\) and fish length in centimeters with ImageJ.~\cite{imagejCite}
+%In this subset of images the average error for the scale calculation
+%was \(0.91\%\), and the average error for the fish length calculation was \(5.87\%\).
+
+
+%\section{Discussion}
+%\textbf{Todo}: Will need some sort of intro/framing paragraph
+%DRAFT from jg: Our results provide insight into how off-the-shelf software, supplemented by additional XXX [programming?] can support automatic metadata generation. Results are promising in a number of respects, helping us to identify more clearly areas, where more work is needed [e.g., failed fish, failed rulers]
+%Discussion needed to weave in at least a couple of citations. Happy to discuss
+
+%\subsection{Results}\todo{Just going to put the results discussion in small sections and we can change it later if that doesn't make sense}
+
+%\subsubsection{Brightness?}
+%\textit{Like I said in slack, the standard deviation of background does not currently correlate with the is\_background\_uniform property. Brightness results are are in previous section. Need to think about what is worth noting since it's a fairly trivial result.}
+
+\section{Conclusions}
+\textbf{Todo}
 \subsection{Future Work}
 The most pressing next step is to refine the pixel analysis thresholding process so that the entirety of even light colored fish are marked as foreground in the mask. A deficiency of the current process is that it only operates on single channel intensity. Some of the lightest tails appear yellow in hue to the human eye and easily distinguishable, but when compressed to a single intensity value they are almost identical in value to the white background. Considering when the RGB channels of a pixel are not equal in value may be able to improve masking of such features. Another possible approach to solving this is to threshold an mask on subsets of the bounding box, as to ensure that very dark trunk pixels do not affect the thresholding of lighter regions.
 
@@ -694,8 +756,8 @@ Our ultimate goal is to create a generalized process to work on classes of speci
 % Todo: Are these worth mentioning?
 %Adding things like seahorses and eels.
 %Fitting a ``spine'' to specimen.
-\section{Conclusion}
-\textbf{Todo}
+%\section{Conclusion}
+%\textbf{Todo}
 
 \section*{Acknowledgment}
 %can make possible note about larger BGNN team, and/or general note to Tulane data in-putters for giving us data to compare, and/or INHS collection. [we can discuss]
