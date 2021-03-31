@@ -86,14 +86,7 @@ bioinformatics, metadata, image analysis, applied machine learning
 \end{IEEEkeywords}
 
 \section{Introduction}
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=.45\textwidth]{images/teaser1_crop}
-  \hspace{4mm}
-  \includegraphics[width=.45\textwidth]{images/teaser2_crop}
-  \caption{Initial object detection on specimen images using Detectron2~\cite{wu2019detectron2}}
-  \label{fig:teaser}
-\end{figure}
+% Moving teaser since this template doesn't actually ask for one
 Over the last several decades advances in computing, imaging, and cyberinfrastructure have supported the growth of digital natural history collections, many of which have specimen images.~\cite{beaman2012mass} Additionally, initiatives, such as National Science Foundation’s Advancing Digitization of Biodiversity Collections (ADBC) program, which ran for nearly a decade, have supported the digitization and curation of tens of thousands of biological specimens.~\cite{page2015digitization} These digital specimen accessible through global, open access repositories; they enable researchers, educators, students, and the general public to examine and compare in ways previously unimaginable. Significant challenges surface, however, when researchers seek to apply computational methods to these data items, due to both image quality and metadata issues.
 %{jane}should we try to insert machine learning here, last sentence, or computation methods ok?
 
@@ -315,6 +308,14 @@ for biological specimen image collections.
 Our process for metadata generation can be broken into three steps: object detection with Facebook's Detectron2 machine learning library (subsequently referred to as \verb|detectron|), image informatics analysis at the pixel level, and calculations on the results of the previous steps to determine higher level metadata properties.
 % \todo{Definitely need to explain somewhere in more detail about our current admissibility criteria for images. Not sure where I want to put it yet so just leaving it as a todo}
 
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=.49\linewidth]{images/teaser1_crop}
+  %\hspace{4mm}
+  \includegraphics[width=.49\linewidth]{images/teaser2_crop}
+  \caption{Initial object detection on specimen images using Detectron2~\cite{wu2019detectron2}}
+  \label{fig:teaser}
+\end{figure}
 \subsection{Detectron}
 A prerequisite task to performing any advanced metadata property generation
 is finding the specimens (and other relevant objects) within the collection
@@ -322,7 +323,10 @@ images. Object detection has been a broadly active field of study in recent
 years \cite{zou2019object}, and has resulted in a number of well-tested, purpose-built architectures. We elected to use Facebook AI Research's \verb|detectron| tool \cite{wu2019detectron2}, and specifically its implementation of the Mask R-CNN architecture \cite{he2018mask}, for object detection in our project.
 \verb|detectron| is built on \verb|pytorch|~\cite{NEURIPS2019_9015} and provides a relatively straightforward method for training on COCO~\cite{DBLP:journals/corr/LinMBHPRDZ14} format datasets. It is able to handle an arbitrary number of object classes, and can classify an arbitrary number of object within a given image. For our project, we are currently using it to identify five object classes: fish, fish eyes, rulers, and the numbers 2 and 3 on rulers.
 
-\begin{wraptable}{r}{5.5cm}
+% Not sure wrapping this is really getting us much after the 2 column switch
+
+%\begin{wraptable}{r}{5.5cm}
+\begin{table}[H]
     \centering
       \caption{Training dataset}
     \label{tab:dataset}
@@ -337,7 +341,8 @@ years \cite{zou2019object}, and has resulted in a number of well-tested, purpose
         Three & 100\\
       \bottomrule
     \end{tabular}
-\end{wraptable}
+\end{table}
+%\end{wraptable}
 
 Table \ref{tab:dataset} lists the number of instances for each class 
 used in our training dataset.
@@ -548,7 +553,6 @@ For all 6 of the cases where an eye was detected but the \verb|side| value was w
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.49\linewidth]{images/curved1}
-  %\includegraphics[width=0.49\linewidth]{images/}
   \caption{An example of a heavily curved specimen.}
 \end{figure}
 Of the specimens for which clock values were generated, 33 did not match the manually created data (within a tolerance of \(\pm{}1\)).For 25 of those the human generated data was incorrect, giving the automated process a \(3.1\) times lower error rate. Of the remaining 8, 2 specimens were quite curved making it difficult to assign a clear angle value. The other 6 were values of 3 instead of 9 or vice versa that resulted from a mislabeled eye as discussed in the previous section. A small number of images (such as on the right in Figure~\ref{fig:teaser}) have tags that overlap with the fish. These tags were light enough that they were correctly labeled as background by the pixel analysis.
