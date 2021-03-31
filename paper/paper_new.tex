@@ -557,16 +557,23 @@ and high F/B contrast.  We could show a representative image from each
 group.
 
 \subsection{Brightness/Uniformity Results?}
-\textbf{Todo}: Need standard deviations here, too. To show that the
-differences are significant and meaningful. Clearly the trend is there.\newline
-It looks like we should leave out Uniformity.
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]{images/histo}
+  \caption{Histogram for brightness.}
+\end{figure}
+\textbf{Todo}: It looks like we should leave out Uniformity.
 
 \begin{verbatim}
-Mean intensity in bounding box | Std | Count
+Mean intensity in bounding box | Std
+        | Count
 
-dark: 153.94935240158566 | 15.526143315470392 | 1800
-normal: 168.2924981358199 | 14.214506494349248 | 5186
-bright: 177.68854540643952 | 12.401282979349904 | 242
+dark: 153.94935240158566 |
+        15.526143315470392 | 1800
+normal: 168.2924981358199 |
+        14.214506494349248 | 5186
+bright: 177.68854540643952 |
+        12.401282979349904 | 242
 \end{verbatim}
 \begin{verbatim}
 Standard Deviations for:
