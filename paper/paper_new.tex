@@ -506,7 +506,18 @@ For 246 of the images \verb|detectron| was unable to find a fish eye. Of the rem
 Clock position values were successfully generated for \(6,991\) of the images. Of those, all but 8 were within \(\pm{}1\) of the correct result.
 
 \subsection{Brightness/Uniformity Results?}
-\textbf{Todo}: I can try to do this but I need to set up the infrastructure, we probably need to discuss a plan of action for this.
+\begin{verbatim}
+Mean intensity in bounding box | Count
+
+dark: 153.94935240158551 | 1800
+normal: 168.2924981358199 | 5186
+bright: 177.68854540643943 | 242
+\end{verbatim}
+\begin{verbatim}
+Standard Deviations for:
+    Uniform: 12.554834863869324
+    Not Uniform: 11.312181711328828
+\end{verbatim}
 
 \subsection{Mask and Bounding Box}
 \begin{figure}[H]
@@ -567,7 +578,7 @@ Of the specimens for which clock values were generated, 33 did not match the man
 Masks and bounding boxes contain the head and trunk of the fish in nearly all cases, but there is still more fine tuning to be done to ensure that light fins and tails are masked consistently and accurately.\todo{Talk about ideas for fixing here, or in future work? Or both?}
 
 \subsubsection{Brightness?}
-\textit{Like I said in slack, the standard deviation of background does not currently correlate with the is\_background\_uniform property. I still have to look into the dark normal bright calculations in the new way we discussed.}
+\textit{Like I said in slack, the standard deviation of background does not currently correlate with the is\_background\_uniform property. Brightness results are are in previous section. Need to think about what is worth noting since it's a fairly trivial result.}
 
 \subsubsection{Scale and Length}
 \begin{figure}[H]
@@ -580,14 +591,12 @@ Masks and bounding boxes contain the head and trunk of the fish in nearly all ca
 Scale calculations using the ``2'' and ``3'' method are nearly identical to those calculated by hand between the tick marks on the ruler. When the tail of the fish is accurately masked and the specimen is fairly straight, the length calculation is highly accurate as well. An example of such a result can be seen in Figure~\ref{fig:scale_len}, for which the difference between the hand measured length and the automatically calculated length was only \(0.6\%\) (\(8.88\) cm vs \(8.82\) cm). Thus, the primary means of lowering the error of the length calculation is to improve tail masking accuracy.
 
 \subsection{Future Work}
-\begin{itemize}
-    \item Further fine tuning of pixel analysis (e.g.\ thresholding on different regions of the bbox).
-    \item Generalizing ruler reading.
-    \item Training on a progressively larger number of image collections to hopefully gain reasonable generality for the whole class of fish specimen images.
-    \item Adding things like seahorses and eels.
-    \item Fitting a ``spine'' to specimen.
-    \item Check for color channel inequality when masking fish
-\end{itemize}
+The most pressing next step is to refine the pixel analysis thresholding process so that the entirety of even light colored fish are marked as foreground in the mask. A deficiency of the current process is that it only operates on single channel intensity. Some of the lightest tails appear yellow in hue to the human eye and easily distinguishable, but when compressed to a single intensity value they are almost identical in value to the white background. Considering when the RGB channels of a pixel are not equal in value may be able to improve masking of such features. Another possible approach to solving this is to threshold an mask on subsets of the bounding box, as to ensure that very dark trunk pixels do not affect the thresholding of lighter regions.
+
+Our ultimate goal is to create a generalized process to work on classes of specimen images (specifically all fish images for BGNN), not only the INHS collection. To accomplish this, a much larger training dataset full of more diverse images will be required. Another requirement will be to generalize the ruler reading process beyond the INHS specific reading of digits on the ruler.\todo{Suggest way(s) to do this?}
+% Todo: Are these worth mentioning?
+%Adding things like seahorses and eels.
+%Fitting a ``spine'' to specimen.
 \section{Conclusion}
 \textbf{Todo}
 
