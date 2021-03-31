@@ -73,6 +73,8 @@ Philadelphia, USA\\
 
 \maketitle
 
+%abstract can be shortened a good bit.
+%can offer an alternative manana..
 \begin{abstract}
      Over the last several decades advances in computing, imaging, and cyberinfrastructure have had a major impact on scientific research and discovery. One area of considerable activity is the digitization of the biological specimens that have been acquired worldwide by museums and other research institutions, undertakings that have produced large image collections.
 The metadata that is vital for subsequent machine learning, analysis and
@@ -129,7 +131,6 @@ The following section of the paper provides contextual background for this work,
 A number of different metadata standards have been applied to support the description and access of digitized scientific images. Darwin Core~\cite{biodiv_info_standards} developed specifically for digital museum projects is one of the most frequently used standards. Another approach is to create a metadata application profile by integrating properties from Dublin Core's DCMI Metadata Terms \cite{dc_terms}, the Ecological Metadata Language (EML) \cite{EML_2019} and other namespaces. There is also the recent Audubon Core supporting the discoverability, dissemination, and use of data relating to biological organisms, including digitized specimens.\cite{audub_core} These descriptive standards include metadata properties for taxon, geographic location, and other important specimen content, and have been developed primarily from the eye of a human curator. In other words, their application anticipates that a curator or data entry staff will manually generate metadata, drawing from acquisition logs or original specimen labels. This task is labor intensive, and the metadata associated with each digital rendering is limited, particularly for researchers seeking to apply machine learning, and leverage both the image and the metadata for scientific research.
 
 This limitation is magnified when trying get a handle on the actual quality of the digitized specimen. Descriptive oriented standards support search and retrieval, and the biodiversity community advocated for data fitness standards \cite{chapman2020developing}. Even so, metadata properties used to record image quality is severely limited and generally missing. This point is addressed in detail in \cite{leipzig2021biodiversity}, justifying the capture of 22 metadata properties supporting selection of high quality images for the development of a bgnn. Although, the manual generation of this metadata is costly in terms of labor and time.
-%will add cites above, depending on paper length.
 
 %Fish species dataset in Pakistan Shah 2019 \cite{Shah2019FishPakFS},
 
@@ -138,7 +139,8 @@ Technical metadata, such as camera settings and temporal information (date and t
 
 Automatic metadata generation of descriptive bibliographic data has been a research focus for close to 20 years \cite{liddy2002automatic,greenberg2004metadata,cardinaels2005automating}. Researchers have applied support vector machine (SVM) approaches \cite{han2003automatic}, and associated networks to address sparse and incomplete metadata \cite{rodriguez2009automatic}, and various successes are integrated into day-to-day workflows. 
 
-%\cite{heidorn2008automatic} speciment labels \cite{manso2004automatic} carteogrpahic info.
+%\cite{heidorn2008automatic} speciment labels \cite{manso2004automatic} cartographic info.
+%above paragraph..need to finesse a couple of sentences w/results, weave in these 2 citations, and then say we can look to image analysis.  
 
 \subsection{Fish Image Analysis}
 
@@ -268,7 +270,7 @@ Williams 2020 \cite{Williams:2020:UIF})
 
 Digitized specimen collections offer numerous outstanding opportunities
 for new scientific studies and discoveries.
-
+%I think we can go from the above, statement, directly to the paragraph that starts with "Given the many..." Then, specifically state the goal of this paper is to XXXX address the need, or the goal is to investigate, test, (pick your verb) an approach automatically generating metadata, combining off-the-shelf software and custom written, or is it simply test off-the-shelf software, and later the realization that customization happens.
 The amount of data is immense, with image collections containing 10,000's
 of entries. These discoveries will only be possible
 with computational techniques that can process this vast amount of data.
@@ -577,6 +579,8 @@ Image scale and fish lengths were calculated for \(7,179\) of the images. 50 of 
 
 \section{Discussion}
 \textbf{Todo}: Will need some sort of intro/framing paragraph
+%DRAFT from jg: Our results provide insight into how off-the-shelf software, supplemented by additional XXX [programming?] can support automatic metadata generation. Results are promising in a number of respects, helping us to identify more clearly areas, where more work is needed [e.g., failed fish, failed rulers]
+%Discussion needed to weave in at least a couple of citations. Happy to discuss
 \subsection{Results}\todo{Just going to put the results discussion in small sections and we can change it later if that doesn't make sense}
 \subsubsection{Object Detection}
 \begin{figure}[H]
@@ -641,8 +645,7 @@ Our ultimate goal is to create a generalized process to work on classes of speci
 \textbf{Todo}
 
 \section*{Acknowledgment}
-
-Vishal? Hank's undergrads? Other team members?
+%can make possible note about larger BGNN team, and/or general note to Tulane data in-putters for giving us data to compare, and/or INHS collection. [we can discuss]
 
 \bibliographystyle{IEEEtran}
 \bibliography{paper}
