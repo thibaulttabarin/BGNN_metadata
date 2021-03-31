@@ -30,6 +30,8 @@
 
 \title{Automated Metadata Generation for Fish Specimen Image Collections%*\\
     {\footnotesize \thanks{NSF Grant ???} }}
+%do we add grant now, or wait til acceptance. i think we need to ultimately remove any identifying info., i think bgnn is likely okay; but, perhaps mention metadata research center (MRC) need to be removed?. if so, i kind of like to put it back in for final version, if accepted. it helps with getting funding ... you are both listed on the MRC page. we should check on the identifying info. removed, or not.
+%for the record: Research supported by NSF OAC #1940233 and #1940322.
 
 \author{
 \IEEEauthorblockN{Joel Pepper}
@@ -122,17 +124,21 @@ images drawn from the Illinois Natural History Survey (INHS) Collection.
 The following section of the paper provides contextual background for this work, followed by the research goals and objectives, and a review of our research methods. Next, the results are presented, followed by a discussion. The conclusion highlights key findings and identifies next steps.
 
 \section{Related Work}
-\textbf{Todo}
 \subsection{Metadata for Natural History Image Collection}
 %question/comment - we need to keep in mind we are deal with digitized specimens, not simply digital, in other words, the artifacts themselves are digital version of physical, not like an x-ray, where the image is digital from the start.  
-A number of different metadata standards have been applied to support the description and access of digitized scientific images. Darwin Core developed specifically for digital museum projects is one of the most frequently used standards. Other popular standards include the Dublin Core, particularly application profiles, drawing from other namespaces such as the Ecological Metadata Language (EML) and ISO-geo [jane add]; and there is also the recent Audubon Core, designed to support the discoverability, dissemination, and use of data relating to biological organisms, including digitized specimens. These descriptive standards include metadata properties for taxon, geographic location, and other important specimen content, and have been developed primarily from the eye of a human curator. In other words, their application anticipates that a curator or data entry staff person will manually enter data from the original acquisition logs, or historical labels. As a result, the metadata associated with each digital rendering seems somewhat limited, particularly to researchers seeking to apply machine learning, and leverage both the image and the metadata.
+A number of different metadata standards have been applied to support the description and access of digitized scientific images. Darwin Core~\cite{biodiv_info_standards} developed specifically for digital museum projects is one of the most frequently used standards. Another approach is to create a metadata application profile by integrating properties from Dublin Core's DCMI Metadata Terms \cite{dc_terms}, the Ecological Metadata Language (EML) \cite{EML_2019} and other namespaces. There is also the recent Audubon Core supporting the discoverability, dissemination, and use of data relating to biological organisms, including digitized specimens.\cite{audub_core} These descriptive standards include metadata properties for taxon, geographic location, and other important specimen content, and have been developed primarily from the eye of a human curator. In other words, their application anticipates that a curator or data entry staff will manually generate metadata, drawing from acquisition logs or original specimen labels. This task is labor intensive, and the metadata associated with each digital rendering is limited, particularly for researchers seeking to apply machine learning, and leverage both the image and the metadata for scientific research.
+
+This limitation is magnified when trying get a handle on the actual quality of the digitized specimen. Descriptive oriented standards support search and retrieval, and the biodiversity community advocated for data fitness standards \cite{chapman2020developing}. Even so, metadata properties used to record image quality is severely limited and generally missing. This point is addressed in detail in \cite{leipzig2021biodiversity}, justifying the capture of 22 metadata properties supporting selection of high quality images for the development of a bgnn. Although, the manual generation of this metadata is costly in terms of labor and time.
 %will add cites above, depending on paper length.
 
 %Fish species dataset in Pakistan Shah 2019 \cite{Shah2019FishPakFS},
 
 \subsection{Automatic Metadata Generation}
-Metadata researchers are aware of challenges posted by manual metadata generation, both in terms of time, 
-%jane working here, i figured out how to scope this, I think! I need to get outside now, but back later.
+Technical metadata, such as camera settings and temporal information (date and time) are automatically generated during a digitization sequence, following standards such as XX. Some of this metadata may be useful in for selecting a machine learning sample. A researcher may desire images captured chiefly with a certain aperture setting. Even so, the majority of automatically captured technical metadata associated with digitized specimens is insufficient for computational research, leaving researchers to reply on manually generated descriptive metadata, which itself is sparse.
+
+Automatic metadata generation of descriptive bibliographic data has been a research focus for close to 20 years \cite{liddy2002automatic,greenberg2004metadata,cardinaels2005automating}. Researchers have applied support vector machine (SVM) approaches \cite{han2003automatic}, and associated networks to address sparse and incomplete metadata \cite{rodriguez2009automatic}, and various successes are integrated into day-to-day workflows. 
+
+%\cite{heidorn2008automatic} speciment labels \cite{manso2004automatic} carteogrpahic info.
 
 \subsection{Fish Image Analysis}
 
