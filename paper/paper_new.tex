@@ -64,13 +64,14 @@ Philadelphia, PA\hspace{3mm}USA\\
 %abstract can be shortened a good bit.
 %can offer an alternative manana..
 \begin{abstract}
-     Over the last several decades advances in computing, imaging, and cyberinfrastructure have had a major impact on scientific research and discovery. One area of considerable activity is the digitization of the biological specimens that have been acquired worldwide by museums and other research institutions, undertakings that have produced large image collections.
-The metadata that is vital for subsequent machine learning, analysis and
-scientific discovery based on these specimen image repositories
-is often unavailable, sparse or incorrect.
-As a step towards improving metadata in specimen research image collections, our team is developing methods for automatically analyzing fish images to extract a variety of important features. These fish specimens are being studied for a larger project entitled Biology Guided Neural Networks (BGNN), which is developing a novel class of artificial neural networks that can exploit the machine readable and predictive knowledge about biology that is available in specimen images, phylogenies and anatomy ontologies. Using a combination of machine learning and image informatics tools and techniques, we can accurately determine metadata such as fish quantity and location within images, fish orientation and other quantitative fish features, image scaling based on ruler identification and measurement, and general image quality metrics for a substantial number of the images being used in the BGNN project.
-Our goal is to develop image metadata generation methods that both support
-the research underway within the BGNN project, and provide a framework for future technology developments that can be deployed by repository curators to improve and bolster the metadata they provide with their specimen images. A longer term goal is to extend the image analysis methods for computing quantitative features in support of specific biological investigations.
+Metadata is a key data source particularly for researchers seeking use [apply] machine learning to the vast collections of digitized specimens. Unfortunately, the metadata available is often sparse and, at times, erroneous; and it is prohibitively expensive to address these limitations through traditional, manual [*human] means. This paper reports on a research applying machine-driven [*automatic] approaches to analyze digitized fish images and extract a variety of important features. The digitized fish specimen are being analyzed as part of the XXX project [*Biology Guided Neural Networks (BGNN)], where researchers are developing a novel class of artificial neural networks using phylogenies and anatomy ontologies. The paper reports on research combining machine  learning  and  image  informatics  tools and techniques. A sample 7247 images from the INHS (write-out) were examined via automatic processes; and results show we can  accurately determine metadata, such as, fish quantity, fish orientation, image scaling based on ruler identification and measurement, and general image quality metrics. Results also indicate that automatic approaches "can outperform humans" [and/or "expedite"] the creation of metadata that's critical to leveraging digitized specimens for machine learning. The sections that follow cover background context, reviews the research design, reports results Next,  the  results  are presented, followed by a discussion. 
+%items in square brackets are just other suggested words, e.g., select one or the other, or .... 
+%something about implications above
+%something about comparison to human results.
+
+
+
+% Over the last several decades advances in computing, imaging, and cyberinfrastructure have had a major impact on scientific research and discovery. One area of considerable activity is the digitization of the biological specimens that have been acquired worldwide by museums and other research institutions, undertakings that have produced large image collections.The metadata that is vital for subsequent machine learning, analysis and scientific discovery based on these specimen image repositories is often unavailable, sparse or incorrect. As a step towards improving metadata in specimen research image collections, our team is developing methods for automatically analyzing fish images to extract a variety of important features. These fish specimens are being studied for a larger project entitled Biology Guided Neural Networks (BGNN), which is developing a novel class of artificial neural networks that can exploit the machine readable and predictive knowledge about biology that is available in specimen images, phylogenies and anatomy ontologies. Using a combination of machine learning and image informatics tools and techniques, we can accurately determine metadata such as fish quantity and location within images, fish orientation and other quantitative fish features, image scaling based on ruler identification and measurement, and general image quality metrics for a substantial number of the images being used in the BGNN project.Our goal is to develop image metadata generation methods that both support the research underway within the BGNN project, and provide a framework for future technology developments that can be deployed by repository curators to improve and bolster the metadata they provide with their specimen images. A longer term goal is to extend the image analysis methods for computing quantitative features in support of specific biological investigations.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -99,6 +100,16 @@ Additionally, some digitization efforts record technical metadata, detailing ima
 human examining several images at a time, they are insufficient for researchers seeking to apply computational methods to examine thousands of images
 to determine if, for instance, a specific fish grows to different lengths
 in different habitats.
+\begin{figure*}
+  \centering
+  \includegraphics[width=.31\linewidth]{images/INHS_FISH_100314}
+  \hspace{1mm}
+  \includegraphics[width=.31\linewidth]{images/INHS_FISH_100682}
+  \hspace{1mm}
+  \includegraphics[width=.31\linewidth]{images/INHS_FISH_100020}
+  \caption{Three example images from the Illinois Natural History Survey (INHS) collection.}
+  \label{fig:INHS_examples}
+\end{figure*}
 
 Since the digital collections may each contain tens of thousands of images, producing metadata for each image via a manual process is prohibitively labor-intensive and infeasible. Methods for automatically computing metadata from images are therefore needed to fully exploit biological image repositories for scientific discovery.
 As a step towards improving metadata in specimen research image collections, members of Drexel University's Metadata Research Center are developing methods to automatically analyze fish images and
@@ -111,6 +122,8 @@ allows us to compute quantitative features about the fish specimens, such
 as their length and area.  In order to test and validate our methods, they
 were  applied to a set of \(7,244\)
 images drawn from the Illinois Natural History Survey (INHS) Collection.
+Figure \ref{fig:INHS_examples} presents three typical images used in our
+study.
 The following section of the paper provides contextual background for this work, followed by the research goals and objectives, and a review of our research methods. Next, the results are presented, followed by a discussion. The conclusion highlights key findings and identifies next steps.
 
 \section{Related Work}
@@ -301,23 +314,26 @@ for biological specimen image collections.
 
 
 \section{Methods}
-Our process for metadata generation can be broken into three steps: object detection with Facebook's Detectron2 machine learning library (subsequently referred to as \verb|detectron|), image informatics analysis at the pixel level, and calculations on the results of the previous steps to determine higher level metadata properties.
+Our process for metadata generation can be broken into three steps: object detection with Facebook's Detectron2 machine learning library (subsequently referred to as \verb|detectron|), image processing at the pixel level, and calculations on the results of the previous steps to determine higher level metadata properties.
 % \todo{Definitely need to explain somewhere in more detail about our current admissibility criteria for images. Not sure where I want to put it yet so just leaving it as a todo}
 
-\begin{figure}[H]
+\begin{figure}[b]
   \centering
-  \includegraphics[width=.49\linewidth]{images/teaser1_crop}
+%  \includegraphics[width=.49\linewidth]{images/teaser1_crop}
   %\hspace{4mm}
-  \includegraphics[width=.49\linewidth]{images/teaser2_crop}
-  \caption{Initial object detection on specimen images using Detectron2~\cite{wu2019detectron2}}
+  \includegraphics[width=.90\linewidth]{images/teaser2_crop}
+  \caption{Initial object detection on a specimen image using Detectron2~\cite{wu2019detectron2}.}
   \label{fig:teaser}
 \end{figure}
+
 \subsection{Detectron}
 A prerequisite task to performing any advanced metadata property generation
 is finding the specimens (and other relevant objects) within the collection
 images. Object detection has been a broadly active field of study in recent
 years \cite{zou2019object}, and has resulted in a number of well-tested, purpose-built architectures. We elected to use Facebook AI Research's \verb|detectron| tool \cite{wu2019detectron2}, and specifically its implementation of the Mask R-CNN architecture \cite{he2018mask}, for object detection in our project.
-\verb|detectron| is built on \verb|pytorch|~\cite{NEURIPS2019_9015} and provides a relatively straightforward method for training on COCO~\cite{DBLP:journals/corr/LinMBHPRDZ14} format datasets. It is able to handle an arbitrary number of object classes, and can classify an arbitrary number of object within a given image. For our project, we are currently using it to identify five object classes: fish, fish eyes, rulers, and the numbers 2 and 3 on rulers.
+\verb|detectron| is built on \verb|pytorch|~\cite{NEURIPS2019_9015} and provides a relatively straightforward method for training on COCO~\cite{DBLP:journals/corr/LinMBHPRDZ14} format datasets. It is able to handle an arbitrary number of object classes, and can classify an arbitrary number of object within a given image. 
+For our project, we use it to identify five object classes: fish, fish eyes, rulers, and the numbers 2 and 3 on rulers,
+as shown in Figure \ref{fig:teaser}.
 
 % Not sure wrapping this is really getting us much after the 2 column switch
 
@@ -404,6 +420,7 @@ informatics to produce more accurate objects masks and bounding boxes.
         \verb|background.std| & Per Fish & Float & The standard deviation of the background within a given fish's bounding box.\\
         \verb|foreground.mean| & Per Fish & Float & The mean intensity of the foreground within a given fish's bounding box.\\
         \verb|foreground.std| & Per Fish & Float & The standard deviation of the foreground within a given fish's bounding box.\\
+        \verb|contrast| & Per Fish & Float & The contrast between foreground and background intensities within a given fish's bounding box.\\
         \verb|centroid| & Per Fish & 4 Tuple & The centroid of a given fish's bitmask.\\
         \verb|primary_axis| & Per Fish & 2D Vector & The unit length primary axis (eigenvector) for the bitmask of a given fish.\\
         \verb|clock_value| & Per Fish & Integer & Fish's primary axis converted into an integer ``clock value'' between 1 and 12.\\
@@ -467,10 +484,15 @@ described above:
 The remaining properties are computed as described below, with all the
 metadata properties listed in Table \ref{tab:properties}.
 
+\subsubsection{contrast}
+The contrast between the intensities of the foreground and background
+pixels is computed as \verb|background.mean| - \verb|foreground.mean|.
+
 \subsubsection{centroid and eye\_center}
 Centroids are provided for the masks and bounding boxes generated by \verb|detectron|, and since we do not recalculate the mask of fish eyes we can use that value directly for \verb|eye_center|.
 
-Since we recalculate the mask of the fish, we must recalculate its centroid as well. This can be done via
+Since we recalculate the mask of the fish, its centroid must be recalculated
+as well. This can be done via
 \begin{equation}
     (\bar{x}, \bar{y}) = (\mathrm{round}(\frac{M_{10}}{M_{00}}), \mathrm{round}(\frac{M_{01}}{M_{00}})),
 \end{equation}
@@ -506,39 +528,57 @@ Just gonna throw some caveats in here, might be its own section might not
 \end{itemize}
 \end{comment}
 \section{Results and Discussion}
-Technicians employed by our team have manually generated the 22 metadata properties deemed crucial to the overall BGNN project~\cite{leipzig2021biodiversity} for a large number of INHS images. \(20,699\) total entries were created by 13 technicians that spanned \(8,398\) unique images. Of these \(8,398\) images, \(7,244\) were both not part of the \verb|detectron| training set and met our current admissibility criteria for \verb|detectron| and pixel analysis processing. We ran the metadata extraction program on these \(7,244\) images.
+Technicians employed by our team have manually generated the 22 metadata properties deemed crucial to the overall BGNN project~\cite{leipzig2021biodiversity} for a large number of INHS images. \(20,699\) total entries were created by 13 technicians that spanned \(8,398\) unique images. Of these \(8,398\) images, \(7,244\) were both not part of the \verb|detectron| training set and met our current admissibility criteria for \verb|detectron| and pixel processing. We ran the metadata extraction program on these \(7,244\) images.
 For the properties of image scale, fish length, and fish bounding boxes
 (properties not manually generated),
 a random sample of 50 specimens from the set of \(7,244\) were analyzed by
 hand for comparison.
 
-Our automated process currently generates 7 of the 22 core metadata properties: \verb|if_fish| (\verb|has_fish|), \verb|fish_number| (\verb|fish_count|), \verb|if_ruler| (\verb|has_ruler|), \verb|specimen_angled| (\verb|clock_value|), \verb|specimen_view| (\verb|side|), \verb|brightness| (derived from \verb|background.mean| and \verb|foreground.mean|), and \verb|if_background_uniform| (\verb|background.std|). In addition, our process also calculates bounding boxes and fish lengths in centimeters.
+Our automated process currently generates 6 of the 22 core metadata properties: \verb|if_fish| (\verb|has_fish|), \verb|fish_number| (\verb|fish_count|), \verb|if_ruler| (\verb|has_ruler|), \verb|specimen_angled| (\verb|clock_value|), \verb|specimen_view| (\verb|side|), and \verb|brightness| (\verb|foreground.mean|).
+% and \verb|if_background_uniform| (\verb|background.std|).
+In addition, our process also calculates contrast, bounding boxes and
+fish lengths in centimeters.
 
-\subsection{Fish Detection}
-All images in the INHS dataset contain exactly one fish. For \(7,209\) of the specimen images, one fish was detected, a 99.5\% correct rate.
-For 25 of the images, 2 fish were detected, 3 fish were detected for 3 images, and for 7 images no fish were found. In the case of greater than 1 fish, 9 of the 28 contained tags which overlapped the fish and were themselves labeled as a second fish. Of the remaining 17, \verb|detectron| erroneously labeled the fish as two separate fish objects, or labeled a subsection of the fish a second time. The 7 fish that were not detected were quite small, which is something that is a type of specimen that is currently lacking from the training set. See the left image in Figure~\ref{fig:fish_detect_wrong} for an example of this. Fish that were double labeled were generally quite large and/or dissimilar from the fish found in the training set, such as the right image in Figure~\ref{fig:fish_detect_wrong}.
-
-\begin{figure}[H]
+\begin{figure}[t]
   \centering
-  \includegraphics[width=0.49\linewidth]{images/none1}
-  \includegraphics[width=0.49\linewidth]{images/double1}
-  \caption{A fish that was not detected (left) and a fish that was detected twice (right).}
+  \includegraphics[width=0.9\linewidth]{images/none1_crop} \\
+  \vspace{3mm}
+  \includegraphics[width=0.9\linewidth]{images/double1_crop}
+  \caption{A fish that was not detected (top) and a fish that was detected twice (bottom).}
   \label{fig:fish_detect_wrong}
 \end{figure}
 
-\subsection{Ruler Detection}
-For all but 2 of the \(7,244\) images \verb|detectron| was able to find the ruler, a nearly perfect correct rate.
-In 56 of the images, the ruler itself was found but the ``2'' and/or the ``3'' on it was not, so a scale calculation could not be performed, producing a 99.2\% success rate for
-the \verb|scale| computation.
-
-Images where one of these three objects were not detected generally had some form of coloration issue. They were either washed out, very dark or yellow in hue. Some of the rulers for which ``2'' and/or ``3'' were not detected were particularly scratched and damaged. Only ``3'' was missed in 45 of the 56 cases, only ``2'' was missed in 2 cases, and both were missed in 9 cases. This may indicate that more training samples for ``3'' are required. Many of the rulers where both numerals were missed were particularly small within the image, which again may be solvable through bolstering the training dataset.
+\subsection{Fish Detection}
+All images in the INHS dataset contain exactly one fish. For \(7,209\) of the specimen images, one fish was detected, a 99.5\% correct rate.
+For 25 of the images, 2 fish were detected, 3 fish were detected for 3 images, and for 7 images no fish were found.
+The 7 fish that were not detected were quite small. This type of specimen 
+is currently lacking from the training set.
+See the top image in Figure~\ref{fig:fish_detect_wrong} for an example.
+In the case of greater than 1 fish, 9 of the 28 contained tags that
+overlapped the fish and were themselves labeled as a second fish.
+Of the remaining 17, \verb|detectron| erroneously labeled the fish as two separate fish objects, or labeled a subsection of the fish a second time.
+Fish that were double labeled were generally quite large and/or dissimilar from the fish found in the training set, such as the bottom image in
+Figure~\ref{fig:fish_detect_wrong}.
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.49\linewidth]{images/no_ruler1}
   \includegraphics[width=0.49\linewidth]{images/no_ruler2}
   \caption{The two images where the ruler was not found. The left image exhibits a yellow hue, and the right is quite washed out with poor contrast.}
+  \label{fig:no_ruler}
 \end{figure}
+
+
+\subsection{Ruler Detection}
+For all but 2 of the \(7,244\) images \verb|detectron| was able to find the ruler, a nearly perfect correct rate.
+In 56 of the images, the ruler itself was found, but the numbers ``2''
+and/or the ``3'' on the ruler were not. Therefore a scale calculation could
+not be performed, producing a 99.2\% success rate for
+the \verb|scale| computation.
+
+Images where one of these objects were not detected generally had some form of coloration issue. They were either washed out, very dark or yellow in hue.
+See Figure \ref{fig:no_ruler} two such examples.
+Some of the rulers for which ``2'' and/or ``3'' were not detected were particularly scratched and damaged. Only ``3'' was missed in 45 of the 56 cases, only ``2'' was missed in 2 cases, and both were missed in 9 cases. This may indicate that more training samples for ``3'' are required. Many of the rulers where both numerals were missed were particularly small within the image, which again may be solvable through expanding the training dataset.
 
 %\begin{itemize}
     %\item Worked fairly well all things considered
@@ -546,85 +586,114 @@ Images where one of these three objects were not detected generally had some for
     %\item Talk about which rulers failed
 %\end{itemize}
 
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=0.31\linewidth]{images/dark}
+  \includegraphics[width=0.31\linewidth]{images/normal}
+  \includegraphics[width=0.31\linewidth]{images/bright}
+  \caption{Examples of low, medium and high contrast fish images.}
+  \label{fig:contrast}
+\end{figure*}
+
 \subsection{Side Detection}
 \verb|detectron| was unable to find a fish eye
 in 246 of the images. Of the remaining \(6,998\) images, the correct side
 (\verb|left| or \verb|right|) was detected in all but 6 cases, producing
 a 96.5\% correct rate.
 
-
-There were six cases where an eye was detected but the \verb|side| value
-was wrong. Here, a spot on the wrong side of the fish was labeled as the
+% There were six cases where an eye was detected but the \verb|side| value
+% was wrong.
+For these 6 cases, a spot on the wrong side of the fish was labeled as the
 most likely eye within the bounding box of the fish, i.e.~eye detection 
-was incorrect.
+was incorrect. Figure \ref{fig:wrong_eye} presents one such example.
 There were an additional 17 images for which the automated process generated a result that did not match the manually created data. For these remaining cases the manual data was incorrect, giving the automated system an error rate \(2.8\) times lower than the human error rate.
 This result highlights the additional utility of automated methods to
 double-check and verify human-generated metadata.
 
-\begin{figure}[H]
+\begin{figure}[h]
   \centering
   \includegraphics[width=0.49\linewidth]{images/wrong_side_orig}
   \includegraphics[width=0.49\linewidth]{images/wrong_side1}
   \caption{A fish for which a splotch on its tail fin was labeled the most likely eye.}
+  \label{fig:wrong_eye}
 \end{figure}
 
 \subsection{Clock Value}
 Clock position values were successfully generated for \(6,991\) of the images. Of those, all but 8 were within \(\pm{}1\) of the correct result,
-our definition of a correct/acceptable result. The correct rate for this
-computation is 96.4\%.
+our definition of a correct/acceptable result, making the correct rate for
+this computation 96.4\%.
 
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.49\linewidth]{images/curved1}
-  \caption{An example of a heavily curved specimen.}
-  \label{fig:curvedFish}
-\end{figure}
 Of the specimens for which clock values were generated, 33 did not match the manually created data (within a tolerance of \(\pm{}1\)).
-For 25 of those, the human-generated data was incorrect, giving the automated process a \(3.1\) times lower error rate. Of the remaining 8, 2 specimens were quite curved making it difficult to assign a clear angle value, as
+For 25 of those, the human-generated data was incorrect, giving the automated process a \(3.1\) times lower error rate. Of the 8 that were
+computationally classified incorrectly,
+two specimens were quite curved making it difficult to assign a clear angle value, as
 seen in Figure \ref{fig:curvedFish}.
-The other 6 were values of 3 instead of 9 or vice versa, which resulted from
+The other 6 were values of ``3'' instead of ``9'' or vice versa, which resulted from
 a mislabeled eye as discussed in the previous section.
 %\todo{Why is the following sentence here? What does it have to do with
 %Clock Value?}
 %A small number of images (such as on the right in Figure~\ref{fig:teaser}) have tags that overlap with the fish. These tags were light enough that they were correctly labeled as background by the pixel analysis.
 
-\subsection{Image Contrast}
-\begin{figure}[H]
+\begin{figure}[h]
   \centering
-  \includegraphics[width=\linewidth]{images/histo}
+  \includegraphics[width=0.7\linewidth]{images/curved1}
+  \caption{An example of a heavily curved specimen.}
+  \label{fig:curvedFish}
+\end{figure}
+
+\begin{comment}
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.9\linewidth]{images/histo}
   \caption{Histogram for difference in brightness between foreground an background.}
   \label{fig:histo}
 \end{figure}
+\end{comment}
 
-The contrast of an image is an important aspect of the image quality for the BGNN study. Ideally, for INHS images the fish should be well lit and vibrant, and the background should also be as light and white as possible. Figure~\ref{fig:histo} shows the distribution of the difference between the mean intensity of the foreground (i.e.\ the pixels of the fish) and the mean intensity of the background within the fish's bounding box. The overall mean of the distribution is \(144.26\), with a standard deviation of \(15.79\). Images on the low end of this distribution exhibit poor foreground--background contrast, and images on the high end likely contain poorly lit specimens. Examples of each type of image (low, normal, and high contrast) can be seen in Figure~\ref{fig:contrast}. The top left image has a mean intensity of 103 (low), the top right 144 (normal), and the bottom 186 (high).
+\subsection{Image Contrast}
+The contrast of an image is an important image property needed
+for the analyses of the BGNN study. Ideally, for INHS images the fish should be well lit and clearly displayed, and the background should also be as light and white as possible.
+% Figure~\ref{fig:histo} shows the distribution of
+The difference between
+the mean intensity of the foreground (i.e.\ the pixels of the fish) and the mean intensity of the background within the fish's bounding box
+was computed for all 7,244 images.
+The overall mean of the differences is \(144.3\), with a standard deviation of \(15.8\). Images on the low end of the distribution exhibit poor foreground--background contrast, and images on the high end likely contain poorly lit specimens.
+Images are considered to have ``low'' and
+``high'' contrast if their background-foreground difference is greater than
+one standard deviation away from the mean; otherwise they are classified as
+``medium''.
+Examples of each type of image (low, medium, and high contrast) can be seen in Figure~\ref{fig:contrast}.
+The left image has a mean intensity of 103 (low), the middle image 144
+(medium), and the right 186 (high).
 
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.49\linewidth]{images/dark}
-  \includegraphics[width=0.49\linewidth]{images/normal}
-  \includegraphics[width=0.49\linewidth]{images/bright}
-  \caption{Examples of low, normal and high contrast fish images.}
-  \label{fig:contrast}
-\end{figure}
-
-\subsection{Brightness}
-Specimen brightness is one of the 22 hand recorded properties. It is encoded as \verb|dark|, \verb|normal| or \verb|bright|. These values correspond to the measurement of mean foreground intensity by the automated system. The correlation between the two measurements can be seen in Table~\ref{tab:bright} below.
 \begin{table}[H]
     \centering
-    \caption{Brightness measurements}
+%    \caption{\verb|foreground.mean| statistics for the three Brightness classes}
+    \caption{foreground.mean statistics for the three Brightness classes}
     \label{tab:bright}
     \begin{tabular}{cccc}
         \toprule
         \textbf{Class} & \textbf{Mean Intensity} & \textbf{Standard Deviation} & \textbf{Instances}\\
         \midrule
-        Dark & 75.15 & 13.49 & 1800\\
-        Normal & 93.64 & 14.78 & 5186\\
-        Bright & 108.39 & 15.21 & 242\\
+        Dark & 75.2 & 13.5 & 1800\\
+        Normal & 93.6 & 14.8 & 5186\\
+        Bright & 108.4 & 15.2 & 242\\
         \bottomrule
     \end{tabular}
 \end{table}
-
-\textbf{Todo}: I suppose more should be said here.
+\subsection{Brightness}
+Specimen brightness is one of the 22 hand-recorded metadata properties. It is encoded as \verb|dark|, \verb|normal| or \verb|bright|. These values
+correspond to the mean foreground intensity computed by the automated system.
+The mean and standard deviation of the mean foreground intensities were
+computed for the images in the three human-specified classes.
+Table~\ref{tab:bright} contains the resulting values and shows that
+automated intensities values provide objective measures that may be used to break images into groups that correlate with human-defined brightness
+classifications.
+The mean of \verb|foreground.mean| over all 7,244 images is 89.5, with a
+standard deviation of 16.6. These numbers suggest, for example, that
+\verb|foreground.mean| $\pm$ one-half a standard deviation could define 
+\verb|normal| brightness, with values outside this range being classified
+as \verb|dark| or \verb|bright|.
 
 %\begin{verbatim}
 %Standard Deviations for:
@@ -634,7 +703,7 @@ Specimen brightness is one of the 22 hand recorded properties. It is encoded as 
 
 \subsection{Mask and Bounding Box}
 
-\begin{figure}[H]
+\begin{figure}[t]
   \centering
   \includegraphics[width=0.49\linewidth]{images/011196_pred}
   \includegraphics[width=0.49\linewidth]{images/011196_mask}
@@ -653,23 +722,27 @@ Figure \ref{fig:bbox_mask}.
 All 50 masks and bounding boxes were correctly placed
 on/around the location of the fish. However, a number of them lacked portions of lightly colored tails and/or fins.
 Specifically, 22 masks and bounding boxes covered the entire fish,
-16 missed some of the tail, and 12 missed most or all of the tail.
+16 missed some of the tail, and 12 missed most or all of the tail, as
+seen in Figure \ref{fig:missedTail}.
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.49\linewidth]{images/61631}
   \includegraphics[width=0.49\linewidth]{images/61631_mask}
   \caption{An example of a light colored tail being missed during the pixel analysis process.}
+  \label{fig:missedTail}
 \end{figure}
-Masks and bounding boxes contain the head and trunk of the fish in nearly all cases, but there is still more fine tuning to be done to ensure that light fins and tails are masked consistently and accurately.
+Masks and bounding boxes contain the head and trunk of the fish in nearly all cases, but further refinement of our algoriths will be needed
+to ensure that light fins and tails are masked consistently and accurately.
 
 \subsection{Scale and Length}
 Image scale and fish lengths were calculated for \(7,179\) of the images.
 For the remaining 65 images, either the fish, the ``2'' and/or the ``3'' on the ruler were not detected.
 Image scale ($\frac{\mathrm{pixels}}{\mathrm{cm}}$) and fish length were
-measured, using ImageJ,~\cite{imagejCite} in the same(?) 50 test images.
-% 50 of these images \todo{The same 50 as before?} were measured by hand to get \(\frac{\mathrm{pixels}}{\mathrm{cm}}\) and fish length in centimeters with ImageJ.~\cite{imagejCite}
+measured, using ImageJ~\cite{imagejCite}, in the same 50 test images.
+% 50 of these images \todo{The same 50 as before?} were measured by hand to get \(\frac{\mathrm{pixels}}{\mathrm{cm}}\) and fish length in centimeters with ImageJ~\cite{imagejCite}.
 In this subset of images the average error for the scale calculation
 was \(0.91\%\), and the average error for the fish length calculation was \(5.87\%\).
+Scale calculations using the ``2'' and ``3'' method are nearly identical to those calculated by hand between the tick marks on the ruler. When the tail of the fish is accurately masked and the specimen is fairly straight, the length calculation is highly accurate as well. An example of such a result can be seen in Figure~\ref{fig:scale_len}, for which the difference between the hand measured length and the automatically calculated length was only \(0.6\%\) (\(8.88\) cm vs \(8.82\) cm). Thus, the primary means of lowering the error of the length calculation is to improve tail masking accuracy.
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.49\linewidth]{images/54172}
@@ -677,7 +750,6 @@ was \(0.91\%\), and the average error for the fish length calculation was \(5.87
   \caption{A fish for which the masking and measurement process was highly accurate.}
   \label{fig:scale_len}
 \end{figure}
-Scale calculations using the ``2'' and ``3'' method are nearly identical to those calculated by hand between the tick marks on the ruler. When the tail of the fish is accurately masked and the specimen is fairly straight, the length calculation is highly accurate as well. An example of such a result can be seen in Figure~\ref{fig:scale_len}, for which the difference between the hand measured length and the automatically calculated length was only \(0.6\%\) (\(8.88\) cm vs \(8.82\) cm). Thus, the primary means of lowering the error of the length calculation is to improve tail masking accuracy.
 
 %\section{Discussion}
 %\textbf{Todo}: Will need some sort of intro/framing paragraph
