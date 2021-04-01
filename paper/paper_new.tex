@@ -79,19 +79,19 @@ bioinformatics, metadata, image analysis, applied machine learning
 
 \section{Introduction}
 % Moving teaser since this template doesn't actually ask for one
-Over the last several decades advances in computing, imaging, and cyberinfrastructure have supported the growth of digital natural history collections, many of which have specimen images.~\cite{beaman2012mass} Additionally, initiatives, such as National Science Foundation’s Advancing Digitization of Biodiversity Collections (ADBC) program, which ran for nearly a decade, have supported the digitization and curation of tens of thousands of biological specimens.~\cite{page2015digitization} These digital specimen accessible through global, open access repositories; they enable researchers, educators, students, and the general public to examine and compare in ways previously unimaginable. Significant challenges surface, however, when researchers seek to apply computational methods to these data items, due to both image quality and metadata issues.
+Over the last several decades advances in computing, imaging, and cyberinfrastructure have supported the growth of digital natural history collections, many of which contain specimen images.~\cite{beaman2012mass} Additionally, initiatives, such as National Science Foundation’s Advancing Digitization of Biodiversity Collections (ADBC) program, which ran for nearly a decade, have supported the digitization and curation of tens of thousands of biological specimens.~\cite{page2015digitization} These digital specimen images are accessible through global, open access repositories; they enable researchers, educators, students, and the general public to examine and compare collections in ways previously unimaginable. Significant challenges surface, however, when researchers seek to apply computational methods to these repositories, due to both image quality and metadata issues.
 %{jane}should we try to insert machine learning here, last sentence, or computation methods ok?
 
 Unfortunately, potential scientific advances are hindered by image quality
 problems and the lack of accurate and pertinent metadata
 associated with the image collections.
-Poor quality images, e.g. with low contrast, inadequate lighting,
-out-of-focus or cluttered visual arrangements, provide inadequate input
+Poor quality images---e.g.\ those with low contrast, inadequate lighting,
+out-of-focus or cluttered visual arrangements---provide inadequate input
 for automated
-image analysis and machine learning algorithms and lead to inferior
+image analysis and machine learning algorithms, and lead to inferior
 computational results.
 In order to perform quantitative morphometric analysis of the specimens,
-the physical scale of the images (pixels/inch) is needed; thus
+the physical scale of the images (pixels/cm) is needed; thus
 requiring the ability to identify and measure rulers in the images.
 Many specimen collections do include Darwin Core metadata,~\cite{biodiv_info_standards} detailing
 specimen taxon, geographic location, and several other descriptive aspects.
@@ -109,14 +109,14 @@ Using a combination of machine learning and image informatics tools and techniqu
 image scaling based on ruler identification and measurement. Image scaling
 allows us to compute quantitative features about the fish specimens, such
 as their length and area.  In order to test and validate our methods, they
-were  applied to a set of 7,247
+were  applied to a set of \(7,244\)
 images drawn from the Illinois Natural History Survey (INHS) Collection.
 The following section of the paper provides contextual background for this work, followed by the research goals and objectives, and a review of our research methods. Next, the results are presented, followed by a discussion. The conclusion highlights key findings and identifies next steps.
 
 \section{Related Work}
 \subsection{Metadata for Natural History Image Collection}
 %question/comment - we need to keep in mind we are deal with digitized specimens, not simply digital, in other words, the artifacts themselves are digital version of physical, not like an x-ray, where the image is digital from the start.  
-A number of different metadata standards have been applied to support the description and access of digitized scientific images. Darwin Core~\cite{biodiv_info_standards} developed specifically for digital museum projects is one of the most frequently used standards. Another approach is to create a metadata application profile by integrating properties from Dublin Core's DCMI Metadata Terms \cite{dc_terms}, the Ecological Metadata Language (EML) \cite{EML_2019} and other namespaces. There is also the recent Audubon Core supporting the discoverability, dissemination, and use of data relating to biological organisms, including digitized specimens.\cite{audub_core} These descriptive standards include metadata properties for taxon, geographic location, and other important specimen content, and have been developed primarily from the eye of a human curator. In other words, their application anticipates that a curator or data entry staff will manually generate metadata, drawing from acquisition logs or original specimen labels. This task is labor intensive, and the metadata associated with each digital rendering is limited, particularly for researchers seeking to apply machine learning, and leverage both the image and the metadata for scientific research.
+A number of different metadata standards have been applied to support the description and access of digitized scientific images. Darwin Core~\cite{biodiv_info_standards} developed specifically for digital museum projects is one of the most frequently used standards. Another approach is to create a metadata application profile by integrating properties from Dublin Core's DCMI Metadata Terms~\cite{dc_terms}, the Ecological Metadata Language (EML)~\cite{EML_2019} and other namespaces. There is also the recent Audubon Core supporting the discoverability, dissemination, and use of data relating to biological organisms, including digitized specimens.~\cite{audub_core} These descriptive standards include metadata properties for taxon, geographic location, and other important specimen content, and have been developed primarily from the eye of a human curator. In other words, their application anticipates that a curator or data entry staff will manually generate metadata, drawing from acquisition logs or original specimen labels. This task is labor intensive, and the metadata associated with each digital rendering is limited, particularly for researchers seeking to apply machine learning, and leverage both the image and the metadata for scientific research.
 
 This limitation is magnified when trying get a handle on the actual quality of the digitized specimen. Descriptive oriented standards support search and retrieval, and the biodiversity community advocated for data fitness standards \cite{chapman2020developing}. Even so, metadata properties used to record image quality is severely limited and generally missing. This point is addressed in detail in \cite{leipzig2021biodiversity}, justifying the capture of 22 metadata properties supporting selection of high quality images for the development of a bgnn. Although, the manual generation of this metadata is costly in terms of labor and time.
 
