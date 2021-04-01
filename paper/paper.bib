@@ -7,8 +7,8 @@
   volume    = {9(7)},
   pages     = {671--675},
   year      = {2012},
-  url       = {http://www.nature.com/nmeth/journal/v9/n7/full/nmeth.2089.html},
 }
+%   url       = {http://www.nature.com/nmeth/journal/v9/n7/full/nmeth.2089.html},
 
 @MISC{INHS,
    author = {{Illinois Natural History Survey}},
@@ -24,6 +24,7 @@
    year = {2019},
 }
 
+%  journal   = {CoRR},
 @article{DBLP:journals/corr/LinMBHPRDZ14,
   author    = {T.-Y. Lin and
                M. Maire and
@@ -36,7 +37,7 @@
                P. Doll{\'{a}}r and
                C.L. Zitnick},
   title     = {Microsoft {COCO:} Common Objects in Context},
-  journal   = {CoRR},
+  journal = {arXiv e-prints},
   volume    = {abs/1405.0312},
   year      = {2014},
   url       = {http://arxiv.org/abs/1405.0312},
@@ -56,10 +57,10 @@ editor = {H. Wallach and H. Larochelle and A. Beygelzimer and F. d\textquotesing
 pages = {8024--8035},
 year = {2019},
 publisher = {Curran Associates, Inc.},
-url = {http://papers.neurips.cc/paper/9015-pytorch-an-imperative-style-high-performance-deep-learning-library.pdf}
 }
+% url = {http://papers.neurips.cc/paper/9015-pytorch-an-imperative-style-high-performance-deep-learning-library.pdf}
 
-@misc{zou2019object,
+@misc{zou2019object_misc,
       title={Object Detection in 20 Years: A Survey}, 
       author={Z. Zou and Z. Shi and Y. Guo and J. Ye},
       year={2019},
@@ -68,10 +69,34 @@ url = {http://papers.neurips.cc/paper/9015-pytorch-an-imperative-style-high-perf
       primaryClass={cs.CV}
 }
 
+@article{zou2019object,
+      title={Object Detection in 20 Years: A Survey}, 
+      author={Z. Zou and Z. Shi and Y. Guo and J. Ye},
+      journal = {arXiv e-prints},
+      year={2019},
+      eid = {arXiv:1905.05055},
+      pages = {arXiv:1905.05055},
+      eprint={1905.05055},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV}
+}
+
+@misc{he2018mask_misc,
+      title={{Mask R-CNN}}, 
+      author={K. He and G. Gkioxari and P. Dollár and R. Girshick},
+      year={2018},
+      eprint={1703.06870},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV}
+}
+
 @misc{he2018mask,
       title={{Mask R-CNN}}, 
       author={K. He and G. Gkioxari and P. Dollár and R. Girshick},
       year={2018},
+      journal = {arXiv e-prints},
+      eid = {arXiv:1703.06870},
+      pages = {arXiv:1703.06870},
       eprint={1703.06870},
       archivePrefix={arXiv},
       primaryClass={cs.CV}
@@ -332,7 +357,7 @@ author = {J.M. Miranda and M. Romero},
 @article{Iqbal2021AutomaticFS,
   title={Automatic Fish Species Classification Using Deep Convolutional Neural Networks},
   author={M.A. Iqbal and Z. Wang and Z. Ali and S. Riaz},
-  journal={Wirel. Pers. Commun.},
+  journal={Wireless Personal Communications},
   year={2021},
   volume={116},
   pages={1043-1053}
@@ -559,7 +584,7 @@ pages = {1097–1105},
 }
 
 @MISC{biodiv_info_standards,
-   author = {Darwin Core Maintenance Group},
+   author = {{Darwin Core Maintenance Group}},
    title = {{List of Darwin Core terms}},
    howpublished = "\url{http://rs.tdwg.org/dwc/doc/list/}",
    year = {2020},
@@ -575,7 +600,13 @@ pages = {1097–1105},
   pages={62-66},
 }
 
-@article{EML_2019,title={Ecological Metadata Language version 2.2.0},url={https://eml.ecoinformatics.org},DOI={10.5063/f11834t2},publisher={KNB Data Repository},author={Jones, Matthew and O’Brien, Margaret and Mecum, Bryce and Boettiger, Carl and Schildhauer, Mark and Maier, Mitchell and Whiteaker, Timothy and Earl, Stevan and Chong, Steven},year={2019}}
+@misc{EML_2019,
+  title={Ecological Metadata Language version 2.2.0},
+  url={https://eml.ecoinformatics.org},
+  DOI={10.5063/f11834t2},
+  publisher={KNB Data Repository},
+  author={Jones, Matthew and O’Brien, Margaret and Mecum, Bryce and Boettiger, Carl and Schildhauer, Mark and Maier, Mitchell and Whiteaker, Timothy and Earl, Stevan and Chong, Steven},
+  year={2019}}
 
 @inproceedings{leipzig2021biodiversity,
   title={Biodiversity Image Quality Metadata Augments Convolutional Neural Network Classification of Fish Species},
@@ -608,7 +639,7 @@ pages = {1097–1105},
 @inproceedings{han2003automatic,
   title={Automatic document metadata extraction using support vector machines},
   author={Han, Hui and Giles, C Lee and Manavoglu, Eren and Zha, Hongyuan and Zhang, Zhenyue and Fox, Edward A},
-  booktitle={2003 Joint Conference on Digital Libraries, 2003. Proceedings.},
+  booktitle={Proc.~Joint Conference on Digital Libraries},
   pages={37--48},
   year={2003},
   organization={IEEE}
@@ -617,7 +648,7 @@ pages = {1097–1105},
 @article{rodriguez2009automatic,
   title={Automatic metadata generation using associative networks},
   author={Rodriguez, Marko A and Bollen, Johan and Sompel, Herbert Van De},
-  journal={ACM Transactions on Information Systems (TOIS)},
+  journal={ACM Transactions on Information Systems},
   volume={27},
   number={2},
   pages={1--20},
@@ -628,7 +659,7 @@ pages = {1097–1105},
 @inproceedings{cardinaels2005automating,
   title={Automating metadata generation: the simple indexing interface},
   author={Cardinaels, Kris and Meire, Michael and Duval, Erik},
-  booktitle={Proceedings of the 14th international conference on World Wide Web},
+  booktitle={Proc.~International Conference on World Wide Web},
   pages={548--556},
   year={2005}
 }
@@ -645,8 +676,8 @@ pages = {1097–1105},
 }
 @inproceedings{liddy2002automatic,
   title={Automatic metadata generation \& evaluation},
-  author={Liddy, Elizabeth D and Allen, Eileen and Harwell, Sarah and Corieri, Susan and Yilmazel, Ozgur and Ozgencil, N Ercan and Diekema, Anne and McCracken, Nancy and Silverstein, Joanne and Sutton, Stuart},
-  booktitle={Proceedings of the 25th annual international ACM SIGIR conference on Research and development in information retrieval},
+  author={Liddy, E.D. and Allen, E. and Harwell, S. and Corieri, S. and Yilmazel, O. and Ozgencil, N.E. and Diekema, A. and McCracken, N. and Silverstein, J. and Sutton, S.},
+  booktitle={Proc.~ACM SIGIR Conference on Research and Development in Information Retrieval},
   pages={401--402},
   year={2002}
 }
@@ -662,14 +693,14 @@ pages = {1097–1105},
 }
 
 @MISC{dc_terms,
-   author = {DCMI Usage Board},
+   author = {{DCMI Usage Board}},
    title = {{DCMI Metadata Terms}},
    howpublished = "\url{https://www.dublincore.org/specifications/dublin-core/dcmi-terms/}",
    year = {2020},
 }
 
 @MISC{audub_core,
-   author = {GBIF/TDWG Multimedia Resources Task Group},
+   author = {{GBIF/TDWG Multimedia Resources Task Group}},
    title = {{Audubon Core Multimedia Resources Metadata Schema}},
    howpublished = "\url{http://www.tdwg.org/standards/638}",
    year = {2013},
