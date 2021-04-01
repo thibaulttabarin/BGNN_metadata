@@ -7,15 +7,6 @@
 \usepackage{textcomp}
 \usepackage{xcolor}
 \usepackage{comment}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%% REMOVE FOLLOWING LINE BEFORE SUBMITTING %%%%%%%%%
-\setlength {\marginparwidth }{2cm}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \usepackage{todonotes}
 \usepackage{wrapfig}
 \usepackage{hyperref}
@@ -354,7 +345,7 @@ used in our training dataset.
 All of the training data was labeled by hand using \verb|makesense.ai| \cite{make-sense}
 % While the ultimate goal of the project is to generalize to images from a variety of specimen collections, we have thus far focused only
 on images from the INHS\ Fish Collection \cite{INHS}.
-Using \verb|detectron|'s default training scheme, the model was trained for \(100,000\) epochs. All instance types were included in a single object detection model. The total loss\todo{Find and specify which loss function was used} began at \(2.948\) and ended at \(0.158\) for the training data.
+Using \verb|detectron|'s default training scheme, the model was trained for \(100,000\) epochs. All instance types were included in a single object detection model. The total cross--entropy loss began at \(2.948\) and ended at \(0.158\) for the training data.
 
 \begin{comment}
 \begin{verbatim}
@@ -487,7 +478,7 @@ where \(M_{00}\) is the pixel area of the fish's blob, \(M_{10}\) is the sum of 
 \subsubsection{side}
 Determining which \verb|side| of the fish is visible is predicated on finding its eye. If an eye is found, the sign of the \(x\) component of the vector from the centroid of the fish to the centroid of the eye specifies which side is up: negative for left and positive for right. This assumes the fish was photographed vertically, which is essentially always the case for all image collections our group has worked on.
 \subsubsection{primary\_axis and clock\_value}
-The \verb|primary_axis| of a fish can be calculated by taking the covariance\todo{I could explain this in more detail if necessary. (DEB No, that's OK.} of its blob in \(x\) and \(y\), which yields its principle eigenvector.
+The \verb|primary_axis| of a fish can be calculated by taking the covariance of its blob in \(x\) and \(y\), which yields its principle eigenvector.
 The eigenvector can be directly assigned to the property. If an eye is
 present, we ensure that \verb|primary_axis| points in the direction of the
 eye in relation to the fish's centroid.
@@ -521,7 +512,7 @@ For the properties of image scale, fish length, and fish bounding boxes
 a random sample of 50 specimens from the set of \(7,244\) were analyzed by
 hand for comparison.
 
-Our automated process currently generates 7 of the 22 core metadata properties: \verb|if_fish| (\verb|has_fish|), \verb|fish_number| (\verb|fish_count|), \verb|if_ruler| (\verb|has_ruler|), \verb|specimen_angled| (\verb|clock_value|), \verb|specimen_view| (\verb|side|), \verb|brightness| (derived from \verb|background.mean| and \verb|foreground.mean|), and \verb|if_background_uniform| (\verb|background.std|). In addition, our process also calculates bounding boxes and fish lengths in centimeters.\todo{Talk more about what we can and can't verify and how.}
+Our automated process currently generates 7 of the 22 core metadata properties: \verb|if_fish| (\verb|has_fish|), \verb|fish_number| (\verb|fish_count|), \verb|if_ruler| (\verb|has_ruler|), \verb|specimen_angled| (\verb|clock_value|), \verb|specimen_view| (\verb|side|), \verb|brightness| (derived from \verb|background.mean| and \verb|foreground.mean|), and \verb|if_background_uniform| (\verb|background.std|). In addition, our process also calculates bounding boxes and fish lengths in centimeters.
 
 \subsection{Fish Detection}
 All images in the INHS dataset contain exactly one fish. For \(7,209\) of the specimen images, one fish was detected, a 99.5\% correct rate.
@@ -537,7 +528,6 @@ For 25 of the images, 2 fish were detected, 3 fish were detected for 3 images, a
 
 \subsection{Ruler Detection}
 For all but 2 of the \(7,244\) images \verb|detectron| was able to find the ruler, a nearly perfect correct rate.
-% \todo{Not sure if I can phrase it that way or not since I haven't looked at all the images to see if the ruler itself was found or something else was labeled a ruler}
 In 56 of the images, the ruler itself was found but the ``2'' and/or the ``3'' on it was not, so a scale calculation could not be performed, producing a 99.2\% success rate for
 the \verb|scale| computation.
 
@@ -561,7 +551,7 @@ Images where one of these three objects were not detected generally had some for
 in 246 of the images. Of the remaining \(6,998\) images, the correct side
 (\verb|left| or \verb|right|) was detected in all but 6 cases, producing
 a 96.5\% correct rate.
-\todo{Comment on the 6 cases. What failed?}
+
 
 There were six cases where an eye was detected but the \verb|side| value
 was wrong. Here, a spot on the wrong side of the fish was labeled as the
@@ -582,7 +572,6 @@ double-check and verify human-generated metadata.
 Clock position values were successfully generated for \(6,991\) of the images. Of those, all but 8 were within \(\pm{}1\) of the correct result,
 our definition of a correct/acceptable result. The correct rate for this
 computation is 96.4\%.
-\todo{Comment on the cases where we were unable to compute clock value. What failed?}
 
 \begin{figure}[H]
   \centering
@@ -671,11 +660,11 @@ Specifically, 22 masks and bounding boxes covered the entire fish,
   \includegraphics[width=0.49\linewidth]{images/61631_mask}
   \caption{An example of a light colored tail being missed during the pixel analysis process.}
 \end{figure}
-Masks and bounding boxes contain the head and trunk of the fish in nearly all cases, but there is still more fine tuning to be done to ensure that light fins and tails are masked consistently and accurately.\todo{Talk about ideas for fixing here, or in future work? Or both?}
+Masks and bounding boxes contain the head and trunk of the fish in nearly all cases, but there is still more fine tuning to be done to ensure that light fins and tails are masked consistently and accurately.
 
 \subsection{Scale and Length}
 Image scale and fish lengths were calculated for \(7,179\) of the images.
-\todo{What happened the excluded images?}
+For the remaining 65 images, either the fish, the ``2'' and/or the ``3'' on the ruler were not detected.
 Image scale ($\frac{\mathrm{pixels}}{\mathrm{cm}}$) and fish length were
 measured, using ImageJ,~\cite{imagejCite} in the same(?) 50 test images.
 % 50 of these images \todo{The same 50 as before?} were measured by hand to get \(\frac{\mathrm{pixels}}{\mathrm{cm}}\) and fish length in centimeters with ImageJ.~\cite{imagejCite}
@@ -766,7 +755,7 @@ Scale calculations using the ``2'' and ``3'' method are nearly identical to thos
 \subsection{Future Work}
 The most pressing next step is to refine the pixel analysis thresholding process so that the entirety of even light colored fish are marked as foreground in the mask. A deficiency of the current process is that it only operates on single channel intensity. Some of the lightest tails appear yellow in hue to the human eye and easily distinguishable, but when compressed to a single intensity value they are almost identical in value to the white background. Considering when the RGB channels of a pixel are not equal in value may be able to improve masking of such features. Another possible approach to solving this is to threshold an mask on subsets of the bounding box, as to ensure that very dark trunk pixels do not affect the thresholding of lighter regions.
 
-Our ultimate goal is to create a generalized process to work on classes of specimen images (specifically all fish images for BGNN), not only the INHS collection. To accomplish this, a much larger training dataset full of more diverse images will be required. Another requirement will be to generalize the ruler reading process beyond the INHS specific reading of digits on the ruler.\todo{Suggest way(s) to do this?}
+Our ultimate goal is to create a generalized process to work on classes of specimen images (specifically all fish images for BGNN), not only the INHS collection. To accomplish this, a much larger training dataset full of more diverse images will be required. Another requirement will be to generalize the ruler reading process beyond the INHS specific reading of digits on the ruler. \textbf{Todo}: Suggest way(s) to do this?
 % Todo: Are these worth mentioning?
 %Adding things like seahorses and eels.
 %Fitting a ``spine'' to specimen.
