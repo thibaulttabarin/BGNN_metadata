@@ -525,13 +525,14 @@ Our automated process currently generates 7 of the 22 core metadata properties: 
 
 \subsection{Fish Detection}
 All images in the INHS dataset contain exactly one fish. For \(7,209\) of the specimen images, one fish was detected, a 99.5\% correct rate.
-For 25 of the images, 2 fish were detected, 3 fish were detected for 3 images, and for 7 images no fish were found. In the case of greater than 1 fish, 9 of the 28 contained tags which overlapped the fish and were themselves labeled as a second fish. Of the remaining 17, \verb|detectron| erroneously labeled the fish as two separate fish objects, or labeled a subsection of the fish a second time.
+For 25 of the images, 2 fish were detected, 3 fish were detected for 3 images, and for 7 images no fish were found. In the case of greater than 1 fish, 9 of the 28 contained tags which overlapped the fish and were themselves labeled as a second fish. Of the remaining 17, \verb|detectron| erroneously labeled the fish as two separate fish objects, or labeled a subsection of the fish a second time. The 7 fish that were not detected were quite small, which is something that is a type of specimen that is currently lacking from the training set. See the left image in Figure~\ref{fig:fish_detect_wrong} for an example of this. Fish that were double labeled were generally quite large and/or dissimilar from the fish found in the training set, such as the right image in Figure~\ref{fig:fish_detect_wrong}.
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.49\linewidth]{images/none1}
   \includegraphics[width=0.49\linewidth]{images/double1}
-  \caption{An example of a fish that was not detected (left) and a fish that was detected twice (right).}
+  \caption{A fish that was not detected (left) and a fish that was detected twice (right).}
+  \label{fig:fish_detect_wrong}
 \end{figure}
 
 \subsection{Ruler Detection}
