@@ -131,12 +131,13 @@ The following section of the paper provides contextual background for this work,
 %question/comment - we need to keep in mind we are deal with digitized specimens, not simply digital, in other words, the artifacts themselves are digital version of physical, not like an x-ray, where the image is digital from the start.  
 A number of different metadata standards have been applied to support the description and access of digitized scientific images. The Darwin Core (DwC~\cite{biodiv_info_standards}, developed specifically to describe biological diversity data is among the most popular standard for such efforts. It is an extension of the Dublin Core's DCMI Metadata Terms \cite{dc_terms}. There is also the recent Audubon Core\cite{audub_core} supporting the discoverability, dissemination, and use of data relating to biological organisms, including digitized specimens. These descriptive standards include metadata properties for taxon, geographic location, and other important specimen content, and have been developed primarily from the eye of a human curator. In other words, their application anticipates that a curator or data entry staff will manually generate metadata, drawing from acquisition logs or original specimen labels. This task is labor intensive, and the metadata associated with each digital rendering is generally sparse and more prone to human error, placing limitations on a researcher seeking to apply machine learning to the image and the metadata for scientific research.
 
-This limitation is magnified when trying get a handle on the actual quality of the digitized specimen. Descriptive oriented standards support search and retrieval, and the biodiversity community advocated for data fitness standards \cite{chapman2020developing}. Even so, metadata properties used to record image quality is severely limited and generally missing. This point is addressed in detail in \cite{leipzig2021biodiversity}, and serves to justify a new initiative at Tulane University, where staff are manually capturing content for 22 metadata properties, to get a handle on the quality of digitized specimens drawn from the INHS collection and iDigBio. This current process is costly in terms of labor and time, and underscores the need to explore automatic metadata generation [*extraction].
+This limitation is magnified when trying to assess the actual quality of the digitized specimen. Descriptive oriented standards support search and retrieval, and the biodiversity community has advocated for data fitness standards \cite{chapman2020developing}. Even so, metadata properties used to record image quality is severely limited and generally missing. This point is addressed in detail in \cite{leipzig2021biodiversity}, and serves to justify a new initiative at Tulane University, where staff are manually capturing content for 22 metadata properties, to characterize the quality of digitized specimens drawn from the INHS collection and iDigBio. This current process is costly in terms of labor and time, error-prone, and underscores the need to
+explore automatic metadata generation methods.
 
 %Fish species dataset in Pakistan Shah 2019 \cite{Shah2019FishPakFS},
 
 \subsection{Automatic Metadata Generation}
-Technical metadata, such as camera settings and temporal information (date and time) are automatically generated during a digitization sequence, following standards such as XX. Some of this metadata may be useful in for selecting a machine learning sample. A researcher may desire images captured chiefly with a certain aperture setting. Even so, the majority of automatically captured technical metadata associated with digitized specimens is insufficient for computational research, leaving researchers to reply on manually generated descriptive metadata, which itself is sparse.
+Technical metadata, such as camera settings and temporal information (date and time) are automatically generated during a digitization sequence, following standards such as XX. Some of this metadata may be useful when selecting a machine learning sample. A researcher may desire images captured chiefly with a certain aperture setting. Even so, the majority of automatically captured technical metadata associated with digitized specimens is insufficient for computational research, leaving researchers to rely on manually generated descriptive metadata, which itself is sparse.
 
 Automatic metadata generation of descriptive bibliographic data has been a research focus for close to 20 years \cite{liddy2002automatic,greenberg2004metadata,cardinaels2005automating}. Researchers have applied support vector machine (SVM) approaches \cite{han2003automatic}, and associated networks to address sparse and incomplete metadata \cite{rodriguez2009automatic}, and various successes are integrated into day-to-day workflows. 
 
@@ -158,8 +159,7 @@ Hu et al.~\cite{HuJing2012Fscb} presented a method of classifying species
 of fish based on color and texture features and a multi-class support
 vector machine (MSVM) \cite{Vapnik1999AOS}.
 Li and Hong \cite{Li2014IdentificationOF} computed eleven shape and color
-features from fish images that were distilled down to four, using Principal
-Component Analysis, and derived a linear model
+features from fish images and derived a linear model
 that could discriminate between four different fishes.
 %  Kinda unimpressive. Let's leave out.
 % Saitoh \cite{Saitoh2015ImagebasedFR}
@@ -210,9 +210,8 @@ with 90\% accuracy.
 Especially in industrial settings it is necessary to automatically
 detect the orientation, length and weight of fish during handling
 and processing.
-In some instances it is necessary to computationally straighten the
-fish in the images \cite{MuozBenavent2018EnhancedFB} before further
-processing can be attempted.
+In some instances fish in the images need to be computationally straightened
+before further processing can be attempted \cite{MuozBenavent2018EnhancedFB}.
 Balaban et al.~\cite{Balaban2010UsingIA} demonstrated that image analysis
 and data fitting may be used to predict the weight of salmons with high
 accuracy.
@@ -241,6 +240,20 @@ freshness categories with 93\% accuracy.
 % In the current research, the potential of a novel method based on the artificial neural network was investigated to diagnose the freshness of common carp (Cyprinus carpio) during ice storage. Fish as an aquaculture product has high nutrients and low-fat content. So, people have consumed it as a safe and high-value foodstuff in their daily diet. Investigation of fish freshness is proposed as a significant issue in the aquaculture industry since fish spoils rapidly. The applied system of this study is comprised of the following steps: First, images of samples were captured and the pre-processing operation was done on the images. Then, particular channels including R, G, B, H, S, I, L*, a*, and b* were computed. Next, feature extraction was performed to obtain 6 types of texture features from each channel. Afterward, the hybrid Artificial Bee Colony-Artificial Neural Network (ABC-ANN) algorithm was applied to select the best features. Finally, the Support Vector Machine (SVM), K-Nearest Neighbor (K-NN) and Artificial Neural Network (ANN) algorithms as the most common methods were used to classify fish images. The best performance of the K-NN classifier was calculated in the k = 8 neighborhood size with the accuracy of 90.48. The best kernel function for the SVM algorithm was polynomial with C, sigma, and accuracy of 1, 2 and 91.52 percent, respectively. In this system, the input layer has consisted of 22 neurons based on the feature selection operation and 4 classes including most fresh, fresh, fairly fresh and spoiled have been used as the number of output layer. At the end, the best results of the MLP networks were achieved by LM learning algorithm and 6 neurons in the hidden layer with the 22–10–4 topology and accuracy of 93.01 percent.
 % The achieved results demonstrate the high performance of the ANN classifier for evaluation of common carp freshness during ice storage as a rapid, accurate, non-destructive, real-time and automated method. It shows the potential of computer vision method in combination with artificial neural networks as an intelligent technique for evaluation of fish freshness.
 A similar approach was developed by Lalabadi et al.~\cite{Lalabadi2020FishFC}.
+
+Our work stands apart from previous work in that we are
+addressing a different need. Lack of metadata is impeding scientific studies.
+Our focus and motivation are different.
+Effectively doing the computational pre-processing
+that will enable further downstream analyses.
+
+We are applying a variety of machine learning, image processing and
+image informatics techniques to extract critical properties from the
+images.  The properties will allow follow-on studies to identify
+the specific images needed for a particular analysis, ensuring that
+the specimen images meet both scientific and technical requirements.
+
+
 % Developing new techniques to determine fish freshness and quality can enhance nutritional value of the overall household food basket. In this research, digital image analysis was utilized to assess the freshness of rainbow trout fish by tracing the color attributes of its eyes and gills. The image data were collected from left and right eyes and gills in a 10-day ice-storage duration, and color components were extracted in RGB, HSV, and L*a*b* color spaces. Analysis of variance revealed that the RGB components of both eyes and gills had a significant change towards getting brighter during the ice-storage. Feature extraction was fulfilled from the color spaces, and then artificial neural networks (ANNs) and support vector machines (SVMs) were applied for classification of the ice-storage durations. The overall accuracies of the developed models demonstrated that the ANN somewhat outperformed the SVM for both the extracted features from the eyes and gills. Moreover, the gills’ features could describe the variance in the storage durations more efficiently than those extracted from the eyes. Finally, it was concluded that the applied colorimetric system along with the developing models could be employed as a successful non-destructive approach for evaluation of fish freshness.
 
 \begin{comment}
