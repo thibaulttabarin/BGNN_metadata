@@ -64,7 +64,7 @@ Philadelphia, PA\hspace{3mm}USA\\
 %abstract can be shortened a good bit.
 %can offer an alternative manana..
 \begin{abstract}
-Metadata is a key data source particularly for researchers seeking use [apply] machine learning to the vast collections of digitized specimens. Unfortunately, the metadata available is often sparse and, at times, erroneous; and it is prohibitively expensive to address these limitations through traditional, manual [*human] means. This paper reports on a research applying machine-driven [*automatic] approaches to analyze digitized fish images and extract a variety of important features. The digitized fish specimen are being analyzed as part of Biology Guided Neural Networks (BGNN) initiative, where researchers are developing a novel class of artificial neural networks using phylogenies and anatomy ontologies. The paper reports on research combining machine  learning  and  image  informatics tools and techniques. A sample 7247 images from the Illionois Natural History Survey (INHS) were examined via automatic processes [*<--needs help]. Results show we can  accurately determine metadata, such as, fish quantity, fish orientation, image scaling based on ruler identification and measurement, and general image quality metrics. Results also indicate that automatic approaches "can outperform humans" [*and/or "expedite"] the creation of metadata that's critical to leveraging digitized specimens for machine learning. The sections that follow cover background context, reviews the research design, reports results Next,  the  results  are presented, followed by a discussion. 
+Metadata is a key data source particularly for researchers seeking use [apply] machine learning to the vast collections of digitized specimens. Unfortunately, the metadata available is often sparse and, at times, erroneous; and it is prohibitively expensive to address these limitations through traditional, manual [*human] means. This paper reports on a research applying machine-driven [*automatic] approaches to analyze digitized fish images and extract a variety of important features. The digitized fish specimen are being analyzed as part of Biology Guided Neural Networks (BGNN) initiative, where researchers are developing a novel class of artificial neural networks using phylogenies and anatomy ontologies. The paper reports on research combining machine  learning  and  image  informatics tools and techniques. A sample 7244 images from the Illinois Natural History Survey (INHS) were examined via automatic processes [*<--needs help]. Results show we can  accurately extract metadata, such as, fish quantity, fish orientation, image scaling based on ruler identification and measurement, and general image quality metrics. Results also indicate that automatic approaches "can outperform humans" [*and/or "expedite"] the creation of metadata that's critical to leveraging digitized specimens for machine learning. The sections that follow cover background context, reviews the research design, reports results Next,  the  results  are presented, followed by a discussion. 
 %items in square brackets [*xxx] are just other suggested words, e.g., select one or the other, or ....
 %let's give a few data results, e.g., percentages, numbers..what will be emphasize in conclusion, key findings.
 %abstract could say something about comparison to human results.
@@ -120,7 +120,7 @@ Using a combination of machine learning and image informatics tools and techniqu
 image scaling based on ruler identification and measurement. Image scaling
 allows us to compute quantitative features about the fish specimens, such
 as their length and area.  In order to test and validate our methods, they
-were  applied to a set of 7,247
+were  applied to a set of \(7,244\)
 images drawn from the Illinois Natural History Survey (INHS) Collection.
 Figure \ref{fig:INHS_examples} presents three typical images used in our
 study.
@@ -731,7 +731,7 @@ seen in Figure \ref{fig:missedTail}.
   \caption{An example of a light colored tail being missed during the pixel analysis process.}
   \label{fig:missedTail}
 \end{figure}
-Masks and bounding boxes contain the head and trunk of the fish in nearly all cases, but further refinement of our algoriths will be needed
+Masks and bounding boxes contain the head and trunk of the fish in nearly all cases, but further refinement of our algorithms will be needed
 to ensure that light fins and tails are masked consistently and accurately.
 
 \subsection{Scale and Length}
