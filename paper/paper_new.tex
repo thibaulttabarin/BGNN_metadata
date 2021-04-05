@@ -279,10 +279,22 @@ Williams 2020 \cite{Williams:2020:UIF})
 
 \section{Goals and Objectives}
 
-Digitized specimen accessible in open access repositories provide a rich, extensive data source machine-learning and scientific discovery, however, these resources remain largely untapped due image quality and metadata limitations. The overall goal is addressing this need by combining machine-learning and image informatics techniques. The overall goal of our  
-
-
-
+Digitized specimen accessible in open access repositories provide a rich, extensive data source machine-learning and scientific discovery, however, these resources remain largely untapped due image quality and metadata limitations. The overall goal is addressing this need by combining machine-learning and image informatics techniques. The overall goal of our research is to offer a machine-driven [*novel/innovative?? blah...] approach to current manual metadata generation that is prohibitively costly in both terms of labor and time, and to further offer a [*novel] approach to computing higher-level metadata that supports scientific inquiry. Three key objectives are to:
+1) Test [*Explore, Demonstrate the us of] Facebook's AI Research's dectectron tool
+Specific aims are to use dectectron to identify five object classes: fish, fish eyes, rulers, and the numbers 2 and 3 on rulers, as shown in Figure 2.
+2) Pursue [*Investigate] image processing at the pixel level.
+Pilot testing found the dectectron bounding boxes could be more tightly enclosed the detected objects. We will see if additional masking background as part of the fish, or the
+bounding box may clip away part(s) of the fish with pixel analysis methods commonly
+found in image informatics. Specific aim [*objectives] of our research are to:
+%not sure we have to list all the details, but something like the below, with the 4 aspects of pixel analysis we tested/investigate/experimented with 
+1. Identify the appropriate threshold. We will compute optimal scaling between [*or is it Otsu thresholding] to identify an improved threshold value. [Or we will determine is we can computed as the halfway point between the Otsu threshold value and the mean of the background intensities.]
+2. Consolidate the foreground
+3. Adjusting the bounding box. [We will use computational methods for masking [calcuate a mask?] to determine if bounding box needs to be shrunk or expanded]
+% Jane confused here, if this belongs here, or below
+4. Developing a fallback approach for when flood fill operations behave unexpectedly the image is too washed out.
+3) Compute [Test our ability to calculate] the following higher-level metadata properties: 
+1) contrast (intensities of
+the foreground and background, 2) centroid and eye center, and if eye is found, the fish 3) side 4) primary axis and clock value, finally the 5) scale and length.
 %Following is original Goals/objectives text: The amount of data is immense, with image collections containing 10,000's of entries. These discoveries will only be possible with computational techniques that can process this vast amount of data.
 
 %These image-based computational techniques are hampered by both poor image quality and the lack of high-quality and pertinent metadata associated with collections.
@@ -293,8 +305,7 @@ Digitized specimen accessible in open access repositories provide a rich, extens
 
 %In order to address the need for fish specimen image metadata that can support scientific investigations we have begun the deployment of both off-the-shelf and custom-written software that automatically generates a variety of metadata from a publicly-available biological image repository.  The types of metadata being produced are related to image quality, content and scale, and should provide the information necessary for advanced quantitative studies of the digitized specimens.
 
-%The automated metadata generation methods for our project were developed to work on a specific set of images, the INHS\ Fish Collection~\cite{INHS}.  Most of these images have been configured, produced and acquired with a standard procedure.  The images used for our study contain one fish placed on a bright, white background and contain an information tag and the same ruler.  See Figure \ref{fig:teaser} for two example images from the collection. While training and focusing our system on images with very similar compositions and visual properties may limit its immediate applicability, our efforts do demonstrate the potential that machine learning and image informatics techniques have for automatically generating metadata for biological specimen image collections.
-
+The automated metadata generation methods for our project were developed to work on a specific set of images, the INHS\ Fish Collection~\cite{INHS}.  Most of these images have been configured, produced and acquired with a standard procedure.  The images used for our study contain one fish placed on a bright, white background and contain an information tag and the same ruler.  See Figure \ref{fig:teaser} for two example images from the collection. While training and focusing our system on images with very similar compositions and visual properties may limit its immediate applicability, our efforts do demonstrate the potential that machine learning and image informatics techniques have for automatically generating metadata for biological specimen image collections.
 
 \section{Methods}
 Our process for metadata generation can be broken into three steps: 1) object detection with Facebook's Detectron2 machine learning library (subsequently referred to as \verb|detectron|), 2) image processing at the pixel level, and 3) calculations on the results of the previous steps to determine higher level metadata properties.
@@ -344,7 +355,7 @@ used in our training dataset.
 All of the training data was labeled by hand using \verb|makesense.ai| \cite{make-sense}
 % While the ultimate goal of the project is to generalize to images from a variety of specimen collections, we have thus far focused only
 on images from the INHS\ Fish Collection \cite{INHS}.
-Using \verb|detectron|'s default training scheme, the model was trained for \(100,000\) epochs. All instance types were included in a single object detection model. The total cross--entropy loss began at \(2.948\) and ended at \(0.158\) for the training data.
+Using \verb|detectron|'s default training scheme, the model was trained for \(100,000\) epochs. All instance types were included in a single object detection model. The total cross-entropy loss began at \(2.948\) and ended at \(0.158\) for the training data.
 
 \begin{comment}
 \begin{verbatim}
@@ -383,7 +394,7 @@ where the most accurate segmentation is desired.
 The mask may include additional background as part of the fish, or the
 bounding box may clip away part(s) of the fish. To solve these
 shortcomings, we utilize pixel analysis methods commonly found in image
-informatics to produce more accurate objects masks and bounding boxes.
+informatics to produce more accurate object masks and bounding boxes.
 
 \begin{table*}[t]
     \centering
@@ -452,10 +463,10 @@ While thresholding has the potential to generate better masks than a neural netw
 To accomplish this, we apply an iterative process of flood filling from all the foreground pixels in the image until a blob is generated that is large enough to constitute the fish. This is another metaparameter, but greater than 10\% of the current bounding box has masked the specimen in all observed cases. Once the fish's blob is found, noise then needs removed. This is done by flood filling from each of the corner of the bounding box where the specimen is not present (all four corners in the overwhelming majority of cases), then taking the inverse of the result. The fish mask is excluded from these corner flood fills, so this process removes all noise from both the background and foreground of the image leaving only a close mask over the fish itself.
 
 \subsubsection{Adjusting the Bounding Box}
-With an accurate mask generated, it is then necessary to check whether the bounding box needs expanded or shrunk along any edges. Expansion is done first, buy checking whether any edge intersects with any of the foreground mask pixels. If one does, it is expanded out by 1 pixel. If any edges are expanded, the whole the process, masking and expansion process is repeated to account for any changes in average intensities. Once no edges contain foreground pixels, the mask is the shrunk. This process is more efficient as all that is required is to shrink each edge by one up until the point they contain one or more foreground pixels. Once the shrinkage step is accomplished, the final mask and bounding box have been generated.
+With an accurate mask generated, it is then necessary to check whether the bounding box needs expanded or shrunk along any edges. Expansion is done first, by checking whether any edge intersects with any of the foreground mask pixels. If one does, it is expanded out by 1 pixel. If any edges are expanded, the whole process of masking and expansion process is repeated to account for any changes in average intensities. Once no edges contain foreground pixels, the mask is then shrunk. This process is more efficient as all that is required is to shrink each edge by one up until the point they contain one or more foreground pixels. Once the shrinkage step is accomplished, the final mask and bounding box have been generated.
 
 \subsubsection{Fallback} The pixel analysis process occasionally fails,
-e.g.~ flood-filling does not produce a large enough blob or
+e.g.\ when flood-filling does not produce a large enough blob or
 the bounding box adjustment does not terminate.
 This can occur if certain flood fill operations behave unexpectedly, or if the image is too washed out or otherwise atypical for the thresholding process to work correctly. In the event this happens, the original mask and bounding box generated by \verb|detectron| is used for metadata generation.
 
