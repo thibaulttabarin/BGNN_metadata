@@ -280,21 +280,27 @@ Williams 2020 \cite{Williams:2020:UIF})
 \section{Goals and Objectives}
 
 Digitized specimen accessible in open access repositories provide a rich, extensive data source machine-learning and scientific discovery, however, these resources remain largely untapped due image quality and metadata limitations. The overall goal is addressing this need by combining machine-learning and image informatics techniques. The overall goal of our research is to offer a machine-driven [*novel/innovative?? blah...] approach to current manual metadata generation that is prohibitively costly in both terms of labor and time, and to further offer a [*novel] approach to computing higher-level metadata that supports scientific inquiry. Three key objectives are to:
-1) Test [*Explore, Demonstrate the us of] Facebook's AI Research's dectectron tool
-Specific aims are to use dectectron to identify five object classes: fish, fish eyes, rulers, and the numbers 2 and 3 on rulers, as shown in Figure 2.
-2) Pursue [*Investigate] image processing at the pixel level.
+
+GOAL 1) Test [*Explore, Demonstrate the us of] Facebook's AI Research's dectectron tool
+Specific aims are to use dectectron to identify five object classes: fish, fish eyes, rulers, and the numbers 2 and 3 on rulers, as shown in Figure 
+
+GOAL 2) Pursue [*Investigate] image processing at the pixel level.
 Pilot testing found the dectectron bounding boxes could be more tightly enclosed the detected objects. We will see if additional masking background as part of the fish, or the
 bounding box may clip away part(s) of the fish with pixel analysis methods commonly
 found in image informatics. Specific aim [*objectives] of our research are to:
-%not sure we have to list all the details, but something like the below, with the 4 aspects of pixel analysis we tested/investigate/experimented with 
+%not sure we have to list all the details, but something like the below, with the 4 aspects of pixel analysis we tested/investigate/experimented with
+
 1. Identify the appropriate threshold. We will compute optimal scaling between [*or is it Otsu thresholding] to identify an improved threshold value. [Or we will determine is we can computed as the halfway point between the Otsu threshold value and the mean of the background intensities.]
+
 2. Consolidate the foreground
+
 3. Adjusting the bounding box. [We will use computational methods for masking [calcuate a mask?] to determine if bounding box needs to be shrunk or expanded]
 % Jane confused here, if this belongs here, or below
+
 4. Developing a fallback approach for when flood fill operations behave unexpectedly the image is too washed out.
-3) Compute [Test our ability to calculate] the following higher-level metadata properties: 
-1) contrast (intensities of
-the foreground and background, 2) centroid and eye center, and if eye is found, the fish 3) side 4) primary axis and clock value, finally the 5) scale and length.
+
+GOAL 3) Compute [*Test our ability to calculate] the following set of higher-level metadata properties: 1) contrast (intensities of the foreground and background, 2) centroid and eye center, and if eye is found, the fish 3) side 4) primary axis and clock value, finally the 5) scale and length.
+
 %Following is original Goals/objectives text: The amount of data is immense, with image collections containing 10,000's of entries. These discoveries will only be possible with computational techniques that can process this vast amount of data.
 
 %These image-based computational techniques are hampered by both poor image quality and the lack of high-quality and pertinent metadata associated with collections.
@@ -327,7 +333,7 @@ images. Object detection has been a broadly active field of study in recent
 years \cite{zou2019object}, and has resulted in a number of well-tested, purpose-built architectures. We elected to use Facebook AI Research's (FAIR) \verb|detectron| tool \cite{wu2019detectron2}, and specifically its implementation of the Mask R-CNN architecture \cite{he2018mask}, for object detection in our project.
 \verb|detectron| is built on \verb|pytorch|~\cite{NEURIPS2019_9015} and provides a relatively straightforward method for training on COCO~\cite{DBLP:journals/corr/LinMBHPRDZ14} format datasets. It is able to handle an arbitrary number of object classes, and can classify an arbitrary number of object within a given image. We chose \verb|detectron| for its relative ease of use compared to lower level libraries, and its implementations of powerful architectures developed by FAIR.
 For our project, we use it to identify five object classes: fish, fish eyes, rulers, and the numbers 2 and 3 on rulers,
-as shown in Figure \ref{fig:teaser}.
+as shown in Figure \ref{fig:teaser}. Objects with a 30\% confidence score or higher are maintained for analysis.
 
 % Not sure wrapping this is really getting us much after the 2 column switch
 
@@ -455,7 +461,7 @@ point between the Otsu threshold value and the
 mean of the background intensities.
 This adjusted threshold value
 % by 50\% of the difference between the mean of the background and the original threshold value, which 
-captures most of fish's fins in most cases, without also masking parts of the background.
+struck a fairly optimal balance between capturing most of fish's fins in most cases, without also masking parts of the background.
 
 \subsubsection{Consolidating the Foreground}
 While thresholding has the potential to generate better masks than a neural network (when provided an initial approximate bounding box), it also introduces considerable noise. Single or small groups of errant pixels can be marked as foreground depending on the consistency of the background, and interior pixels of the fish (especially around the fins) can be marked as background. To be useful for generating an accurate bounding box and for subsequent computational analysis, the mask must consist of one single ``blob'' over the fish the contains no holes, and no other pixels disconnected from this blob can be marked as foreground.
@@ -492,7 +498,7 @@ as well. This can be done via
 \end{equation}
 where \(M_{00}\) is the pixel area of the fish's blob, \(M_{10}\) is the sum of all the \(x\) values of blob pixels, and \(M_{01}\) is the sum of all the \(y\) values of blob pixels.
 \subsubsection{side}
-Determining which \verb|side| of the fish is visible is predicated on finding its eye. If an eye is found, the sign of the \(x\) component of the vector from the centroid of the fish to the centroid of the eye specifies which side is up: negative for left and positive for right. This assumes the fish was photographed vertically, which is essentially always the case for all image collections our group has worked on.
+Determining which \verb|side| of the fish is visible is predicated on finding its eye. If an eye is found, the sign of the \(x\) component of the vector from the centroid of the fish to the centroid of the eye specifies which side is up: negative for left and positive for right. This assumes the fish was photographed vertically (i.e.\ dorsal fin on top), which is essentially always the case for all image collections our group has worked on.
 \subsubsection{primary\_axis and clock\_value}
 The \verb|primary_axis| of a fish can be calculated by taking the covariance of its blob in \(x\) and \(y\), which yields its principle eigenvector.
 The eigenvector can be directly assigned to the property. If an eye is
@@ -566,7 +572,7 @@ Figure~\ref{fig:fish_detect_wrong}.
 \subsection{Ruler Detection}
 For all but 2 of the \(7,244\) images \verb|detectron| was able to find the ruler, a nearly perfect correct rate.
 In 56 of the images, the ruler itself was found, but the numbers ``2''
-and/or the ``3'' on the ruler were not. Therefore a scale calculation could
+and/or ``3'' on the ruler were not. Therefore, a scale calculation could
 not be performed, producing a 99.2\% success rate for
 the \verb|scale| computation.
 
@@ -591,14 +597,14 @@ Some of the rulers for which ``2'' and/or ``3'' were not detected were particula
 
 \subsection{Side Detection}
 \verb|detectron| was unable to find a fish eye
-in 246 of the images. Of the remaining \(6,998\) images, the correct side
+in 246 of the images. These eyes were generally extremely dark, small, or looked nothing like those found in the training set. Of the remaining \(6,998\) images, the correct side
 (\verb|left| or \verb|right|) was detected in all but 6 cases, producing
 a 96.5\% correct rate.
 
 % There were six cases where an eye was detected but the \verb|side| value
 % was wrong.
 For these 6 cases, a spot on the wrong side of the fish was labeled as the
-most likely eye within the bounding box of the fish, i.e.~eye detection 
+most likely eye within the bounding box of the fish, i.e.\ eye detection 
 was incorrect. Figure \ref{fig:wrong_eye} presents one such example.
 There were an additional 17 images for which the automated process generated a result that did not match the manually created data. For these remaining cases the manual data was incorrect, giving the automated system an error rate \(2.8\) times lower than the human error rate.
 This result highlights the additional utility of automated methods to
@@ -678,7 +684,7 @@ The left image has a mean intensity of 103 (low), the middle image 144
 \subsection{Brightness}
 Specimen brightness is one of the 22 hand-recorded metadata properties. It is encoded as \verb|dark|, \verb|normal| or \verb|bright|. These values
 correspond to the mean foreground intensity computed by the automated system.
-The mean and standard deviation of the mean foreground intensities were
+The mean and standard deviation of the foreground intensities were
 computed for the images in the three human-specified classes.
 Table~\ref{tab:bright} contains the resulting values and shows that
 automated intensities values provide objective measures that may be used to break images into groups that correlate with human-defined brightness
@@ -817,11 +823,13 @@ Scale calculations using the ``2'' and ``3'' method are nearly identical to thos
 %\textit{Like I said in slack, the standard deviation of background does not currently correlate with the is\_background\_uniform property. Brightness results are are in previous section. Need to think about what is worth noting since it's a fairly trivial result.}
 
 \section{Conclusions}
-\textbf{Todo}
-\subsection{Future Work}
-The most pressing next step is to refine the pixel analysis thresholding process so that the entirety of even light colored fish are marked as foreground in the mask. A deficiency of the current process is that it only operates on single channel intensity. Some of the lightest tails appear yellow in hue to the human eye and easily distinguishable, but when compressed to a single intensity value they are almost identical in value to the white background. Considering when the RGB channels of a pixel are not equal in value may be able to improve masking of such features. Another possible approach to solving this is to threshold an mask on subsets of the bounding box, as to ensure that very dark trunk pixels do not affect the thresholding of lighter regions.
+The BGNN project demonstrates a clear need for improved metadata for specimen image collections. Much effort, time and money have been put into photographing and digitizing physical specimen, but without detailed and complete metadata properties the utility of these repositories for advanced computation analysis and machine learning is limited. Since it is prohibitively time intensive to generate all the pertinent properties by hand, automated techniques are needed to generate this missing metadata at scale.
 
-Our ultimate goal is to create a generalized process to work on classes of specimen images (specifically all fish images for BGNN), not only the INHS collection. To accomplish this, a much larger training dataset full of more diverse images will be required. Another requirement will be to generalize the ruler reading process beyond the INHS specific reading of digits on the ruler. \textbf{Todo}: Suggest way(s) to do this?
+In this paper we presented such a metadata generation program. It produces 6 of the 22 core BGNN metadata properties~\cite{leipzig2021biodiversity}, as well as image contrast, bounding boxes and scale and length information. Testing this program on \(7,244\) images from the INHS dataset~\cite{INHS}, we see that the vast majority of the resulting metadata is correct within a tolerance of a few percentage points, and in some cases contains fewer mistakes than the manually generated validation metadata. Through further refinement and generalizing beyond only INHS images, we aim to create a tool that can be distributed to specimen image collection curators to correct the metadata sparsity that precipitated this work.
+\subsection{Future Work}
+The most pressing next step is to refine the pixel analysis thresholding process so that the entirety of even light colored fish are marked as foreground in the mask. A deficiency of the current process is that it only operates on single channel intensity. Some of the lightest tails appear yellow in hue to the human eye and easily distinguishable, but when compressed to a single intensity value they are almost identical in value to the white background. Considering when the RGB channels of a pixel are not equal in value may be able to improve masking of such features. Another possible approach to solving this is to threshold and mask on subsets of the bounding box, as to ensure that very dark trunk pixels do not affect the thresholding of lighter regions.
+
+Our ultimate goal is to create a generalized process to work on classes of specimen images (specifically all fish images for BGNN), not only the INHS collection. To accomplish this, a much larger training dataset full of more diverse images will be required. Another requirement will be to generalize the ruler reading process beyond the INHS specific reading of digits on the ruler, which will likely involve an automated method of reading ruler ticks instead of digits.
 % Todo: Are these worth mentioning?
 %Adding things like seahorses and eels.
 %Fitting a ``spine'' to specimen.
