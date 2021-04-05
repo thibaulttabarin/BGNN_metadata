@@ -63,11 +63,12 @@ Philadelphia, PA\hspace{3mm}USA\\
 %can offer an alternative manana..
 \begin{abstract}
 Metadata is a key data source particularly for researchers seeking use apply achine learning to the vast collections of digitized specimens. Unfortunately, the metadata available is often sparse and, at times, erroneous; and it is prohibitively expensive to address these limitations through traditional, manual means. This paper reports on a research applying machine-driven approaches to analyze digitized fish images and extract a variety of important features. The digitized fish specimen are being analyzed as part of Biology Guided Neural Networks (BGNN) initiative, where researchers are developing a novel class of artificial neural networks using phylogenies and anatomy ontologies. The automatically generated metadata is crucial for identifying high-quality images for the neural network to support predictive analyses.%predictive analytics?
-Research combining machine learning  and  image  informatics techniques allow us to rapidly enrich existing metadata associated for a sample of 7244 images from the Illinois Natural History Survey (INHS). The sample also includes 22 manually generated image-quality metadata properties, aiding our comparsion.  Results show we can  accurately generate metadata for six key %6? 
+Research combining machine learning  and  image  informatics techniques allow us to rapidly enrich existing metadata associated for a sample of 7244 images from the Illinois Natural History Survey (INHS). The sample also includes 22 manually generated image-quality metadata properties, aiding our comparison.  Results show we can  accurately generate metadata for six key %6? 
 metadata properties: fish quantity, fish orientation, image scaling based on ruler identification and measurement, and general image quality metrics. Results also show can also x, y, z.
 %to confirm list of six properties.
-%x, y, z = any other key results. jg will add from results sectin, unless someone else does first. 
-The automatic process out-performs humans in terms and cost, and provides a novel solution for leveraging digitized specimens for machine learning. This research has implications for harnessing the tens of thousands of digitized specimens stored in globally, accessible open repositories.
+%x, y, z = any other key results. jg will add from results section, unless someone else does first. 
+The automatic process out-performs humans in terms time and labor cost, and provides a novel solution for leveraging digitized specimens for machine learning. This research has implications for harnessing the tens of thousands of digitized specimens stored in open access repositories found wold-wide.
+%world wide [*across the globe] or we may not even need this part as open access is global access
 
 % OLD text - Over the last several decades advances in computing, imaging, and cyberinfrastructure have had a major impact on scientific research and discovery. One area of considerable activity is the digitization of the biological specimens that have been acquired worldwide by museums and other research institutions, undertakings that have produced large image collections.The metadata that is vital for subsequent machine learning, analysis and scientific discovery based on these specimen image repositories is often unavailable, sparse or incorrect. As a step towards improving metadata in specimen research image collections, our team is developing methods for automatically analyzing fish images to extract a variety of important features. These fish specimens are being studied for a larger project entitled Biology Guided Neural Networks (BGNN), which is developing a novel class of artificial neural networks that can exploit the machine readable and predictive knowledge about biology that is available in specimen images, phylogenies and anatomy ontologies. Using a combination of machine learning and image informatics tools and techniques, we can accurately determine metadata such as fish quantity and location within images, fish orientation and other quantitative fish features, image scaling based on ruler identification and measurement, and general image quality metrics for a substantial number of the images being used in the BGNN project.Our goal is to develop image metadata generation methods that both support the research underway within the BGNN project, and provide a framework for future technology developments that can be deployed by repository curators to improve and bolster the metadata they provide with their specimen images. A longer term goal is to extend the image analysis methods for computing quantitative features in support of specific biological investigations.
 \end{abstract}
@@ -78,14 +79,13 @@ bioinformatics, metadata, image analysis, applied machine learning
 
 \section{Introduction}
 % Moving teaser since this template doesn't actually ask for one
-Over the last several decades advances in computing, imaging, and cyberinfrastructure have supported the growth of digital natural history collections, many of which have specimen images.~\cite{beaman2012mass} Additionally, initiatives, such as National Science Foundation’s Advancing Digitization of Biodiversity Collections (ADBC) program, which ran for nearly a decade, have supported the digitization and curation of tens of thousands of biological specimens.~\cite{page2015digitization} These digital specimen accessible through global, open access repositories; they enable researchers, educators, students, and the general public to examine and compare in ways previously unimaginable. Significant challenges surface, however, when researchers seek to apply computational methods to these data items, due to both image quality and metadata issues.
-%{jane}should we try to insert machine learning here, last sentence, or computation methods ok?
+Over the last several decades advances in computing, imaging, and cyberinfrastructure have supported the growth of digital natural history collections, many of which have specimen images.~\cite{beaman2012mass} Additionally, initiatives, such as National Science Foundation’s Advancing Digitization of Biodiversity Collections (ADBC) program, which ran for nearly a decade, have supported the digitization and curation of tens of thousands of biological specimens.~\cite{page2015digitization} These digitized specimen are generally accessible through global, open access repositories supporting digital library services, such as browsing, search and retrieval, and preservation. These digitized renderings of these rich collections permit researchers, educators, students, and the general public to examine collections on a previously unattainable scale. Moreover, the digitized instantiations present a pathway for applying machine learning and making new scientific discoveries. 
 
 Unfortunately, potential scientific advances are hindered by image quality
 problems and the lack of accurate and pertinent metadata
 associated with the image collections.
-Poor quality images, e.g. with low contrast, inadequate lighting,
-out-of-focus or cluttered visual arrangements, provide inadequate input
+Poor quality images (e.g. low contrast, inadequate lighting,
+out-of-focus or cluttered visual arrangements) provide inadequate input
 for automated
 image analysis and machine learning algorithms and lead to inferior
 computational results.
@@ -95,9 +95,10 @@ requiring the ability to identify and measure rulers in the images.
 Many specimen collections do include Darwin Core metadata,~\cite{biodiv_info_standards} detailing
 specimen taxon, geographic location, and several other descriptive aspects.
 Additionally, some digitization efforts record technical metadata, detailing imaging specifications. While these types of metadata are helpful for a
-human examining several images at a time, they are insufficient for researchers seeking to apply computational methods to examine thousands of images
-to determine if, for instance, a specific fish grows to different lengths
-in different habitats.
+human examining several images at a time, they are insufficient for researchers seeking to apply computational methods %machine learning? or okay here
+to examine thousands of images
+to determine if, for example, a specific fish grows to different lengths
+in different habitats, or the impact of temporal factors the size of a dorsal fin.
 \begin{figure*}
   \centering
   \includegraphics[width=.31\linewidth]{images/INHS_FISH_100314}
@@ -109,12 +110,16 @@ in different habitats.
   \label{fig:INHS_examples}
 \end{figure*}
 
-Since the digital collections may each contain tens of thousands of images, producing metadata for each image via a manual process is prohibitively labor-intensive and infeasible. Methods for automatically computing metadata from images are therefore needed to fully exploit biological image repositories for scientific discovery.
+Since the digital collections may each contain tens of thousands of images, manually producing additional image quality metadata for each digitized specimen is both labor-and time intensive and prohibitively expensive. Methods for automatically computing metadata are therefore needed to fully exploit biological image repositories for scientific discovery.
+%we are both extracting and calculating. Just to double check then, our definition/understanding of computing here includes both of these, or should we focus on extraction, with the idea that calculating is the extra novel thing added, the application of math-the groovy stuff you guys added.  
 As a step towards improving metadata in specimen research image collections, members of Drexel University's Metadata Research Center are developing methods to automatically analyze fish images and
 extract a set of data features that provide important metadata about the
 digitized specimen.
 The research is being conducted as part of the Biology Guided Neural Networks (BGNN) project, which aims to develop a novel class of artificial neural networks that exploit machine readable and predictive knowledge associated with specimen images, phylogenies and anatomy ontologies.
-Using a combination of machine learning and image informatics tools and techniques, we can accurately determine general image quality and metadata, such as fish quantity and location within images, fish orientation, and
+Using a combination of machine learning and image informatics 
+techniques,
+%tools and [okay to just say image informatics techniques instead of "image informatics tools and techniques" - thinking techniques implies tools.]
+we can accurately determine general image quality and metadata, such as fish quantity and location within images, fish orientation, and
 image scaling based on ruler identification and measurement. Image scaling
 allows us to compute quantitative features about the fish specimens, such
 as their length and area.  In order to test and validate our methods, they
