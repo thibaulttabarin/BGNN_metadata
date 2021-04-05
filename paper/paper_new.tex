@@ -7,7 +7,7 @@
 \usepackage{textcomp}
 \usepackage{xcolor}
 \usepackage{comment}
-\usepackage{todonotes}
+%\usepackage{todonotes}
 \usepackage{wrapfig}
 \usepackage{hyperref}
 \usepackage{xurl}
@@ -245,12 +245,9 @@ addressing a different need. Lack of metadata is impeding scientific studies.
 Our focus and motivation are different.
 Effectively doing the computational pre-processing
 that will enable further downstream analyses.
+%RE: paragraph directly above, DAVE/JOEL - thinking we should we shift message a little bit to something like, e.g., The research reviewed above demonstrates image features extraction; although researchers have not applied these approaches the rich and extensive collections of digitized specimens accessible in open repositories. Our research addresses this need by applying machine learning and informatics techniques to extract key metadata properties from the images, and, further computing higher-level metadata based on these initial results. Our goals and objectives our presented below.
 
-We are applying a variety of machine learning, image processing and
-image informatics techniques to extract critical properties from the
-images.  The properties will allow follow-on studies to identify
-the specific images needed for a particular analysis, ensuring that
-the specimen images meet both scientific and technical requirements.
+%I think this paragraph could be deleted then, or moves elsewhere, we say this a lot already: We are applying a variety of machine learning, image processing and image informatics techniques to extract key metadata properties from the images. These properties a critical for selecting high-quality, usable digitized specimens for further computational analysis, and and ensuring that the specimen images meet both scientific and technical requirements.
 
 
 % Developing new techniques to determine fish freshness and quality can enhance nutritional value of the overall household food basket. In this research, digital image analysis was utilized to assess the freshness of rainbow trout fish by tracing the color attributes of its eyes and gills. The image data were collected from left and right eyes and gills in a 10-day ice-storage duration, and color components were extracted in RGB, HSV, and L*a*b* color spaces. Analysis of variance revealed that the RGB components of both eyes and gills had a significant change towards getting brighter during the ice-storage. Feature extraction was fulfilled from the color spaces, and then artificial neural networks (ANNs) and support vector machines (SVMs) were applied for classification of the ice-storage durations. The overall accuracies of the developed models demonstrated that the ANN somewhat outperformed the SVM for both the extracted features from the eyes and gills. Moreover, the gills’ features could describe the variance in the storage durations more efficiently than those extracted from the eyes. Finally, it was concluded that the applied colorimetric system along with the developing models could be employed as a successful non-destructive approach for evaluation of fish freshness.
@@ -281,48 +278,21 @@ Williams 2020 \cite{Williams:2020:UIF})
 
 \section{Goals and Objectives}
 
-Digitized specimen collections offer numerous outstanding opportunities
-for new scientific studies and discoveries.
-%I think we can go from the above, statement, directly to the paragraph that starts with "Given the many..." Then, specifically state the goal of this paper is to XXXX address the need, or the goal is to investigate, test, (pick your verb) an approach automatically generating metadata, combining off-the-shelf software and custom written, or is it simply test off-the-shelf software, and later the realization that customization happens.
-The amount of data is immense, with image collections containing 10,000's
-of entries. These discoveries will only be possible
-with computational techniques that can process this vast amount of data.
+Digitized specimen accessible in open access repositories provide a rich, extensive data source machine-learning and scientific discovery, however, these resources remain largely untapped due image quality and metadata limitations. We are addressing this need by combining machine-learning and image informatics technqiues. The overall goal of our  
 
-These image-based computational techniques are hampered by both poor
-image quality and the lack of high-quality and pertinent metadata
-associated with collections.
 
-For example, a study may require images that contain only one fish with a
-given level of lighting and contrast. Additionally, performing quantitative
-investiations into the morphology of the specimens requires knowing
-the physical scale of the images, i.e.~pixels/inch.
 
-Given the many thousands of images that have and will be acquired of
-biological specimens, it is infeasible to generate the needed metadata
-via manual, i.e. via human input, methods.  It is critical to deploy
-computational techniques that will automate the process of generating
-the metatdata that is essential for downstream analyses and studies.
+%Following is original Goals/objectives text: The amount of data is immense, with image collections containing 10,000's of entries. These discoveries will only be possible with computational techniques that can process this vast amount of data.
 
-In order to address the need for fish specimen image metadata that can
-support scientific investigations we have begun the deployment of
-both off-the-shelf and custom-written software that automatically
-generates a variety of metadata from a publicly-available biological
-image repository.  The types of metadata being produced are related
-to image quality, content and scale, and should provide the information
-necessary for advanced quantitative studies of the digitized specimens.
+%These image-based computational techniques are hampered by both poor image quality and the lack of high-quality and pertinent metadata associated with collections.
 
-The automated metadata generation methods for our project were developed
-to work on a specific set of images, the INHS\ Fish
-Collection~\cite{INHS}.  Most of these images have been configured,
-produced and acquired with a standard procedure.  The images used for
-our study contain one fish placed on a bright, white background and
-contain an information tag and the same ruler.  See
-Figure \ref{fig:teaser} for two example images from the collection.
-While training and focusing our system on images with very similar
-compositions and visual properties may limit its immediate applicability,
-our efforts do demonstrate the potential that machine learning and
-image informatics techniques have for automatically generating metadata
-for biological specimen image collections.
+%For example, a study may require images that contain only one fish with a given level of lighting and contrast. Additionally, performing quantitative investiations into the morphology of the specimens requires knowing the physical scale of the images, i.e.~pixels/inch.
+
+%Given the many thousands of images that have and will be acquired of biological specimens, it is infeasible to generate the needed metadata via manual, i.e. via human input, methods.  It is critical to deploy computational techniques that will automate the process of generating the metatdata that is essential for downstream analyses and studies.
+
+%In order to address the need for fish specimen image metadata that can support scientific investigations we have begun the deployment of both off-the-shelf and custom-written software that automatically generates a variety of metadata from a publicly-available biological image repository.  The types of metadata being produced are related to image quality, content and scale, and should provide the information necessary for advanced quantitative studies of the digitized specimens.
+
+%The automated metadata generation methods for our project were developed to work on a specific set of images, the INHS\ Fish Collection~\cite{INHS}.  Most of these images have been configured, produced and acquired with a standard procedure.  The images used for our study contain one fish placed on a bright, white background and contain an information tag and the same ruler.  See Figure \ref{fig:teaser} for two example images from the collection. While training and focusing our system on images with very similar compositions and visual properties may limit its immediate applicability, our efforts do demonstrate the potential that machine learning and image informatics techniques have for automatically generating metadata for biological specimen image collections.
 
 
 \section{Methods}
@@ -622,7 +592,7 @@ There were an additional 17 images for which the automated process generated a r
 This result highlights the additional utility of automated methods to
 double-check and verify human-generated metadata.
 
-\begin{figure}[h]
+\begin{figure}[H]
   \centering
   \includegraphics[width=0.49\linewidth]{images/wrong_side_orig}
   \includegraphics[width=0.49\linewidth]{images/wrong_side1}
@@ -646,7 +616,7 @@ a mislabeled eye as discussed in the previous section.
 %Clock Value?}
 %A small number of images (such as on the right in Figure~\ref{fig:teaser}) have tags that overlap with the fish. These tags were light enough that they were correctly labeled as background by the pixel analysis.
 
-\begin{figure}[h]
+\begin{figure}[H]
   \centering
   \includegraphics[width=0.7\linewidth]{images/curved1}
   \caption{An example of a heavily curved specimen.}
