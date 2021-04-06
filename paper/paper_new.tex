@@ -404,7 +404,7 @@ informatics to produce more accurate object masks and bounding boxes.
 
 \begin{table*}[t]
     \centering
-    \caption{Metadata properties}
+    \caption{Metadata properties (* indicates higher order properties)}
     \label{tab:properties}
     \begin{tabular}{cccp{0.5\linewidth}}
         \toprule
@@ -414,23 +414,23 @@ informatics to produce more accurate object masks and bounding boxes.
         \verb|fish_count| & Overall Image & Integer & The quantity of fish present.\\
         \verb|has_ruler| & Overall Image & Boolean & Whether a ruler was found in the image.\\
         \verb|ruler_bbox| & Overall Image & 4 Tuple & The bounding box of the ruler (if found).\\
-        \verb|scale| & Overall Image & Float & The scale of the image in \(\frac{\mathrm{pixels}}{\mathrm{cm}}\).\\
+        \verb|scale|* & Overall Image & Float & The scale of the image in \(\frac{\mathrm{pixels}}{\mathrm{cm}}\).\\
         \verb|bbox| & Per Fish & 4 Tuple & The top left and bottom right coordinates of the bounding box for a fish.\\
         \verb|background.mean| & Per Fish & Float & The mean intensity of the background within a given fish's bounding box.\\
         \verb|background.std| & Per Fish & Float & The standard deviation of the background within a given fish's bounding box.\\
         \verb|foreground.mean| & Per Fish & Float & The mean intensity of the foreground within a given fish's bounding box.\\
         \verb|foreground.std| & Per Fish & Float & The standard deviation of the foreground within a given fish's bounding box.\\
-        \verb|contrast| & Per Fish & Float & The contrast between foreground and background intensities within a given fish's bounding box.\\
+        \verb|contrast|* & Per Fish & Float & The contrast between foreground and background intensities within a given fish's bounding box.\\
         \verb|centroid| & Per Fish & 4 Tuple & The centroid of a given fish's bitmask.\\
-        \verb|primary_axis| & Per Fish & 2D Vector & The unit length primary axis (eigenvector) for the bitmask of a given fish.\\
-        \verb|clock_value| & Per Fish & Integer & Fish's primary axis converted into an integer ``clock value'' between 1 and 12.\\
-        \verb|length| & Per Fish & Float & The length of a fish in \(\frac{\mathrm{pixels}}{\mathrm{cm}}\).\\
+        \verb|primary_axis|* & Per Fish & 2D Vector & The unit length primary axis (eigenvector) for the bitmask of a given fish.\\
+        \verb|clock_value|* & Per Fish & Integer & Fish's primary axis converted into an integer ``clock value'' between 1 and 12.\\
+        \verb|length|* & Per Fish & Float & The length of a fish in \(\frac{\mathrm{pixels}}{\mathrm{cm}}\).\\
         \verb|mask| & Per Fish & 2D Matrix & The bitmask of a fish in 0's and 1's.\\
         \verb|pixel_analysis_failed| & Per Fish & Boolean & Whether the pixel analysis process failed for a given fish. If \verb|true|, \verb|detectron|'s mask and bounding box were used for metadata generation.\\
         \verb|score| & Per Fish & Float & The percent confidence score output by \verb|detectron| for a given fish.\\
         \verb|has_eye| & Per Fish & Boolean & Whether an eye was found for a given fish.\\
         \verb|eye_center| & Per Fish & 2 Tuple & The centroid of a fish's eye.\\
-        \verb|side| & Per Fish & String & The side (i.e.\ \verb|'left'| or \verb|'right'|) of the fish that is facing the camera (dependent on finding its eye).\\
+        \verb|side|* & Per Fish & String & The side (i.e.\ \verb|'left'| or \verb|'right'|) of the fish that is facing the camera (dependent on finding its eye).\\
       \bottomrule
 \end{tabular}
 \end{table*}
