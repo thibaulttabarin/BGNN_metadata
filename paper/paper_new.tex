@@ -128,7 +128,7 @@ images drawn from the Illinois Natural History Survey (INHS) Collection~\cite{IN
 Figure \ref{fig:INHS_examples} presents three typical images used in our
 study.
 %Dave/Joel, the section above, from "we can accurately ..." to the figures" to me is more results. I guess it's okay to give this in introduction. Just wanted to raise this point. I sometimes give a paraphrase too, but just good to see if it is a little too much or okay with you both. I think it's okay as I re-read it, but good to have someone check.
-The following section of the paper provides contextual background for this work, followed by the research goals and objectives, and a review of our research methods. Next, the results are presented, followed by a discussion. The conclusion highlights key findings and identifies next steps.
+The following section of the paper provides contextual background for this work, followed by the research goals and objectives, and a review of our research methods. Next, the results, along with discussion, are presented. The conclusion highlights key findings and identifies next steps.
 
 \section{Related Work}
 \subsection{Metadata for Natural History Image Collection}
@@ -240,6 +240,17 @@ freshness categories with 93\% accuracy.
 % The achieved results demonstrate the high performance of the ANN classifier for evaluation of common carp freshness during ice storage as a rapid, accurate, non-destructive, real-time and automated method. It shows the potential of computer vision method in combination with artificial neural networks as an intelligent technique for evaluation of fish freshness.
 A similar approach was developed by Lalabadi et al.~\cite{Lalabadi2020FishFC}.
 
+
+The research reviewed above involves image features extraction and
+artificial intelligence; although the researchers have not applied these
+approaches to the burgeoning collections of digitized specimens
+accessible in open repositories. Our research addresses this need by
+applying machine learning and image informatics techniques to extract key
+metadata properties from fish specimen images and computing
+higher-level metadata based on these initial results.
+Our goals and objectives our presented below.
+
+\begin{comment}
 Our work stands apart from previous work in that we are
 addressing a different need: lack of metadata is impeding scientific studies.
 Our focus and motivation are different.
@@ -247,6 +258,7 @@ Effectively doing the computational pre-processing
 that will enable further downstream analyses.
 
 <--NOTE-NOTE-NOTE DAVE/JOEL/ALL - RE: above paragraph, I'm thinking we should we shift message a little bit to something like, e.g., "The research reviewed above demonstrates image features extraction; although researchers have not applied these approaches the rich and extensive collections of digitized specimens accessible in open repositories. Our research addresses this need by applying machine learning and informatics techniques to extract key metadata properties from the images, and, further computing higher-level metadata based on these initial results. Our goals and objectives are presented in the following section.
+\end{comment}
 
 %I think this paragraph could be deleted then, or moves elsewhere, we say this a lot already: We are applying a variety of machine learning, image processing and image informatics techniques to extract key metadata properties from the images. These properties a critical for selecting high-quality, usable digitized specimens for further computational analysis, and and ensuring that the specimen images meet both scientific and technical requirements.
 
@@ -279,27 +291,74 @@ Williams 2020 \cite{Williams:2020:UIF})
 
 \section{Goals and Objectives}
 
-Digitized specimen accessible in open access repositories provide a rich, extensive data source machine-learning and scientific discovery, however, these resources remain largely untapped due image quality and metadata limitations. The overall goal is addressing this need by combining machine-learning and image informatics techniques. The overall goal of our research is to offer a machine-driven [*novel/innovative?? blah...] approach to current manual metadata generation that is prohibitively costly in both terms of labor and time, and to further offer a [*novel] approach to computing higher-level metadata that supports scientific inquiry. Three key objectives are to:
+Digitized specimen accessible in open access repositories provide a rich,
+extensive data source for machine-learning and scientific discovery.
+These resources, however, remain largely untapped due to image quality
+issues and metadata limitations.
+The overall goal of our work addresses this need by combining
+machine-learning and image informatics techniques to produce a computational
+% . The overall goal of our research is to offer a machine-driven [*novel/innovative?? blah...]
+alternative to the current manual metadata generation process, one that is
+prohibitively costly in both terms of labor and time. Additionally, our
+methods collectively provide a novel approach to computing higher-level
+metadata that will support further scientific inquiry.
 
-GOAL 1) Test [*Explore, Demonstrate the us of] Facebook's AI Research's dectectron tool
-Specific aims are to use dectectron to identify five object classes: fish, fish eyes, rulers, and the numbers 2 and 3 on rulers, as shown in Figure 
 
-GOAL 2) Pursue [*Investigate] image processing at the pixel level.
-Pilot testing found the dectectron bounding boxes could be more tightly enclosed the detected objects. We will see if additional masking background as part of the fish, or the
-bounding box may clip away part(s) of the fish with pixel analysis methods commonly
-found in image informatics. Specific aim [*objectives] of our research are to:
+% [WHAT'S THE DIFFERENCE BETWEEN A GOAL AND AN OBJECTIVE?]
+
+Four key objectives are to:
+
+1) Explore use of Facebook AI Research's \verb|detectron| tool.  Specific
+aims are to use \verb|detectron| to identify study-specific objects.
+% classes: fish, fish eyes, rulers, and the numbers 2 and 3 on rulers, as shown in
+% Figure \ref{fig:teaser}.
+
+2) Investigate image processing at the pixel level.
+Pilot testing found the detectron under-segmented the detected objects
+with tightly enclosing bounding boxes. We will determine if
+pixel analysis methods commonly found in image informatics may produce
+more accurate bounding boxes and object masks.
+% background as part of the fish, or the
+% bounding box may clip away part(s) of the fish with
+The specific aims of this objective are to:
 %not sure we have to list all the details, but something like the below, with the 4 aspects of pixel analysis we tested/investigate/experimented with
 
-1. Identify the appropriate threshold. We will compute optimal scaling between [*or is it Otsu thresholding] to identify an improved threshold value. [Or we will determine is we can computed as the halfway point between the Otsu threshold value and the mean of the background intensities.]
+\renewcommand{\labelenumi}{\alph{enumi}.}
+\begin{enumerate}
+\item
+Identify the appropriate threshold value for more accurate mask.
+% We will compute optimal scaling between [*or is it Otsu thresholding] to identify an improved threshold value. [Or we will determine is we can computed as the halfway point between the Otsu threshold value and the mean of the background intensities.]
 
-2. Consolidate the foreground
+\item
+Remove noise to produce a single, solid mask.
 
-3. Adjusting the bounding box. [We will use computational methods for masking [calcuate a mask?] to determine if bounding box needs to be shrunk or expanded]
+\item
+Compute more accurate bounding box from updated mask.
+% Adjusting the bounding box. [We will use computational methods for masking [calcuate a mask?] to determine if bounding box needs to be shrunk or expanded]
 % Jane confused here, if this belongs here, or below
 
-4. Developing a fallback approach for when flood fill operations behave unexpectedly the image is too washed out.
+\item
+Automatically determine when modified methods fail and detectron values
+should be used as is.
+% Developing a fallback approach for when flood fill operations behave unexpectedly the image is too washed out.
+\end{enumerate}
 
-GOAL 3) Compute [*Test our ability to calculate] the following set of higher-level metadata properties: 1) contrast (intensities of the foreground and background, 2) centroid and eye center, and if eye is found, the fish 3) side 4) primary axis and clock value, finally the 5) scale and length.
+\begin{figure*}[t]
+  \centering
+ \includegraphics[width=.45\linewidth]{images/teaser1_crop}
+  \hspace{5mm}
+  \includegraphics[width=.45\linewidth]{images/teaser2_crop}
+  \caption{Initial object detection on two specimen images using Detectron2~\cite{wu2019detectron2}.}
+  \label{fig:teaser}
+\end{figure*}
+
+3) Compute a number of high-level metadata properties from the detected objects and image quality metrics.
+% [*Test our ability to calculate] the following set of
+% : 1) contrast (intensities of the foreground and background, 2) centroid and eye center, and if eye is found, the fish 3) side 4) primary axis and clock value, finally the 5) scale and length.
+
+4) Compare computed metadata properties with manually generated properties
+when possible to assess the accuracy and effectiveness of automated 
+methods.
 
 %Following is original Goals/objectives text: The amount of data is immense, with image collections containing 10,000's of entries. These discoveries will only be possible with computational techniques that can process this vast amount of data.
 
@@ -311,26 +370,18 @@ GOAL 3) Compute [*Test our ability to calculate] the following set of higher-lev
 
 %In order to address the need for fish specimen image metadata that can support scientific investigations we have begun the deployment of both off-the-shelf and custom-written software that automatically generates a variety of metadata from a publicly-available biological image repository.  The types of metadata being produced are related to image quality, content and scale, and should provide the information necessary for advanced quantitative studies of the digitized specimens.
 
-The automated metadata generation methods for our project were developed to work on a specific set of images, the INHS\ Fish Collection~\cite{INHS}.  Most of these images have been configured, produced and acquired with a standard procedure.  The images used for our study contain one fish placed on a bright, white background and contain an information tag and the same ruler.  See Figure \ref{fig:teaser} for two example images from the collection. While training and focusing our system on images with very similar compositions and visual properties may limit its immediate applicability, our efforts do demonstrate the potential that machine learning and image informatics techniques have for automatically generating metadata for biological specimen image collections.
+The automated metadata generation methods for our project were developed to work on a specific set of images, the INHS\ Fish Collection~\cite{INHS}.  Most of these images have been configured, produced and acquired with a standard procedure.  The images used for our study contain one fish placed on a bright, white background and contain an information tag and the same ruler.  See Figure \ref{fig:INHS_examples} for three example images from the collection. While training and focusing our system on images with very similar compositions and visual properties may limit its immediate applicability, our efforts do demonstrate the potential that machine learning and image informatics techniques have for automatically generating metadata for biological specimen image collections.
 
 \section{Methods}
 Our process for metadata generation can be broken into three steps: 1) object detection with Facebook's Detectron2 machine learning library (subsequently referred to as \verb|detectron|), 2) image processing at the pixel level, and 3) calculations on the results of the previous steps to determine higher level metadata properties.
 % \todo{Definitely need to explain somewhere in more detail about our current admissibility criteria for images. Not sure where I want to put it yet so just leaving it as a todo}
 
-\begin{figure}[b]
-  \centering
-%  \includegraphics[width=.49\linewidth]{images/teaser1_crop}
-  %\hspace{4mm}
-  \includegraphics[width=.90\linewidth]{images/teaser2_crop}
-  \caption{Initial object detection on a specimen image using Detectron2~\cite{wu2019detectron2}.}
-  \label{fig:teaser}
-\end{figure}
-
 \subsection{Detectron}
 A prerequisite task to performing any advanced metadata property generation
 is finding the specimens (and other relevant objects) within the collection
 images. Object detection has been a broadly active field of study in recent
-years \cite{zou2019object}, and has resulted in a number of well-tested, purpose-built architectures. We elected to use Facebook AI Research's (FAIR) \verb|detectron| tool \cite{wu2019detectron2}, and specifically its implementation of the Mask R-CNN architecture \cite{he2018mask}, for object detection in our project.
+years \cite{zou2019object}, and has resulted in a number of well-tested, purpose-built architectures. We elected to use Facebook AI Research's (FAIR)
+\verb|detectron| tool \cite{wu2019detectron2}, and specifically its implementation of the Mask R-CNN architecture \cite{he2018mask}, for object detection in our project.
 \verb|detectron| is built on \verb|pytorch|~\cite{NEURIPS2019_9015} and provides a relatively straightforward method for training on COCO~\cite{DBLP:journals/corr/LinMBHPRDZ14} format datasets. It is able to handle an arbitrary number of object classes, and can classify an arbitrary number of object within a given image. We chose \verb|detectron| for its relative ease of use compared to lower level libraries, and its implementations of powerful architectures developed by FAIR.
 For our project, we use it to identify five object classes: fish, fish eyes, rulers, and the numbers 2 and 3 on rulers,
 as shown in Figure \ref{fig:teaser}. Objects with a 30\% confidence score or higher are maintained for analysis.
