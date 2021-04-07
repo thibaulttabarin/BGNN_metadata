@@ -94,7 +94,7 @@ bioinformatics, metadata, image analysis, applied machine learning
 
 \section{Introduction}
 % Moving teaser since this template doesn't actually ask for one
-Over the last several decades advances in computing, imaging, and cyberinfrastructure have supported the growth of digital natural history collections, many of which have specimen images~\cite{beaman2012mass}. Additionally, initiatives, such as the National Science Foundation’s Advancing Digitization of Biodiversity Collections (ADBC) program,
+Over the last several decades advances in computing, imaging, and cyberinfrastructure have supported the growth of digital natural history collections, many of which contain specimen images~\cite{beaman2012mass}. Additionally, initiatives, such as the National Science Foundation’s Advancing Digitization of Biodiversity Collections (ADBC) program,
 % (which ran for nearly a decade),
 have supported the digitization and curation of tens of thousands of biological specimens~\cite{page2015digitization}. These digitized specimens are generally accessible through global, open-access repositories that support digital library services, such as browsing, search and retrieval, and preservation. The digitized renderings of these rich collections permit researchers, educators, students, and the general public to examine biological specimens
 on a previously unattainable scale. Moreover, the digitized instantiations present a pathway for applying machine learning and making new scientific discoveries. 
@@ -102,13 +102,13 @@ on a previously unattainable scale. Moreover, the digitized instantiations prese
 Unfortunately, potential scientific advances are hindered by image quality
 problems and the lack of accurate and pertinent metadata
 associated with the image collections.
-Poor quality images (e.g. low contrast, inadequate lighting,
+Poor quality images (e.g.\ low contrast, inadequate lighting,
 out-of-focus or cluttered visual arrangements) provide inadequate input
 for automated
 image analysis and machine learning algorithms and lead to inferior
 computational results.
 In order to perform quantitative morphometric analysis of the specimens,
-the physical scale of the images (pixels/inch) is needed; thus
+the physical scale of the images (\(\frac{\mathrm{pixels}}{\mathrm{cm}}\)) is needed; thus
 requiring the ability to identify and measure rulers in the images.
 Many specimen collections do include Darwin Core metadata~\cite{biodiv_info_standards}, detailing
 specimen taxon, geographic location, and several other descriptive aspects.
@@ -743,7 +743,7 @@ for the analyses of the BGNN study. Ideally, for INHS images the fish should be 
 % Figure~\ref{fig:histo} shows the distribution of
 The difference between
 the mean intensity of the foreground (i.e.\ the pixels of the fish) and the mean intensity of the background within the fish's bounding box
-was computed for all 7,244 images.
+was computed for all \(7,244\) images.
 The overall mean of the differences is \(144.3\), with a standard deviation of \(15.8\). Images on the low end of the distribution exhibit poor foreground--background contrast, and images on the high end likely contain poorly lit specimens.
 Images are considered to have ``low'' and
 ``high'' contrast if their background-foreground difference is greater than
@@ -776,7 +776,7 @@ computed for the images in the three human-specified classes.
 Table~\ref{tab:bright} contains the resulting values and shows that
 automated intensities values provide objective measures that may be used to break images into groups that correlate with human-defined brightness
 classifications.
-The mean of \verb|foreground.mean| over all 7,244 images is 89.5, with a
+The mean of \verb|foreground.mean| over all \(7,244\) images is 89.5, with a
 standard deviation of 16.6. These numbers suggest, for example, that
 \verb|foreground.mean| $\pm$ one-half a standard deviation could define 
 \verb|normal| brightness, with values outside this range being classified
