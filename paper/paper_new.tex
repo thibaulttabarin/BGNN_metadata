@@ -614,6 +614,16 @@ Just gonna throw some caveats in here, might be its own section might not
     \item Program falls back to using detectron mask and bbox for metadata generation in the event the mask generation/pixel analysis fails. Failure is defined as never finding a cohesive flood filled mask that covers more than 10\% of the detectron bbox initially. Can provide a statistic on how often this occurs.
 \end{itemize}
 \end{comment}
+
+\begin{figure}[b]
+  \centering
+  \includegraphics[width=0.9\linewidth]{images/none1_crop} \\
+  \vspace{3mm}
+  \includegraphics[width=0.9\linewidth]{images/double1_crop}
+  \caption{A fish that was not detected (top) and a fish that was detected twice (bottom).}
+  \label{fig:fish_detect_wrong}
+\end{figure}
+
 \section{Results}
 Technicians employed by our team have manually generated the 22 metadata properties deemed crucial to the overall BGNN project~\cite{leipzig2021biodiversity} for a large number of INHS images. \(20,699\) total entries were created by 13 technicians that spanned \(8,398\) unique images. Of these \(8,398\) images, \(7,244\) were both not part of the \verb|detectron| training set and met our current admissibility criteria for \verb|detectron| and pixel processing. We ran the metadata extraction program on these \(7,244\) images.
 For the properties of image scale, fish length, and fish bounding boxes
@@ -623,17 +633,8 @@ hand for comparison.
 
 Our automated process currently generates 6 of the 22 core metadata properties: \verb|if_fish| (\verb|has_fish|), \verb|fish_number| (\verb|fish_count|), \verb|if_ruler| (\verb|has_ruler|), \verb|specimen_angled| (\verb|clock_value|), \verb|specimen_view| (\verb|side|), and \verb|brightness| (\verb|foreground.mean|).
 % and \verb|if_background_uniform| (\verb|background.std|).
-In addition, our process also calculates contrast, bounding boxes and
+In addition, our approach also calculates contrast, bounding boxes and
 fish lengths in centimeters.
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=0.9\linewidth]{images/none1_crop} \\
-  \vspace{3mm}
-  \includegraphics[width=0.9\linewidth]{images/double1_crop}
-  \caption{A fish that was not detected (top) and a fish that was detected twice (bottom).}
-  \label{fig:fish_detect_wrong}
-\end{figure}
 
 \subsection{Fish Detection}
 All images in the INHS dataset contain exactly one fish. For \(7,209\) of the specimen images, one fish was detected, a 99.5\% correct rate.
@@ -664,7 +665,7 @@ not be performed, producing a 99.2\% success rate for
 the \verb|scale| computation.
 
 Images where one of these objects were not detected generally had some form of coloration issue. They were either washed out, very dark or yellow in hue.
-See Figure \ref{fig:no_ruler} two such examples.
+See Figure \ref{fig:no_ruler} for two such examples.
 Some of the rulers for which ``2'' and/or ``3'' were not detected were particularly scratched and damaged. Only ``3'' was missed in 45 of the 56 cases, only ``2'' was missed in 2 cases, and both were missed in 9 cases. This may indicate that more training samples for ``3'' are required. Many of the rulers where both numerals were missed were particularly small within the image, which again may be solvable through expanding the training dataset.
 
 %\begin{itemize}
@@ -690,12 +691,13 @@ a 96.5\% correct rate.
 
 % There were six cases where an eye was detected but the \verb|side| value
 % was wrong.
-For these 6 cases, a spot on the wrong side of the fish was labeled as the
-most likely eye within the bounding box of the fish, i.e.\ eye detection 
-was incorrect. Figure \ref{fig:wrong_eye} presents one such example.
+For these 6 incorrect cases, a spot on the wrong side of the fish was
+labeled as the most likely eye within the bounding box of the fish.
+% , i.e.\ eye detection was incorrect.
+Figure \ref{fig:wrong_eye} presents one such example.
 There were an additional 17 images for which the automated process generated a result that did not match the manually created data. For these remaining cases the manual data was incorrect, giving the automated system an error rate \(2.8\) times lower than the human error rate.
 This result highlights the additional utility of automated methods to
-double-check and verify human-generated metadata.
+double-check and verify manually generated metadata.
 
 \begin{figure}[H]
   \centering
@@ -711,7 +713,7 @@ our definition of a correct/acceptable result, making the correct rate for
 this computation 96.4\%.
 
 Of the specimens for which clock values were generated, 33 did not match the manually created data (within a tolerance of \(\pm{}1\)).
-For 25 of those, the human-generated data was incorrect, giving the automated process a \(3.1\) times lower error rate. Of the 8 that were
+For 25 of those, the manually generated data was incorrect, giving the automated process a \(3.1\) times lower error rate. Of the 8 that were
 computationally classified incorrectly,
 two specimens were quite curved making it difficult to assign a clear angle value, as
 seen in Figure \ref{fig:curvedFish}.
@@ -750,7 +752,7 @@ Images are considered to have ``low'' and
 one standard deviation away from the mean; otherwise they are classified as
 ``medium''.
 Examples of each type of image (low, medium, and high contrast) can be seen in Figure~\ref{fig:contrast}.
-The left image has a mean intensity of 103 (low), the middle image 144
+The left image has a contrast of 103 (low), the middle image 144
 (medium), and the right 186 (high).
 
 \begin{table}[H]
@@ -772,15 +774,25 @@ The left image has a mean intensity of 103 (low), the middle image 144
 Specimen brightness is one of the 22 hand-recorded metadata properties. It is encoded as \verb|dark|, \verb|normal| or \verb|bright|. These values
 correspond to the mean foreground intensity computed by the automated system.
 The mean and standard deviation of the foreground intensities were
-computed for the images in the three human-specified classes.
+computed for the images in the three manually specified classes.
 Table~\ref{tab:bright} contains the resulting values and shows that
-automated intensities values provide objective measures that may be used to break images into groups that correlate with human-defined brightness
-classifications.
+automated intensities values provide objective measures that may be used to break images into groups that correlate with manually generated
+brightness classifications.
 The mean of \verb|foreground.mean| over all 7,244 images is 89.5, with a
-standard deviation of 16.6. These numbers suggest, for example, that
-\verb|foreground.mean| $\pm$ one-half a standard deviation could define 
-\verb|normal| brightness, with values outside this range being classified
-as \verb|dark| or \verb|bright|.
+standard deviation of 16.6.
+Given that human perception of brightness is quite subjective and
+highly variable, we found it problematic to use specific threshold
+values to define \verb|dark|, \verb|normal| or \verb|bright| specimens
+in concordance with the manually generated metadata.  The technicians
+showed little consistency when classifying \verb|normal| or \verb|bright|
+specimens. We did find that an 81.2\% accuracy rate could be achieved by
+classifying \verb|dark|, as those with a \verb|foreground.mean| of 75
+or lower; thus demonstrating that this computed metadata property does 
+offer some value when assessing image quality.
+% These numbers suggest, for example, that
+% \verb|foreground.mean| $\pm$ one-half a standard deviation could define 
+% \verb|normal| brightness, with values outside this range being classified
+% as \verb|dark| or \verb|bright|.
 
 %\begin{verbatim}
 %Standard Deviations for:
@@ -802,7 +814,8 @@ as \verb|dark| or \verb|bright|.
   \label{fig:bbox_mask}
 \end{figure}
 
-Fish bounding boxes were calculated for all \(7,237\) images in which a fish was found. All but 263 of these were generated via pixel analysis, with those 263 falling back to the original \verb|detectron| bounding box.
+Fish bounding boxes were calculated for all \(7,237\) images in which a fish was found. All but 263 of these were generated via pixel analysis, with
+the 263 falling back to the original \verb|detectron| bounding box.
 100 randomly-chosen images were reviewed manually to evaluate the
 calculation, a representative sample are presented in
 Figure \ref{fig:bbox_mask}.
@@ -811,15 +824,15 @@ on/around the location of the fish. However, a number of them lacked portions of
 Specifically, 41 masks and bounding boxes covered the entire fish,
 36 missed some of the tail, and 23 missed most or all of the tail, as
 seen in Figure \ref{fig:missedTail}.
-\begin{figure}[H]
+Masks and bounding boxes contain the head and trunk of the fish in nearly all cases, but further refinement of our algorithms will be needed
+to ensure that light fins and tails are masked consistently and accurately.
+\begin{figure}[t]
   \centering
   \includegraphics[width=0.49\linewidth]{images/61631}
   \includegraphics[width=0.49\linewidth]{images/61631_mask}
   \caption{An example of a light colored tail being missed during the pixel analysis process.}
   \label{fig:missedTail}
 \end{figure}
-Masks and bounding boxes contain the head and trunk of the fish in nearly all cases, but further refinement of our algorithms will be needed
-to ensure that light fins and tails are masked consistently and accurately.
 
 \subsection{Scale and Length}
 Image scale and fish lengths were calculated for \(7,179\) of the images.
@@ -829,7 +842,7 @@ measured, using ImageJ~\cite{imagejCite}, in the same 100  test images.
 % 50 of these images \todo{The same 50 as before?} were measured by hand to get \(\frac{\mathrm{pixels}}{\mathrm{cm}}\) and fish length in centimeters with ImageJ~\cite{imagejCite}.
 In this subset of images the average error for the scale calculation
 was \(0.91\%\), and the average error for the fish length calculation was \(5.87\%\).
-Scale calculations using the ``2'' and ``3'' method are nearly identical to those calculated by hand between the tick marks on the ruler. When the tail of the fish is accurately masked and the specimen is fairly straight, the length calculation is highly accurate as well. An example of such a result can be seen in Figure~\ref{fig:scale_len}, for which the difference between the hand measured length and the automatically calculated length was only \(0.6\%\) (\(8.88\) cm vs \(8.82\) cm). Thus, the primary means of lowering the error of the length calculation is to improve tail masking accuracy.
+Scale calculations using the ``2'' and ``3'' method are nearly identical to those calculated by hand between the tick marks on the ruler. When the tail of the fish is accurately masked and the specimen is fairly straight, the length calculation is highly accurate as well. An example of such a result can be seen in Figure~\ref{fig:scale_len}, for which the difference between the hand-measured length and the automatically calculated length was only \(0.6\%\) (\(8.88\) cm vs \(8.82\) cm). Thus, the primary means of lowering the error of the length calculation is to improve tail masking accuracy.
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.49\linewidth]{images/54172}
