@@ -610,7 +610,7 @@ Just gonna throw some caveats in here, might be its own section might not
 Technicians employed by our team have manually generated the 22 metadata properties deemed crucial to the overall BGNN project~\cite{leipzig2021biodiversity} for a large number of INHS images. \(20,699\) total entries were created by 13 technicians that spanned \(8,398\) unique images. Of these \(8,398\) images, \(7,244\) were both not part of the \verb|detectron| training set and met our current admissibility criteria for \verb|detectron| and pixel processing. We ran the metadata extraction program on these \(7,244\) images.
 For the properties of image scale, fish length, and fish bounding boxes
 (properties not manually generated),
-a random sample of 50 specimens from the set of \(7,244\) were analyzed by
+a random sample of 100 specimens from the set of \(7,244\) were analyzed by
 hand for comparison.
 
 Our automated process currently generates 6 of the 22 core metadata properties: \verb|if_fish| (\verb|has_fish|), \verb|fish_number| (\verb|fish_count|), \verb|if_ruler| (\verb|has_ruler|), \verb|specimen_angled| (\verb|clock_value|), \verb|specimen_view| (\verb|side|), and \verb|brightness| (\verb|foreground.mean|).
@@ -795,13 +795,13 @@ as \verb|dark| or \verb|bright|.
 \end{figure}
 
 Fish bounding boxes were calculated for all \(7,237\) images in which a fish was found. All but 263 of these were generated via pixel analysis, with those 263 falling back to the original \verb|detectron| bounding box.
-50 randomly-chosen images were reviewed manually to evaluate the
+100 randomly-chosen images were reviewed manually to evaluate the
 calculation, a representative sample are presented in
 Figure \ref{fig:bbox_mask}.
-All 50 masks and bounding boxes were correctly placed
+All 100 masks and bounding boxes were correctly placed
 on/around the location of the fish. However, a number of them lacked portions of lightly colored tails and/or fins.
-Specifically, 22 masks and bounding boxes covered the entire fish,
-16 missed some of the tail, and 12 missed most or all of the tail, as
+Specifically, 41 masks and bounding boxes covered the entire fish,
+36 missed some of the tail, and 23 missed most or all of the tail, as
 seen in Figure \ref{fig:missedTail}.
 \begin{figure}[H]
   \centering
@@ -817,7 +817,7 @@ to ensure that light fins and tails are masked consistently and accurately.
 Image scale and fish lengths were calculated for \(7,179\) of the images.
 For the remaining 65 images, either the fish, the ``2'' and/or the ``3'' on the ruler were not detected.
 Image scale ($\frac{\mathrm{pixels}}{\mathrm{cm}}$) and fish length were
-measured, using ImageJ~\cite{imagejCite}, in the same 50 test images.
+measured, using ImageJ~\cite{imagejCite}, in the same 100  test images.
 % 50 of these images \todo{The same 50 as before?} were measured by hand to get \(\frac{\mathrm{pixels}}{\mathrm{cm}}\) and fish length in centimeters with ImageJ~\cite{imagejCite}.
 In this subset of images the average error for the scale calculation
 was \(0.91\%\), and the average error for the fish length calculation was \(5.87\%\).
@@ -902,13 +902,13 @@ Scale calculations using the ``2'' and ``3'' method are nearly identical to thos
 %\textit{Like I said in slack, the standard deviation of background does not currently correlate with the is\_background\_uniform property. Brightness results are are in previous section. Need to think about what is worth noting since it's a fairly trivial result.}
 
 \section{Conclusions}
-The BGNN project demonstrates a clear need for improved metadata for specimen image collections. Much effort, time and money have been put into photographing and digitizing physical specimen, but without detailed and complete metadata properties the utility of these repositories for advanced computation analysis and machine learning is limited. Since it is prohibitively time intensive to generate all the pertinent properties by hand, automated techniques are needed to generate this missing metadata at scale.
+The BGNN project demonstrates a clear need for improved metadata associated with specimen image collections. Much effort, time and money have been put into photographing and digitizing physical specimen, but without detailed and complete metadata properties the utility of these repositories for advanced computation analysis and machine learning is limited. Since it is prohibitively time intensive to generate all the pertinent properties by hand, automated techniques are needed to generate this missing metadata at scale.
 
-In this paper we presented such a metadata generation program. It produces 6 of the 22 core BGNN metadata properties~\cite{leipzig2021biodiversity}, as well as image contrast, bounding boxes and scale and length information. Testing this program on \(7,244\) images from the INHS dataset~\cite{INHS}, we see that the vast majority of the resulting metadata is correct within a tolerance of a few percentage points, and in some cases contains fewer mistakes than the manually generated validation metadata. Through further refinement and generalizing beyond only INHS images, we aim to create a tool that can be distributed to specimen image collection curators to correct the metadata sparsity that precipitated this work.
+In this paper we presented such a metadata generation program. Using machine learning and image informatics tools and techniques, it is able to locate, bitmask and analyze specimen (currently limited to fish) in collection images with a high degree of accuracy. It produces 6 of the 22 core BGNN metadata properties~\cite{leipzig2021biodiversity}, as well as image contrast, bounding boxes and scale and length information. Testing this program on \(7,244\) images from the INHS dataset~\cite{INHS}, we see that the vast majority of the resulting metadata is correct within a tolerance of a few percentage points, and in some cases contains fewer mistakes than the manually generated validation data. Through further refinement and generalizing beyond only INHS images, we aim to create a tool that can be distributed to specimen image collection curators to correct the metadata sparsity that precipitated this work.
 \subsection{Future Work}
 The most pressing next step is to refine the pixel analysis thresholding process so that the entirety of even light colored fish are marked as foreground in the mask. A deficiency of the current process is that it only operates on single channel intensity. Some of the lightest tails appear yellow in hue to the human eye and easily distinguishable, but when compressed to a single intensity value they are almost identical in value to the white background. Considering when the RGB channels of a pixel are not equal in value may be able to improve masking of such features. Another possible approach to solving this is to threshold and mask on subsets of the bounding box, as to ensure that very dark trunk pixels do not affect the thresholding of lighter regions.
 
-Our ultimate goal is to create a generalized process to work on classes of specimen images (specifically all fish images for BGNN), not only the INHS collection. To accomplish this, a much larger training dataset full of more diverse images will be required. Another requirement will be to generalize the ruler reading process beyond the INHS specific reading of digits on the ruler, which will likely involve an automated method of reading ruler ticks instead of digits.
+Our ultimate goal is to create a generalized process that works on classes of specimen images. For the BGNN project we are beginning with fish images, but we are designing the metadata generation system such that it can eventually operate on other species if trained that way. To accomplish this, a much larger training dataset full of more diverse images will be required. The first step towards greater generality will be to operate on other fish collections besides INHS, which is something our program has already show itself capable of doing during initial testing. Another requirement will be to generalize the ruler reading process beyond the INHS specific reading of digits on the ruler, which will likely involve an automated method of reading ruler ticks instead of digits.
 % Todo: Are these worth mentioning?
 %Adding things like seahorses and eels.
 %Fitting a ``spine'' to specimen.
