@@ -336,12 +336,13 @@ on the analysis of specimen image collections.
 
 Our four key objectives are to:
 
-1) Explore use of Facebook AI Research's \verb|detectron| tool.  Specific
+\begin{enumerate}
+\item Explore use of Facebook AI Research's \verb|detectron| tool.  Specific
 aims are to use \verb|detectron| to identify study-specific objects.
 % classes: fish, fish eyes, rulers, and the numbers 2 and 3 on rulers, as shown in
 % Figure \ref{fig:teaser}.
 
-2) Investigate image processing at the pixel level.
+\item Investigate image processing at the pixel level.
 Pilot testing found that \verb|detectron| under-segmented the detected objects
 with tightly enclosing bounding boxes. We will determine if
 pixel analysis methods commonly found in image informatics may produce
@@ -351,7 +352,7 @@ more accurate bounding boxes and object masks.
 The specific aims of this objective are to:
 %not sure we have to list all the details, but something like the below, with the 4 aspects of pixel analysis we tested/investigate/experimented with
 
-\renewcommand{\labelenumi}{\alph{enumi}.}
+%\renewcommand{\labelenumi}{\alph{enumi}.}
 \begin{enumerate}
 \item
 Identify the appropriate threshold value for a more accurate mask.
@@ -380,13 +381,14 @@ should be used as is.
   \label{fig:teaser}
 \end{figure*}
 
-3) Compute a number of high-level metadata properties from the detected objects and image quality metrics.
+\item Compute a number of high-level metadata properties from the detected objects and image quality metrics.
 % [*Test our ability to calculate] the following set of
 % : 1) contrast (intensities of the foreground and background, 2) centroid and eye center, and if eye is found, the fish 3) side 4) primary axis and clock value, finally the 5) scale and length.
 
-4) Compare computed metadata properties with manually generated properties
+\item Compare computed metadata properties with manually generated properties
 when possible to assess the accuracy and effectiveness of automated 
 methods.
+\end{enumerate}
 
 %Following is original Goals/objectives text: The amount of data is immense, with image collections containing 10,000's of entries. These discoveries will only be possible with computational techniques that can process this vast amount of data.
 
