@@ -676,15 +676,6 @@ Some of the rulers for which ``2'' and/or ``3'' were not detected were particula
     %\item Talk about which rulers failed
 %\end{itemize}
 
-\begin{figure*}[t]
-  \centering
-  \includegraphics[width=0.31\linewidth]{images/dark}
-  \includegraphics[width=0.31\linewidth]{images/normal}
-  \includegraphics[width=0.31\linewidth]{images/bright}
-  \caption{Examples of low, medium and high contrast fish images.}
-  \label{fig:contrast}
-\end{figure*}
-
 \subsection{Side Detection}
 \verb|detectron| was unable to find a fish eye
 in 246 of the images. These eyes were generally extremely dark, small, or looked nothing like those found in the training set. Of the remaining \(6,998\) images, the correct side
@@ -740,6 +731,15 @@ a mislabeled eye as discussed in the previous section.
   \label{fig:histo}
 \end{figure}
 \end{comment}
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=0.31\linewidth]{images/dark}
+  \includegraphics[width=0.31\linewidth]{images/normal}
+  \includegraphics[width=0.31\linewidth]{images/bright}
+  \caption{Examples of low, medium and high contrast fish images.}
+  \label{fig:contrast}
+\end{figure*}
 
 \subsection{Image Contrast}
 The contrast of an image is an important image property needed
