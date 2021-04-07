@@ -159,3 +159,4 @@ config/overall_prefix.txt
 failed/
 test/
 test_images/
+.DS_Store

@@ -94,7 +94,7 @@ bioinformatics, metadata, image analysis, applied machine learning
 
 \section{Introduction}
 % Moving teaser since this template doesn't actually ask for one
-Over the last several decades advances in computing, imaging, and cyberinfrastructure have supported the growth of digital natural history collections, many of which have specimen images~\cite{beaman2012mass}. Additionally, initiatives, such as the National Science Foundation’s Advancing Digitization of Biodiversity Collections (ADBC) program,
+Over the last several decades advances in computing, imaging, and cyberinfrastructure have supported the growth of digital natural history collections, many of which contain specimen images~\cite{beaman2012mass}. Additionally, initiatives, such as the National Science Foundation’s Advancing Digitization of Biodiversity Collections (ADBC) program,
 % (which ran for nearly a decade),
 have supported the digitization and curation of tens of thousands of biological specimens~\cite{page2015digitization}. These digitized specimens are generally accessible through global, open-access repositories that support digital library services, such as browsing, search and retrieval, and preservation. The digitized renderings of these rich collections permit researchers, educators, students, and the general public to examine biological specimens
 on a previously unattainable scale. Moreover, the digitized instantiations present a pathway for applying machine learning and making new scientific discoveries. 
@@ -102,13 +102,13 @@ on a previously unattainable scale. Moreover, the digitized instantiations prese
 Unfortunately, potential scientific advances are hindered by image quality
 problems and the lack of accurate and pertinent metadata
 associated with the image collections.
-Poor quality images (e.g. low contrast, inadequate lighting,
+Poor quality images (e.g.\ low contrast, inadequate lighting,
 out-of-focus or cluttered visual arrangements) provide inadequate input
 for automated
 image analysis and machine learning algorithms and lead to inferior
 computational results.
 In order to perform quantitative morphometric analysis of the specimens,
-the physical scale of the images (pixels/inch) is needed; thus
+the physical scale of the images (\(\frac{\mathrm{pixels}}{\mathrm{cm}}\)) is needed; thus
 requiring the ability to identify and measure rulers in the images.
 Many specimen collections do include Darwin Core metadata~\cite{biodiv_info_standards}, detailing
 specimen taxon, geographic location, and several other descriptive aspects.
@@ -745,7 +745,7 @@ for the analyses of the BGNN study. Ideally, for INHS images the fish should be 
 % Figure~\ref{fig:histo} shows the distribution of
 The difference between
 the mean intensity of the foreground (i.e.\ the pixels of the fish) and the mean intensity of the background within the fish's bounding box
-was computed for all 7,244 images.
+was computed for all \(7,244\) images.
 The overall mean of the differences is \(144.3\), with a standard deviation of \(15.8\). Images on the low end of the distribution exhibit poor foreground--background contrast, and images on the high end likely contain poorly lit specimens.
 Images are considered to have ``low'' and
 ``high'' contrast if their background-foreground difference is greater than
@@ -841,8 +841,8 @@ Image scale ($\frac{\mathrm{pixels}}{\mathrm{cm}}$) and fish length were
 measured, using ImageJ~\cite{imagejCite}, in the same 100  test images.
 % 50 of these images \todo{The same 50 as before?} were measured by hand to get \(\frac{\mathrm{pixels}}{\mathrm{cm}}\) and fish length in centimeters with ImageJ~\cite{imagejCite}.
 In this subset of images the average error for the scale calculation
-was \(0.91\%\), and the average error for the fish length calculation was \(5.87\%\).
-Scale calculations using the ``2'' and ``3'' method are nearly identical to those calculated by hand between the tick marks on the ruler. When the tail of the fish is accurately masked and the specimen is fairly straight, the length calculation is highly accurate as well. An example of such a result can be seen in Figure~\ref{fig:scale_len}, for which the difference between the hand-measured length and the automatically calculated length was only \(0.6\%\) (\(8.88\) cm vs \(8.82\) cm). Thus, the primary means of lowering the error of the length calculation is to improve tail masking accuracy.
+was \(0.89\%\), and the average error for the fish length calculation was \(5.55\%\).
+Scale calculations using the ``2'' and ``3'' method are nearly identical to those calculated by hand between the tick marks on the ruler. When the tail of the fish is accurately masked and the specimen is fairly straight, the length calculation is highly accurate as well. An example of such a result can be seen in Figure~\ref{fig:scale_len}, for which the difference between the hand measured length and the automatically calculated length was only \(0.6\%\) (\(8.88\) cm vs \(8.82\) cm). Thus, the primary means of lowering the error of the length calculation is to improve tail masking accuracy.
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.49\linewidth]{images/54172}
