@@ -401,7 +401,7 @@ methods.
 The automated metadata generation methods for our project were developed to work on a specific set of images, the INHS\ Fish Collection~\cite{INHS}.  Most of these images have been configured, produced and acquired with a standard procedure.  The images used for our study contain one fish placed on a bright, white background and contain an information tag and the same ruler.  See Figure \ref{fig:INHS_examples} for three example images from the collection. While training and focusing our system on images with very similar compositions and visual properties may limit its immediate applicability, our efforts demonstrate the potential that machine learning and image informatics techniques have for automatically generating metadata for biological specimen image collections in general.
 
 \section{Methods}
-Our process for metadata generation can be broken into three steps: 1) object detection with Facebook's Detectron2 machine learning library (subsequently referred to as \verb|detectron|), 2) image processing at the pixel level, and 3) calculations on the results of the previous steps to determine higher level metadata properties.
+Our process for metadata generation can be divided into three steps: 1) object detection with Facebook's Detectron2 machine learning library (referred to as \verb|detectron|), 2) image processing at the pixel level, and 3) calculations on the results of the previous steps to determine higher level metadata properties.
 % \todo{Definitely need to explain somewhere in more detail about our current admissibility criteria for images. Not sure where I want to put it yet so just leaving it as a todo}
 
 \subsection{Detectron}
@@ -409,8 +409,8 @@ A prerequisite task to performing any advanced metadata property generation
 is finding the specimens (and other relevant objects) within the collection
 images. Object detection has been a broadly active field of study in recent
 years \cite{zou2019object}, and has resulted in a number of well-tested, purpose-built architectures. We elected to use Facebook AI Research's (FAIR)
-\verb|detectron| tool \cite{wu2019detectron2}, and specifically its implementation of the Mask R-CNN architecture \cite{he2018mask}, for object detection in our project.
-\verb|detectron| is built on \verb|pytorch|~\cite{NEURIPS2019_9015} and provides a relatively straightforward method for training on COCO~\cite{DBLP:journals/corr/LinMBHPRDZ14} format datasets. It is able to handle an arbitrary number of object classes, and can classify an arbitrary number of object within a given image. We chose \verb|detectron| for its relative ease of use compared to lower level libraries, and its implementations of powerful architectures developed by FAIR.
+\verb|detectron| tool \cite{wu2019detectron2}, and specifically its implementation of the Mask R-CNN architecture \cite{he2018mask}, for object detection in our project, given its many flexible and robust capabilities.
+\verb|detectron| is built on \verb|pytorch|~\cite{NEURIPS2019_9015} and provides a relatively straightforward method for training on COCO~\cite{DBLP:journals/corr/LinMBHPRDZ14} format datasets. It is able to handle any number of object classes, and can classify an arbitrary number of objects within a given image. We chose \verb|detectron| for its relative ease of use compared to lower level libraries, and its implementation of powerful architectures developed by FAIR.
 For our project, we use it to identify five object classes: fish, fish eyes, rulers, and the numbers 2 and 3 on rulers,
 as shown in Figure \ref{fig:teaser}. Objects with a 30\% confidence score or higher are maintained for analysis.
 
@@ -440,7 +440,8 @@ used in our training dataset.
 All of the training data was labeled by hand using \verb|makesense.ai| \cite{make-sense}
 % While the ultimate goal of the project is to generalize to images from a variety of specimen collections, we have thus far focused only
 on images from the INHS\ Fish Collection \cite{INHS}.
-Using \verb|detectron|'s default training scheme, the model was trained for \(100,000\) epochs. All instance types were included in a single object detection model. The total cross-entropy loss began at \(2.948\) and ended at \(0.158\) for the training data.
+Using \verb|detectron|'s default training scheme, the model was trained for \(100,000\) epochs. All instance types were included in a single object detection model.
+% The total cross-entropy loss began at \(2.948\) and ended at \(0.158\) for the training data.
 
 \begin{comment}
 \begin{verbatim}
@@ -523,7 +524,7 @@ foreground and background intensities, is used to compute an initial cutoff valu
 While the Otsu value occasionally generates an accurate mask as is, usually
 the contrast between foreground and background is low and much of the lighter parts of the fish (such as its tail fin) are marked as background.
 
-To overcome this under-segmentation, the threshold value should be
+To overcome this improper segmentation, the threshold value should be
 either adjusted up or down, depending on if the background is lighter or darker than the fish.
 For our current dataset, the background is always lighter (i.e.~closer to 255), so the threshold value needs to be scaled up to include more of the
 foreground image.
@@ -540,15 +541,22 @@ point between the Otsu threshold value and the
 mean of the background intensities.
 This adjusted threshold value
 % by 50\% of the difference between the mean of the background and the original threshold value, which 
-struck a fairly optimal balance between capturing most of fish's fins in most cases, without also masking parts of the background.
+usually produced an acceptable balance between capturing most of the
+fish's fins, without also masking parts of the background.
 
 \subsubsection{Consolidating the Foreground}
-While thresholding has the potential to generate better masks than a neural network (when provided an initial approximate bounding box), it also introduces considerable noise. Single or small groups of errant pixels can be marked as foreground depending on the consistency of the background, and interior pixels of the fish (especially around the fins) can be marked as background. To be useful for generating an accurate bounding box and for subsequent computational analysis, the mask must consist of one single ``blob'' over the fish the contains no holes, and no other pixels disconnected from this blob can be marked as foreground.
+While thresholding has the potential to generate better masks than a neural network (when provided an initial approximate bounding box), it also introduces considerable noise. Single or small groups of errant pixels can be marked as foreground depending on the consistency of the background, and interior pixels of the fish (especially around the fins) can be marked as background. To be useful for generating an accurate bounding box and for subsequent computational analysis, the mask must consist of one single ``blob'' over the fish, i.e.~containing no holes, and no other pixels disconnected from this blob can be marked as foreground.
 
-To accomplish this, we apply an iterative process of flood filling from all the foreground pixels in the image until a blob is generated that is large enough to constitute the fish. This is another metaparameter, but greater than 10\% of the current bounding box has masked the specimen in all observed cases. Once the fish's blob is found, noise then needs removed. This is done by flood filling from each of the corner of the bounding box where the specimen is not present (all four corners in the overwhelming majority of cases), then taking the inverse of the result. The fish mask is excluded from these corner flood fills, so this process removes all noise from both the background and foreground of the image leaving only a close mask over the fish itself.
+To accomplish this, we apply an iterative process of flood filling from all the foreground pixels in the image until a blob is generated that is large enough to constitute the fish. This leads to another metaparameter, but
+using greater than 10\% of the current bounding box has masked the specimen in all observed cases. Once the fish's blob is found, noise then needs 
+to be removed. This is done by flood filling from each of the corners of the bounding box, where the specimen is not present (all four corners in the overwhelming majority of cases), then taking the inverse of the result. The fish mask is excluded from these corner flood fills, so this process removes all noise from both the background and foreground of the image, leaving only a single
+mask over the fish itself.
 
 \subsubsection{Adjusting the Bounding Box}
-With an accurate mask generated, it is then necessary to check whether the bounding box needs expanded or shrunk along any edges. Expansion is done first, by checking whether any edge intersects with any of the foreground mask pixels. If one does, it is expanded out by 1 pixel. If any edges are expanded, the whole process of masking and expansion process is repeated to account for any changes in average intensities. Once no edges contain foreground pixels, the mask is then shrunk. This process is more efficient as all that is required is to shrink each edge by one up until the point they contain one or more foreground pixels. Once the shrinkage step is accomplished, the final mask and bounding box have been generated.
+With an accurate mask generated, it is then necessary to check whether the bounding box needs to be expanded or shrunk along any of its edges.
+Expansion is done first, by checking whether any edge intersects with any of the foreground mask pixels. If one does, it is expanded out by 1 pixel. If any edges are expanded, the whole process of masking and expansion is repeated to account for any changes in average intensities. Once no edges contain foreground pixels, the bounding box is then shrunk.
+% This process is more efficient as all that is required is to shrink
+Each edge is contacted by one pixel up until it contain one or more foreground pixels. Once the shrinkage step is accomplished, the final mask and bounding box have been generated.
 
 \subsubsection{Fallback} The pixel analysis process occasionally fails,
 e.g.\ when flood-filling does not produce a large enough blob or
@@ -582,10 +590,10 @@ Determining which \verb|side| of the fish is visible is predicated on finding it
 The \verb|primary_axis| of a fish can be calculated by taking the covariance of its blob in \(x\) and \(y\), which yields its principle eigenvector.
 The eigenvector can be directly assigned to the property. If an eye is
 present, we ensure that \verb|primary_axis| points in the direction of the
-eye in relation to the fish's centroid.
+eye relative to the fish's centroid.
 
 Our team encoded this information as a ``clock value'' between 1 and 12 when manually recording it. To convert \verb|principal_axis| to \verb|clock_value|, the sign of \(x\) and \(y\) on the principal axis are used to determine which Cartesian quadrant the fish angles into relative to its centroid. 
-Depending on this quadrant, we dot product the principal axis with either \([-1,0]\), \([0,-1]\), \([1,0]\) or \([0,1]\), which correspond to 9, 6, 3 and ``0'' o'clock respectively. The resulting radian value is then converted to a polar displacement in clock value space, and added to the comparative clock value used in the dot product. This gives the fish's clock value from
+Depending on the quadrant, we dot product the principal axis with either \([-1,0]\), \([0,-1]\), \([1,0]\) or \([0,1]\), which correspond to 9, 6, 3 and ``0'' o'clock respectively. The resulting radian value is then converted to a polar displacement in clock value space, and added to the comparative clock value used in the dot product. This gives the fish's clock value from
 0 to \(11.\overline{9}\). Before recording \verb|clock_value| in the output,
 the value is rounded to the nearest integer, with a 0 final result replaced with 12.
 \subsubsection{scale and length}
@@ -606,7 +614,7 @@ Just gonna throw some caveats in here, might be its own section might not
     \item Program falls back to using detectron mask and bbox for metadata generation in the event the mask generation/pixel analysis fails. Failure is defined as never finding a cohesive flood filled mask that covers more than 10\% of the detectron bbox initially. Can provide a statistic on how often this occurs.
 \end{itemize}
 \end{comment}
-\section{Results and Discussion}
+\section{Results}
 Technicians employed by our team have manually generated the 22 metadata properties deemed crucial to the overall BGNN project~\cite{leipzig2021biodiversity} for a large number of INHS images. \(20,699\) total entries were created by 13 technicians that spanned \(8,398\) unique images. Of these \(8,398\) images, \(7,244\) were both not part of the \verb|detectron| training set and met our current admissibility criteria for \verb|detectron| and pixel processing. We ran the metadata extraction program on these \(7,244\) images.
 For the properties of image scale, fish length, and fish bounding boxes
 (properties not manually generated),
