@@ -115,16 +115,16 @@ to examine thousands of images
 to determine if, for example, a specific fish grows to different lengths
 in different habitats, or the temporal evolution of an anatomical feature,
 e.g.~the size of a dorsal fin.
-\begin{figure*}
+\begin{figure}[t]
   \centering
-  \includegraphics[width=.31\linewidth]{images/INHS_FISH_100314}
-  \hspace{1mm}
-  \includegraphics[width=.31\linewidth]{images/INHS_FISH_100682}
-  \hspace{1mm}
-  \includegraphics[width=.31\linewidth]{images/INHS_FISH_100020}
-  \caption{Three example images from the Illinois Natural History Survey (INHS) collection.}
+  % \includegraphics[width=.31\linewidth]{images/INHS_FISH_100314}
+  % \hspace{1mm}
+  \includegraphics[width=.95\linewidth]{images/INHS_FISH_100682}
+  % \hspace{1mm}
+  % \includegraphics[width=.31\linewidth]{images/INHS_FISH_100020}
+  \caption{An image from the Illinois Natural History Survey (INHS) collection.}
   \label{fig:INHS_examples}
-\end{figure*}
+\end{figure}
 
 Since digital collections may each contain tens of thousands of images, manually producing image-related metadata for each digitized specimen is both labor- and time-intensive and prohibitively expensive. Methods for automatically computing metadata are therefore needed to fully exploit biological image repositories for scientific discovery.
 %we are both extracting and calculating. Just to double check then, our definition/understanding of computing here includes both of these, or should we focus on extraction, with the idea that calculating is the extra novel thing added, the application of math-the groovy stuff you guys added.  
@@ -141,7 +141,7 @@ allows us to compute quantitative features about the fish specimens, such
 as their length and area.  In order to test and validate our methods, they
 have been  applied to a set of \(7,244\)
 images drawn from the Illinois Natural History Survey (INHS) Collection~\cite{INHS}.
-Figure \ref{fig:INHS_examples} presents three typical images used in our
+Figure \ref{fig:INHS_examples} presents a typical image used in our
 study.
 %Dave/Joel, the section above, from "we can accurately ..." to the figures" to me is more results. I guess it's okay to give this in introduction. Just wanted to raise this point. I sometimes give a paraphrase too, but just good to see if it is a little too much or okay with you both. I think it's okay as I re-read it, but good to have someone check.
 The following section of the paper provides contextual background for this work, followed by the research goals and objectives, and a review of our research methods. Next, the results, along with discussion, are presented. The conclusion highlights key findings and identifies next steps.
@@ -219,9 +219,10 @@ They were able to classify 24 fish families with 90\% accuracy.
 %  I want to see the paper before I cite it.
 % Banan 2020 \cite{Banan2020DeepLA}
 % Hence, in this study, a deep learning neural network as a smart, real-time and non-destructive method was developed and applied to automate the identification of four economically important carp species namely common carp (Cyprinus carpio), grass carp (Ctenopharingodon idella), bighead carp (Hypophtalmichthys nobilis) and silver carp (Hypophthalmichthys molitrix). The obtained results proved that our approach, evaluated through 5-fold cross-validation, achieved the highest possible accuracy of 100 %. The achieved high level of classification accuracy was due to the ability of the suggested deep model to build a hierarchy of self-learned features, which was in accordance with the hierarchy of these fish’s identification keys. In conclusion, the proposed convolutional neural network (CNN)-based method has a single and generic trained architecture with promising performance for fish species identification.
-Iqbal et al.~\cite{Iqbal2021AutomaticFS} used a modified
-AlexNet \cite{AlexNet2012} model to classify six different fish species
-with 90\% accuracy.
+Iqbal et al.~\cite{Iqbal2021AutomaticFS} used a
+deep learning
+% modified AlexNet \cite{AlexNet2012}
+model to classify six different fish species with 90\% accuracy.
 % In this paper, we presented an automated system for identification and classification of fish species. It helps the marine biologists to have greater understanding of the fish species and their habitats. The proposed model is based on deep convolutional neural networks. It uses a reduced version of AlexNet model comprises of four convolutional layers and two fully connected layers. A comparison is presented against the other deep learning models such as AlexNet and VGGNet. The four parameters are considered that is number of convolu- tional layers and number of fully-connected layers, number of iterations to achieve 100% accuracy on training data, batch size and dropout layer. The results show that the proposed and modified AlexNet model with less number of layers has achieved the testing accuracy of 90.48% while the original AlexNet model achieved 86.65% over the untrained bench- mark fish dataset. The inclusion of dropout layer has enhanced the overall performance of our proposed model. It contain less training images, less memory and it is also less compu- tational complex.
 %  No paper. No reference
 % Xu 2021 \cite{Xu2021TransferLA},
@@ -369,14 +370,14 @@ should be used as is.
 % Developing a fallback approach for when flood fill operations behave unexpectedly the image is too washed out.
 \end{enumerate}
 
-\begin{figure*}[t]
+\begin{figure}[t]
   \centering
- \includegraphics[width=.45\linewidth]{images/teaser1_crop}
-  \hspace{5mm}
-  \includegraphics[width=.45\linewidth]{images/teaser2_crop}
-  \caption{Initial object detection on two specimen images using Detectron2~\cite{wu2019detectron2}.}
+ % \includegraphics[width=.45\linewidth]{images/teaser1_crop}
+  % \hspace{5mm}
+  \includegraphics[width=.95\linewidth]{images/teaser2_crop}
+  \caption{Initial object detection on a specimen image using Detectron2~\cite{wu2019detectron2}.}
   \label{fig:teaser}
-\end{figure*}
+\end{figure}
 
 \item Compute a number of high-level metadata properties from the detected objects and image quality metrics.
 % [*Test our ability to calculate] the following set of
@@ -397,7 +398,7 @@ methods.
 
 %In order to address the need for fish specimen image metadata that can support scientific investigations we have begun the deployment of both off-the-shelf and custom-written software that automatically generates a variety of metadata from a publicly-available biological image repository.  The types of metadata being produced are related to image quality, content and scale, and should provide the information necessary for advanced quantitative studies of the digitized specimens.
 
-The automated metadata generation methods for our project were developed to work on a specific set of images, the INHS\ Fish Collection~\cite{INHS}.  Most of these images have been configured, produced and acquired with a standard procedure.  The images used for our study contain one fish placed on a bright, white background and contain an information tag and the same ruler.  See Figure \ref{fig:INHS_examples} for three example images from the collection. While training and focusing our system on images with very similar compositions and visual properties may limit its immediate applicability, our efforts demonstrate the potential that ML and image informatics techniques have for automatically generating metadata for biological specimen image collections in general.
+The automated metadata generation methods for our project were developed to work on a specific set of images, the INHS\ Fish Collection~\cite{INHS}.  Most of these images have been configured, produced and acquired with a standard procedure.  The images used for our study contain one fish placed on a bright, white background and contain an information tag and the same ruler.  See Figure \ref{fig:INHS_examples} for an example image from the collection. While training and focusing our system on images with very similar compositions and visual properties may limit its immediate applicability, our efforts demonstrate the potential that ML and image informatics techniques have for automatically generating metadata for biological specimen image collections in general.
 
 \section{Methods}
 Our process for metadata generation can be divided into three steps: 1) object detection with Facebook's Detectron2 ML library (referred to as \verb|detectron|), 2) image processing at the pixel level, and 3) calculations on the results of the previous steps to determine higher level metadata properties.
