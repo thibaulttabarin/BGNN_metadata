@@ -68,10 +68,11 @@ analyzing digitized fish images and extracting various important
 features from them. The digitized fish specimens are being analyzed as part of the Biology Guided Neural Networks (BGNN) initiative, which is developing a novel class of artificial neural networks using phylogenies and anatomy ontologies. Automatically generated metadata is crucial for identifying
 the high-quality images needed for the neural network's predictive analytics.
 %predictive analytics?
-Methods that  combine ML and image informatics techniques allow us to rapidly enrich the existing metadata associated with each of 
-7,244 images from the Illinois Natural History Survey (INHS). The sample
-images all have 22 manually generated metadata properties associated with them, which
-aid our study.  Results show we can accurately generate many key metadata properties relevant to the
+Methods that  combine ML and image informatics techniques allow us to rapidly enrich the existing metadata associated with the
+7,244 images from the Illinois Natural History Survey (INHS) used in our
+study. The sample
+images also have 22 manually generated metadata properties, which
+can be used for comparison.  Results show we can accurately generate many key metadata properties relevant to the
 BGNN project such as: fish quantity and orientation,  image scaling based on
 ruler identification and measurement, and general image quality metrics
 (e.g.\ brightness and contrast). Results also show we can also accurately generate bounding boxes and segmentation masks for fish, which are needed for subsequent machine learning analysis.
@@ -79,7 +80,10 @@ ruler identification and measurement, and general image quality metrics
 %x, y, z = any other key results. jg will add from results section, unless someone else does first. 
 The automatic process out-performs humans in terms of time and labor cost,
 as well as accuracy, and provides a novel solution for leveraging digitized
-specimens in ML. This research has implications for harnessing the tens of thousands of digitized specimens stored in open-access repositories found wold-wide.
+specimens in ML. This research demonstrates the ability of computational
+methods to enhance the digital library services associated with
+the tens of thousands of digitized specimens stored in open-access
+repositories world-wide.
 %world wide [*across the globe] or we may not even need this part as open access is global access
 
 % OLD text - Over the last several decades advances in computing, imaging, and cyberinfrastructure have had a major impact on scientific research and discovery. One area of considerable activity is the digitization of the biological specimens that have been acquired worldwide by museums and other research institutions, undertakings that have produced large image collections.The metadata that is vital for subsequent ML, analysis and scientific discovery based on these specimen image repositories is often unavailable, sparse or incorrect. As a step towards improving metadata in specimen research image collections, our team is developing methods for automatically analyzing fish images to extract a variety of important features. These fish specimens are being studied for a larger project entitled Biology Guided Neural Networks (BGNN), which is developing a novel class of artificial neural networks that can exploit the machine readable and predictive knowledge about biology that is available in specimen images, phylogenies and anatomy ontologies. Using a combination of ML and image informatics tools and techniques, we can accurately determine metadata such as fish quantity and location within images, fish orientation and other quantitative fish features, image scaling based on ruler identification and measurement, and general image quality metrics for a substantial number of the images being used in the BGNN project.Our goal is to develop image metadata generation methods that both support the research underway within the BGNN project, and provide a framework for future technology developments that can be deployed by repository curators to improve and bolster the metadata they provide with their specimen images. A longer term goal is to extend the image analysis methods for computing quantitative features in support of specific biological investigations.
@@ -220,8 +224,8 @@ They were able to classify 24 fish families with 90\% accuracy.
 % Banan 2020 \cite{Banan2020DeepLA}
 % Hence, in this study, a deep learning neural network as a smart, real-time and non-destructive method was developed and applied to automate the identification of four economically important carp species namely common carp (Cyprinus carpio), grass carp (Ctenopharingodon idella), bighead carp (Hypophtalmichthys nobilis) and silver carp (Hypophthalmichthys molitrix). The obtained results proved that our approach, evaluated through 5-fold cross-validation, achieved the highest possible accuracy of 100 %. The achieved high level of classification accuracy was due to the ability of the suggested deep model to build a hierarchy of self-learned features, which was in accordance with the hierarchy of these fish’s identification keys. In conclusion, the proposed convolutional neural network (CNN)-based method has a single and generic trained architecture with promising performance for fish species identification.
 Iqbal et al.~\cite{Iqbal2021AutomaticFS} used a
-deep learning
-% modified AlexNet \cite{AlexNet2012}
+% deep learning
+modified AlexNet \cite{AlexNet2012}
 model to classify six different fish species with 90\% accuracy.
 % In this paper, we presented an automated system for identification and classification of fish species. It helps the marine biologists to have greater understanding of the fish species and their habitats. The proposed model is based on deep convolutional neural networks. It uses a reduced version of AlexNet model comprises of four convolutional layers and two fully connected layers. A comparison is presented against the other deep learning models such as AlexNet and VGGNet. The four parameters are considered that is number of convolu- tional layers and number of fully-connected layers, number of iterations to achieve 100% accuracy on training data, batch size and dropout layer. The results show that the proposed and modified AlexNet model with less number of layers has achieved the testing accuracy of 90.48% while the original AlexNet model achieved 86.65% over the untrained bench- mark fish dataset. The inclusion of dropout layer has enhanced the overall performance of our proposed model. It contain less training images, less memory and it is also less compu- tational complex.
 %  No paper. No reference
