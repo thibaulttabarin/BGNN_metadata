@@ -129,7 +129,7 @@ dmypy.json
 .pyre/
 
 # CUSTOM
-images/
+/images/
 images
 output/
 Pipfile.lock
@@ -147,7 +147,7 @@ config/overall_prefix.txt
 *.out
 *.pdf
 *.gz
-*.json
+#*.json
 *.bak*
 *.txt
 *.blg
@@ -160,3 +160,4 @@ failed/
 test/
 test_images/
 .DS_Store
+results/
