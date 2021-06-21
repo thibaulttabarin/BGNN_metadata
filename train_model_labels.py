@@ -42,13 +42,13 @@ def main():
             # This if only matters if you want to visualize a certain
             # dataset with the `visualize_input` function after the loop.
             # Otherwise, any of the datasets will work.
-            if name == '1':
+            if name == '1_labels':
                 metadata = Metadata(evaluator_type='coco', image_root=ims,
                         json_file=json_file,
                         name=name,
-                        thing_classes=['fish', 'ruler', 'eye', 'two', 'three'],
+                        thing_classes=['label'],
                         thing_dataset_id_to_contiguous_id=
-                            {1: 0, 2: 1, 3: 2, 4: 3, 5: 4}
+                            {1: 0}
                         )
             register_coco_instances(name, {}, json_file, ims)
 
