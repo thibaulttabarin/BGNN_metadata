@@ -10,7 +10,7 @@ pillow = "*"
 torch = "*"
 torchvision = "*"
 opencv-python = "*"
-detectron2 = {editable = true, ref = "v0.3", git = "https://github.com/facebookresearch/detectron2.git"}
+detectron2 = {editable = true, ref = "v0.4", git = "https://github.com/facebookresearch/detectron2.git"}
 ipython = "*"
 scikit-image = "*"
 pandas = "*"
