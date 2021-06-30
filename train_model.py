@@ -63,13 +63,17 @@ def main():
     cfg.MODEL.WEIGHTS = "detectron2://COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x/137849600/model_final_f10217.pkl"
     cfg.SOLVER.IMS_PER_BATCH = 2
     cfg.SOLVER.BASE_LR = 0.02
-    cfg.SOLVER.MAX_ITER = (
-        500
-    )
+    #cfg.SOLVER.MAX_ITER = (
+        #50000
+    #)
+
+    ################
+    cfg.MODEL.ROI_HEADS.NUM_CLASSES = 5
+    ################
+
     cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = (
         128
     )
-    cfg.MODEL.ROI_HEADS.NUM_CLASSES = 5
 
     os.makedirs(cfg.OUTPUT_DIR, exist_ok=True)
     trainer = DefaultTrainer(cfg)
