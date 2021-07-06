@@ -163,3 +163,4 @@ test_images/
 results/
 check_labels.json
 *.csv
+metadata.json
