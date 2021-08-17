@@ -18,6 +18,7 @@ iopath = "*"
 imutils = "*"
 jedi = "==0.17.2"
 pytesseract = "*"
+pyenchant = "*"
 
 [dev-packages]
 
