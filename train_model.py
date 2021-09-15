@@ -31,7 +31,7 @@ def main():
     conf = json.load(open('config/training_data.json'))
     metadata = None # Need it in outer block for reuse
     train = []
-    test_images = f'{prefix}full_imgs/'
+    test_images = f'{prefix}idigbio_images/'
 
     for img_dir in conf.keys():
         ims = f'{prefix}{img_dir}'
@@ -82,7 +82,7 @@ def main():
 
     cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")
     # set the testing threshold for this model
-    cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.1
+    cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.2
     predictor = DefaultPredictor(cfg)
 
     i = 0
