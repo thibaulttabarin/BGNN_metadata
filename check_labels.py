@@ -1,5 +1,6 @@
 import math
 import json
+import re
 import sys
 import os
 from torch.multiprocessing import Pool
@@ -11,6 +12,7 @@ from functools import partial
 import matplotlib.pyplot as plt
 import pprint
 from copy import copy
+from random import shuffle
 
 import torch
 
@@ -37,9 +39,9 @@ import cv2
 
 from skimage import filters
 from skimage.morphology import flood_fill
-from random import shuffle
 
 import pytesseract as tess
+import enchant
 
 def init_model():
     cfg = get_cfg()
@@ -52,8 +54,9 @@ def init_model():
     predictor = DefaultPredictor(cfg)
     return predictor
 
-def gen_metadata(file_plus_name):
+def gen_metadata(names, file_plus_name):
     file_path, sci_name = file_plus_name
+    sci_name = sci_name.lower()
     predictor = init_model()
     im = cv2.imread(file_path)
     metadata = Metadata(evaluator_type='coco', image_root='.',
@@ -71,18 +74,48 @@ def gen_metadata(file_plus_name):
     vis = visualizer.draw_instance_predictions(insts.to('cpu'))
     os.makedirs('images', exist_ok=True)
     file_name = file_path.split('/')[-1]
-    print(f'{file_name}: {sci_name}\n-------------')
+    print(f'{file_name}: {sci_name}')#\n-------------')
     cv2.imwrite(f'images/check_labels_prediction_{file_name}.png',
             vis.get_image()[:, :, ::-1])
     bbox = [round(x) for x in label.pred_boxes.tensor.cpu().
             numpy().astype('float64')[0]]
     im_crop = im[bbox[1]:bbox[3],bbox[0]:bbox[2],...]
-    text = tess.image_to_string(Image.fromarray(im_crop))
-    print(text)
-    result = sci_name.lower() in text.lower()
-    print(f'Matches metadata: {result}')
+    text = tess.image_to_string(Image.fromarray(im_crop)).lower()
+    #print(text)
+    result = sci_name in text
+    #print(f'Matches metadata exactly: {result}')
+    if not result:
+        lines = [re.sub(r"[^A-Za-z ]+", '', i).strip() for i in text.split('\n') if i]
+        lines = [i for i in lines if len(i) > 9]
+        min_dist = math.inf
+        min_name = sci_name
+        min_line = ''
+        for line in lines:
+            curr_dist = enchant.utils.levenshtein(sci_name, line)
+            if curr_dist < min_dist and curr_dist <= int(.75 * len(line)):
+                min_dist = curr_dist
+                min_line = line
+        result = min_dist < 2
+        #print(f'Off by one character: {result}')
+        if not result:
+            for name in names:
+                for line in lines:
+                    curr_dist = enchant.utils.levenshtein(line, name.lower())
+                    if curr_dist < min_dist and curr_dist <= int(.5 * len(line)):
+                        min_name = name.lower()
+                        min_dist = curr_dist
+                        min_line = line
+            if min_name == sci_name:
+                result = True
+    else:
+        min_dist = 0
+        min_name = sci_name
+        min_line = sci_name
+    #print(min_dist)
+    #print(min_name)
     #exit(0)
-    return {file_name: result}
+    return {file_name: {'matched_metadata': result, 'name_in_tag': min_line,
+        'best_name': min_name, 'lev_dist': min_dist, 'metadata_name': sci_name}}
 
 def gen_metadata_safe(file_plus_name):
     try:
@@ -107,8 +140,10 @@ def main():
             for file in files]
     #pprint.pprint(files_names)
     #exit(0)
+    names = [i.strip() for i in csv_df['ScientificName'].unique() if ' ' in i.strip()]
+    f = partial(gen_metadata, names)
     with Pool(4) as p:
-        results = map(gen_metadata, files_names)
+        results = p.map(f, files_names)
         #results = p.map(gen_metadata_safe, files_names)
     #results = map(gen_metadata, files)
     output = {}
