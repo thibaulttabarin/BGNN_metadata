@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Widget</class>
+ <widget class="QWidget" name="Widget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1294</width>
+    <height>754</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Widget</string>
+  </property>
+  <widget class="QPushButton" name="ocr_mistake">
+   <property name="geometry">
+    <rect>
+     <x>780</x>
+     <y>10</y>
+     <width>101</width>
+     <height>101</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>CSV Correct
+Auto Wrong
+OCR Mistake</string>
+   </property>
+  </widget>
+  <widget class="QPlainTextEdit" name="label_text">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>60</y>
+     <width>381</width>
+     <height>531</height>
+    </rect>
+   </property>
+   <property name="readOnly">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPlainTextEdit" name="metadata">
+   <property name="geometry">
+    <rect>
+     <x>420</x>
+     <y>10</y>
+     <width>341</width>
+     <height>201</height>
+    </rect>
+   </property>
+   <property name="readOnly">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QLabel" name="picture_frame">
+   <property name="geometry">
+    <rect>
+     <x>410</x>
+     <y>240</y>
+     <width>611</width>
+     <height>441</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="scaledContents">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="csv_wrong">
+   <property name="geometry">
+    <rect>
+     <x>1010</x>
+     <y>120</y>
+     <width>101</width>
+     <height>101</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>CSV Wrong
+Auto Correct</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="both_wrong">
+   <property name="geometry">
+    <rect>
+     <x>780</x>
+     <y>120</y>
+     <width>101</width>
+     <height>101</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Both Wrong</string>
+   </property>
+  </widget>
+  <widget class="QPlainTextEdit" name="scientific_name">
+   <property name="geometry">
+    <rect>
+     <x>1040</x>
+     <y>260</y>
+     <width>241</width>
+     <height>51</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_2">
+   <property name="geometry">
+    <rect>
+     <x>1040</x>
+     <y>230</y>
+     <width>191</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Actual Name (Both Wrong):</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="tag_issue">
+   <property name="geometry">
+    <rect>
+     <x>900</x>
+     <y>10</y>
+     <width>101</width>
+     <height>101</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>CSV Correct
+Auto Wrong
+Tag Issue</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="missed_synonym">
+   <property name="geometry">
+    <rect>
+     <x>1010</x>
+     <y>10</y>
+     <width>101</width>
+     <height>101</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>CSV Correct
+Auto Wrong
+Missed Synonym</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="both_correct">
+   <property name="geometry">
+    <rect>
+     <x>900</x>
+     <y>120</y>
+     <width>101</width>
+     <height>101</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Both Correct</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="wrong_other">
+   <property name="geometry">
+    <rect>
+     <x>1120</x>
+     <y>10</y>
+     <width>101</width>
+     <height>101</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>CSV Correct
+Auto Wrong
+Other</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="nothing2">
+   <property name="geometry">
+    <rect>
+     <x>1120</x>
+     <y>120</y>
+     <width>101</width>
+     <height>101</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QPlainTextEdit" name="further_descr">
+   <property name="geometry">
+    <rect>
+     <x>1040</x>
+     <y>350</y>
+     <width>241</width>
+     <height>141</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_3">
+   <property name="geometry">
+    <rect>
+     <x>1040</x>
+     <y>320</y>
+     <width>191</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Further Description:</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="gen_report">
+   <property name="geometry">
+    <rect>
+     <x>1230</x>
+     <y>10</y>
+     <width>61</width>
+     <height>211</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Gen
+Report</string>
+   </property>
+  </widget>
+  <widget class="QPlainTextEdit" name="sys_status">
+   <property name="geometry">
+    <rect>
+     <x>1040</x>
+     <y>560</y>
+     <width>241</width>
+     <height>121</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_4">
+   <property name="geometry">
+    <rect>
+     <x>1040</x>
+     <y>530</y>
+     <width>191</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>System Status:</string>
+   </property>
+  </widget>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections/>
+</ui>

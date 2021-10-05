@@ -7,20 +7,20 @@ name = "pypi"
 numpy = "*"
 pynrrd = "*"
 pillow = "*"
-torch = "*"
-torchvision = "*"
 opencv-python = "*"
 ipython = "*"
 scikit-image = "*"
 pandas = "*"
 iopath = "*"
 imutils = "*"
-detectron2 = {editable = true, ref = "v0.4", git = "https://github.com/facebookresearch/detectron2.git"}
+#detectron2 = {editable = true, ref = "v0.5", git = "https://github.com/facebookresearch/detectron2.git"}
 jedi = "==0.17.2"
 pytesseract = "*"
 pyenchant = "*"
+pyside6 = "*"
+ninja = "*"
 
 [dev-packages]
 
 [requires]
-python_version = "3"
+python_version = "3.9.7"
