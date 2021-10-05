@@ -21,6 +21,8 @@ with open('./check_labels.json') as f:
 #curr_metadata = None
 #window = None
 
+LEV_DIST_CUTOFF = 3
+
 engine = create_engine('sqlite:///label_checking.sqlite')#, echo=True)
 conn = engine.connect()
 Session = sessionmaker(bind=engine)
@@ -36,6 +38,8 @@ class ErrTypes(enum.Enum):
     both_wrong = 5
     auto_right = 6
     both_right = 7
+    both_right_ocr_failed = 8
+    both_right_tag_issue = 9
 
 class Record(Base):
     __tablename__ = 'results'
@@ -61,15 +65,44 @@ def load_next():
     window.picture_frame.setPixmap(pixmap)
     global curr_metadata
     curr_metadata = metadata[filename]
-    window.label_text.setPlainText(curr_metadata['tag_text'])
-    del curr_metadata['tag_text']
-    window.metadata.setPlainText(pprint.pformat(curr_metadata))
+    if 'errored' not in curr_metadata.keys():
+        window.label_text.setPlainText(curr_metadata['tag_text'])
+        del curr_metadata['tag_text']
+        window.metadata.setPlainText(pprint.pformat(curr_metadata))
+    else:
+        window.label_text.clear()
+        window.metadata.clear()
     window.scientific_name.clear()
     window.further_descr.clear()
     print()
     done = session.query(Record).count()
-    window.sys_status.setPlainText('Overall Total: {0}\nTotal to Check: {1}\nDone: {2}\nRemaining: {3}'
-            .format(total, count, done, count - done))
+    window.sys_status.setPlainText(('Overall Total: {}\nTotal to Check: {}' +
+                                    '\n\tErrored: {}\n\tDidn\'t Match: {}' +
+                                    '\n\tLev Dist > {}: {}\nDone: {}' +
+                                    '\nRemaining: {}')
+            .format(total, count, errored, didnt_match, LEV_DIST_CUTOFF,
+                    lev_dist_above, done, count - done))
+
+def both_corr_tag_issue():
+    name = Record(filename=filename, sci_name=curr_metadata['metadata_name'].capitalize(),
+            err_type=ErrTypes.both_right_tag_issue, description=window.further_descr.toPlainText())
+    session.add(name)
+    session.commit()
+    load_next()
+
+def both_corr_ocr_failed():
+    name = Record(filename=filename, sci_name=curr_metadata['metadata_name'].capitalize(),
+            err_type=ErrTypes.both_right_ocr_failed, description=window.further_descr.toPlainText())
+    session.add(name)
+    session.commit()
+    load_next()
+
+def wrong_other():
+    name = Record(filename=filename, sci_name=curr_metadata['metadata_name'].capitalize(),
+            err_type=ErrTypes.auto_wrong_other, description=window.further_descr.toPlainText())
+    session.add(name)
+    session.commit()
+    load_next()
 
 def ocr_mistake():
     name = Record(filename=filename, sci_name=curr_metadata['metadata_name'].capitalize(),
@@ -79,7 +112,7 @@ def ocr_mistake():
     load_next()
 
 def both_correct():
-    name = Record(filename=filename, sci_name=curr_metadata['best_name'].capitalize(),
+    name = Record(filename=filename, sci_name=curr_metadata['metadata_name'].capitalize(),
             err_type=ErrTypes.both_right, description=window.further_descr.toPlainText())
     session.add(name)
     session.commit()
@@ -96,7 +129,7 @@ def get_filename():
     for filename in metadata.keys():
         if 'errored' in metadata[filename].keys() or\
                 ((not metadata[filename]['matched_metadata'])
-                or metadata[filename]['lev_dist'] > 2):
+                or metadata[filename]['lev_dist'] > LEV_DIST_CUTOFF):
 
             #s = select(Base)
             #s = select(Record).filter_by(filename=filename)
@@ -121,48 +154,31 @@ def main():
         sys.exit(-1)
 
     global count
-    count = 0
+    global errored
+    global didnt_match
+    global lev_dist_above
+    count, errored, didnt_match, lev_dist_above = 0, 0, 0, 0
     for key in metadata.keys():
         if 'errored' in metadata[key].keys():
+            errored += 1
             count += 1
-        elif not metadata[key]['matched_metadata'] or\
-                metadata[key]['lev_dist'] > 2:
+        elif not metadata[key]['matched_metadata']:
+            didnt_match += 1
+            count += 1
+        elif metadata[key]['lev_dist'] > LEV_DIST_CUTOFF:
+            lev_dist_above += 1
             count += 1
     global total
     total = len(metadata.keys())
 
     load_next()
 
-    #fname_gen = get_filename()
-    #filename = fname_gen.__next__()
-    #print(filename)
-    #pixmap = QPixmap('images/check_labels_prediction_{}.png'
-    #        .format(filename))
-    #window.picture_frame.setPixmap(pixmap)
-    #curr_metadata = metadata[filename]['tag_text']
-    #window.label_text.setPlainText(curr_metadata)
-    #del metadata[filename]['tag_text']
-    #window.metadata.setPlainText(pprint.pformat(metadata[filename]))
-
-    #with open('./check_labels_text.txt') as f:
-        #labels = f.readlines()
-    #i = 0
-    #while i < len(labels):
-        #if '725' in labels[i]:
-            #temp = ''
-            #i += 2
-            #while 'Matches metadata' not in labels[i]:
-                #temp = temp + labels[i]
-                #i += 1
-            #window.label_text.setPlainText(temp)
-            #break
-        #i += 1
-
-    #window.metadata.setPlainText(pprint.pformat(metadata['INHS_FISH_725.jpg']))
-
     window.csv_wrong.clicked.connect(auto_correct)
     window.both_correct.clicked.connect(both_correct)
     window.ocr_mistake.clicked.connect(ocr_mistake)
+    window.wrong_other.clicked.connect(wrong_other)
+    window.both_correct_ocr_failed.clicked.connect(both_corr_ocr_failed)
+    window.both_correct_tag_issue.clicked.connect(both_corr_tag_issue)
 
     window.show()
     exit_code = app.exec()

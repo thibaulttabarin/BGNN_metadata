@@ -60,8 +60,9 @@ def init_model():
     return predictor
 
 def gen_metadata(names, file_plus_name):
+    file_path, sci_name = file_plus_name
+    file_name = file_path.split('/')[-1]
     try:
-        file_path, sci_name = file_plus_name
         sci_name = sci_name.lower()
         predictor = init_model()
         im = cv2.imread(file_path)
@@ -79,7 +80,6 @@ def gen_metadata(names, file_plus_name):
         visualizer = Visualizer(im[:, :, ::-1], metadata=metadata, scale=1.0)
         vis = visualizer.draw_instance_predictions(insts.to('cpu'))
         os.makedirs('images', exist_ok=True)
-        file_name = file_path.split('/')[-1]
         print(f'{file_name}: {sci_name}')#\n-------------')
         cv2.imwrite(f'images/check_labels_prediction_{file_name}.png',
                 vis.get_image()[:, :, ::-1])
@@ -147,7 +147,7 @@ def gen_metadata(names, file_plus_name):
             'best_name': min_name, 'lev_dist': min_dist, 'metadata_name': sci_name,
             'tag_text': text, 'matched_via_synonym': result and min_name != sci_name}}
     except:
-        return {file_path: {'errored': True}}
+        return {file_name: {'errored': True}}
 
 def gen_metadata_safe(file_plus_name):
     try:

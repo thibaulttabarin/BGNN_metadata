@@ -73,7 +73,7 @@ OCR Mistake</string>
   <widget class="QPushButton" name="csv_wrong">
    <property name="geometry">
     <rect>
-     <x>1010</x>
+     <x>1120</x>
      <y>120</y>
      <width>101</width>
      <height>101</height>
@@ -135,7 +135,7 @@ Auto Wrong
 Tag Issue</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="missed_synonym">
+  <widget class="QPushButton" name="both_correct_tag_issue">
    <property name="geometry">
     <rect>
      <x>1010</x>
@@ -145,9 +145,8 @@ Tag Issue</string>
     </rect>
    </property>
    <property name="text">
-    <string>CSV Correct
-Auto Wrong
-Missed Synonym</string>
+    <string>Both Correct
+Tag Issue</string>
    </property>
   </widget>
   <widget class="QPushButton" name="both_correct">
@@ -178,17 +177,18 @@ Auto Wrong
 Other</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="nothing2">
+  <widget class="QPushButton" name="both_correct_ocr_failed">
    <property name="geometry">
     <rect>
-     <x>1120</x>
+     <x>1010</x>
      <y>120</y>
      <width>101</width>
      <height>101</height>
     </rect>
    </property>
    <property name="text">
-    <string/>
+    <string>Both Correct
+OCR Failed</string>
    </property>
   </widget>
   <widget class="QPlainTextEdit" name="further_descr">
@@ -236,6 +236,9 @@ Report</string>
      <width>241</width>
      <height>121</height>
     </rect>
+   </property>
+   <property name="readOnly">
+    <bool>true</bool>
    </property>
   </widget>
   <widget class="QLabel" name="label_4">
