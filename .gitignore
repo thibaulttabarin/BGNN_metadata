@@ -166,3 +166,4 @@ check_labels.json
 metadata.json
 detectron2/
 *.sqlite
+idigbio/

@@ -97,6 +97,7 @@ def gen_metadata(names, file_plus_name):
         #print(result)
         #print(f'Matches metadata exactly: {result}')
         if True not in result:
+            result = []
             lines = [re.sub(r"[^A-Za-z ]+", '', i).strip() for i in text.split('\n') if i]
             lines = [i for i in lines if len(i) > 9]
             min_dist, min_name, min_line, result = [], [], [], []
@@ -123,10 +124,7 @@ def gen_metadata(names, file_plus_name):
                             min_name = name.lower()
                             min_dist = curr_dist
                             min_line = line
-                if min_name in checks:
-                    result = True
-                else:
-                    result = False
+                result = min_name in checks
             else:
                 loc = result.index(True)
                 result = True
