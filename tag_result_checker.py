@@ -15,6 +15,9 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QPushButton
 from PySide6.QtCore import QFile, QIODevice
 from PySide6.QtGui import QPixmap
 
+IMAGE_DIR = '/usr/local/bgnn/joel_pred_mask_images'
+ERR_IMAGE_DIR = '/usr/local/bgnn/inhs_validation'
+
 with open('./check_labels.json') as f:
     metadata = json.load(f)
 #filename = None
@@ -23,7 +26,8 @@ with open('./check_labels.json') as f:
 
 LEV_DIST_CUTOFF = 3
 
-engine = create_engine('sqlite:///label_checking.sqlite')#, echo=True)
+#engine = create_engine('sqlite:///label_checking.sqlite')#, echo=True)
+engine = create_engine('sqlite:////usr/local/bgnn/label_checking.sqlite')#, echo=True)
 conn = engine.connect()
 Session = sessionmaker(bind=engine)
 session = Session()
@@ -60,18 +64,20 @@ def load_next():
     global filename
     filename = fname_gen.__next__()
     print(filename)
-    pixmap = QPixmap('images/check_labels_prediction_{}.png'
-            .format(filename))
-    window.picture_frame.setPixmap(pixmap)
     global curr_metadata
     curr_metadata = metadata[filename]
     if 'errored' not in curr_metadata.keys():
+        pixmap = QPixmap('{}/check_labels_prediction_{}.png'
+                .format(IMAGE_DIR, filename))
         window.label_text.setPlainText(curr_metadata['tag_text'])
         del curr_metadata['tag_text']
-        window.metadata.setPlainText(pprint.pformat(curr_metadata))
     else:
+        pixmap = QPixmap('{}/{}'
+                .format(ERR_IMAGE_DIR, filename))
         window.label_text.clear()
         window.metadata.clear()
+    window.metadata.setPlainText(pprint.pformat(curr_metadata))
+    window.picture_frame.setPixmap(pixmap)
     window.scientific_name.clear()
     window.further_descr.clear()
     print()
@@ -98,7 +104,11 @@ def both_corr_ocr_failed():
     load_next()
 
 def wrong_other():
-    name = Record(filename=filename, sci_name=curr_metadata['metadata_name'].capitalize(),
+    try:
+        name = curr_metadata['metadata_name']
+    except KeyError:
+        name = "Errored out, must run program to debug"
+    name = Record(filename=filename, sci_name=name,
             err_type=ErrTypes.auto_wrong_other, description=window.further_descr.toPlainText())
     session.add(name)
     session.commit()
