@@ -131,7 +131,7 @@ dmypy.json
 # CUSTOM
 /images/
 images
-# output/
+output/
 Pipfile.lock
 *.pth
 test_images_output/
