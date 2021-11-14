@@ -295,25 +295,47 @@ def clock_value(evec, file_name):
     return round(clock)
 
 def fish_length(mask, centroid, evec, scale):
+    """
+    Check how far fish pixels gets in each direction from the centroid of
+    the fish blob then return fish length. This is done by
+    intersection the major axis with a line defined by a given fish pixel
+    and the minor axis, then finding which two intersection points are
+    farthest from the centroid in each direction.
+    """
+    # Slopes of major and minor axes
     m1 = evec[1] / evec[0]
     m2 = evec[0] / evec[1]
+    # Set these as the first point for point slope form of a line
+    # to be used with m1
     x1 = centroid[0]
     y1 = centroid[1]
+    # Initial values for how far from the major axis
+    # points project in each direction
     x_min = centroid[0]
     x_max = centroid[0]
+    # Loop over every pixel in the bounding box
     for x in range(mask.shape[1]):
         for y in range(mask.shape[0]):
+            # If it is a fish pixel
             if mask[y,x]:
+                # Set this as the second point for point slope form of a line
+                # to be sued with m2
                 x2 = x
                 y2 = y
+                # Intersect the major axis with the line formed by x2, y2 and
+                # m2. I calculated this using basic algebra given the two
+                # line equations.
                 x_calc = (-y1+y2+m1*x1-m2*x2)/(m1-m2)
                 y_calc = m1*(x-x1)+y1
+                # If this is the new furthest point in one or the other,
+                # save it
                 if x_calc > x_max:
                     x_max = x_calc
                     y_max = y_calc
                 elif x_calc < x_min:
                     x_min = x_calc
                     y_min = y_calc
+    # Return the distance between the points we've found scaled into cms
     return distance((x_max, y_max), (x_min, y_min)) / scale
 
 def overlap(fish, eye):
