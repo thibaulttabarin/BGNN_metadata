@@ -45,7 +45,7 @@ VAL_SCALE_FAC = 0.5
 def init_model():
     cfg = get_cfg()
     cfg.merge_from_file("config/mask_rcnn_R_50_FPN_3x.yaml")
-    cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1
+    cfg.MODEL.ROI_HEADS.NUM_CLASSES = 5
     cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")
     cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.3
     predictor = DefaultPredictor(cfg)
@@ -60,8 +60,8 @@ def gen_metadata(file_path):
             name='metadata',
             thing_classes=['fish', 'ruler', 'eye', 'two', 'three'],
             thing_dataset_id_to_contiguous_id=
-                {1: 0}
-                #{1: 0, 2: 1, 3: 2, 4: 3, 5: 4}
+                #{1: 0}
+                {1: 0, 2: 1, 3: 2, 4: 3, 5: 4}
             )
     output = predictor(im)
     insts = output['instances']
@@ -326,7 +326,7 @@ def fish_length(mask, centroid, evec, scale):
                 # m2. I calculated this using basic algebra given the two
                 # line equations.
                 x_calc = (-y1+y2+m1*x1-m2*x2)/(m1-m2)
-                y_calc = m1*(x-x1)+y1
+                y_calc = m1*(x_calc-x1)+y1
                 # If this is the new furthest point in one or the other,
                 # save it
                 if x_calc > x_max:
