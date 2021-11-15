@@ -13,6 +13,7 @@ from detectron2.engine import DefaultTrainer, DefaultPredictor
 from detectron2.config import get_cfg
 from detectron2.utils.visualizer import ColorMode
 
+
 def visualize_input(metadata, count):
     name = metadata.get("name")
     dataset_dicts = DatasetCatalog.get(name)
@@ -26,12 +27,13 @@ def visualize_input(metadata, count):
         print(f'images/{name}_{file_name}')
         cv2.imwrite(f'images/{name}_{file_name}', vis.get_image()[:, :, ::-1])
 
+
 def main():
     prefix = open('config/overall_prefix.txt').readlines()[0].strip()
-    conf = json.load(open('config/training_data.json'))
-    metadata = None # Need it in outer block for reuse
+    conf = json.load(open('config/training_data_all.json'))
+    metadata = None  # Need it in outer block for reuse
     train = []
-    test_images = f'{prefix}idigbio_images/'
+    test_images = f'{prefix}tulane/'
 
     for img_dir in conf.keys():
         ims = f'{prefix}{img_dir}'
@@ -44,15 +46,15 @@ def main():
             # Otherwise, any of the datasets will work.
             if name == '1':
                 metadata = Metadata(evaluator_type='coco', image_root=ims,
-                        json_file=json_file,
-                        name=name,
-                        thing_classes=['fish', 'ruler', 'eye', 'two', 'three'],
-                        thing_dataset_id_to_contiguous_id=
-                            {1: 0, 2: 1, 3: 2, 4: 3, 5: 4}
-                        )
+                                    json_file=json_file,
+                                    name=name,
+                                    thing_classes=['fish', 'ruler', 'eye', 'two', 'three'],
+                                    thing_dataset_id_to_contiguous_id=
+                                    {1: 0, 2: 1, 3: 2, 4: 3, 5: 4}
+                                    )
             register_coco_instances(name, {}, json_file, ims)
 
-    #visualize_input(metadata, 1)
+    # visualize_input(metadata, 1)
 
     cfg = get_cfg()
     cfg.merge_from_file("config/mask_rcnn_R_50_FPN_3x.yaml")
@@ -63,9 +65,9 @@ def main():
     cfg.MODEL.WEIGHTS = "detectron2://COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x/137849600/model_final_f10217.pkl"
     cfg.SOLVER.IMS_PER_BATCH = 2
     cfg.SOLVER.BASE_LR = 0.02
-    #cfg.SOLVER.MAX_ITER = (
-        #50000
-    #)
+    # cfg.SOLVER.MAX_ITER = (
+    # 50000
+    # )
 
     ################
     cfg.MODEL.ROI_HEADS.NUM_CLASSES = 5
@@ -97,14 +99,15 @@ def main():
                        scale=0.8,
                        # remove the colors of unsegmented pixels
                        instance_mode=ColorMode.IMAGE_BW
-        )
+                       )
         v = v.draw_instance_predictions(outputs[-1]["instances"].to("cpu"))
-        i+=1
+        i += 1
         print(f'{i}: {d}')
         os.makedirs('images', exist_ok=True)
         print(f'images/prediction_{d}')
         cv2.imwrite(f'images/prediction_{d}', v.get_image()[:, :, ::-1])
     return outputs
+
 
 if __name__ == '__main__':
     main()
