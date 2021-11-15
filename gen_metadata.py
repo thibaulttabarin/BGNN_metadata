@@ -44,6 +44,12 @@ VAL_SCALE_FAC = 0.5
 
 
 def init_model():
+    """
+    Initialize model using config files for RCNN, the trained weights, and other parameters.
+    
+    Returns:
+        predictor -- DefaultPredictor(**configs).
+    """
     cfg = get_cfg()
     cfg.merge_from_file("config/mask_rcnn_R_50_FPN_3x.yaml")
     cfg.MODEL.ROI_HEADS.NUM_CLASSES = 5
@@ -54,6 +60,14 @@ def init_model():
 
 
 def gen_metadata(file_path):
+    """
+    Generates metadata of an image and stores attributes into a Dictionary.
+    
+    Parameters:
+        file_path -- string of path to image file.
+    Returns:
+        {file_name: results} -- dictionary of file and associated results.
+    """
     predictor = init_model()
     im = cv2.imread(file_path)
     im_gray = cv2.imread(file_path, cv2.IMREAD_GRAYSCALE)
@@ -212,6 +226,14 @@ def gen_metadata(file_path):
 
 
 def adaptive_threshold(bbox, im_gray):
+    """
+    Determines the best thresholding value.
+    Parameters:
+        bbox -- bounding box in [top left x, top left y, bottom right x, bottom right y] format.
+        im_gray -- grayscale version of original image.
+    Returns:
+        val -- new threshold.
+    """
     # bbox_d = [round(x) for x in curr_fish.pred_boxes.tensor.cpu().
     # numpy().astype('float64')[0]]
     im_crop = im_gray[bbox[1]:bbox[3], bbox[0]:bbox[2]]
@@ -239,6 +261,15 @@ def adaptive_threshold(bbox, im_gray):
 
 
 def find_snout_vec(centroid, eye_center, mask):
+    """
+    Determine the direction of the snout.
+    Parameters:
+        centroid -- center of fish in [x, y] format.
+        eye_center -- center of eye in [x, y] format.
+        mask -- thresholded image.
+    Returns:
+        max_vec / max_len -- vector pointing in direction of snout.
+    """
     eye_dir = eye_center - centroid
     x1 = centroid[0]
     y1 = centroid[1]
@@ -275,11 +306,22 @@ def find_snout_vec(centroid, eye_center, mask):
 
 
 def angle(vec1, vec2):
+    """
+    Finds angle between two vectors.
+    """
     # print(f'angle: {vec1}, {vec2}')
     return math.acos(vec1.dot(vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2)))
 
 
 def clock_value(evec, file_name):
+    """
+    Creates a clock value depending on the major axis provided.
+    Parameters:
+        evec -- Eigenvector that depicts the major axis.
+        file_name -- path to image file.
+    Returns:
+        round(clock) -- rounded off clock value, ranging from 1-12.
+    """
     # print(evec)
     if evec[0] < 0:
         if evec[1] > 0:
@@ -309,6 +351,16 @@ def clock_value(evec, file_name):
 
 
 def fish_length(mask, centroid, evec, scale):
+    """
+    Naive implementation of fish length calculation.
+    Parameters:
+        mask -- thresholded image.
+        centroid -- center of fish in [x, y] format.
+        evec -- major axis of fish.
+        scale -- pixels per unit.
+    Returns:
+        distance -- distance from max to min points on major axis.
+    """
     m1 = evec[1] / evec[0]
     m2 = evec[0] / evec[1]
     x1 = centroid[0]
@@ -335,6 +387,14 @@ def fish_length(mask, centroid, evec, scale):
 
 
 def overlap(fish, eye):
+    """
+    Checks if the eye is in the fish.
+    Parameters:
+        fish -- fish coordinates.
+        eye -- eye coordinates.
+    Returns:
+        ol_pct -- percent of eye that is inside the fish.
+    """
     fish = list(fish.pred_boxes.tensor.cpu().numpy()[0])
     eye = list(eye.pred_boxes.tensor.cpu().numpy()[0])
     if not (fish[0] < eye[2] and eye[0] < fish[2] and fish[1] < eye[3]
@@ -348,6 +408,18 @@ def overlap(fish, eye):
 
 # https://alyssaq.github.io/2015/computing-the-axes-or-orientation-of-a-blob/
 def pca(img, glob_scale=None):
+    """
+    Performs principle component analysis on a grayscale image.
+    Parameters:
+        img -- grayscale image.
+        glob_scale -- pixels per unit.
+    Returns:
+        np.array(centroid) -- numpy array containing centroid.
+        evecs[:, sort_indices[0]] -- major axis, or eigenvector associated with highest eigenvalue.
+        length -- length of fish.
+        width -- width of fish.
+        area -- area of fish.
+    """
     # print(np.count_nonzero(img))
     moments = cv2.moments(img)
     centroid = (int(moments["m10"] / moments["m00"]),
@@ -387,10 +459,21 @@ def perimeter(mask, scale):
     print(contour)
 
 def distance(pt1, pt2):
+    """
+    Returns the 2-D Euclidean Distance between 2 points.
+    """
     return np.sqrt((pt1[0] - pt2[0]) ** 2 + (pt1[1] - pt2[1]) ** 2)
 
 
 def calc_scale(two, three):
+    """
+    Calculates the pixels per unit.
+    Parameters:
+        two -- the "two" from the ruler in the image.
+        three -- the "three" from the ruler in the image.
+    Returns:
+        scale -- pixels between the centers of the "two" and "three".
+    """
     pt1 = two.pred_boxes.get_centers()[0]
     pt2 = three.pred_boxes.get_centers()[0]
     scale = distance([float(pt1[0]), float(pt1[1])],
@@ -408,6 +491,9 @@ def check(arr, val, flipped):
 
 def gen_mask(bbox, file_path, file_name, im_gray, val, detectron_mask,
              index=0, flipped=False):
+    """
+    Generates the mask for the fish and floodfills to make a whole image.
+    """
     failed = False
     l = round(bbox[0])
     r = round(bbox[2])
@@ -501,6 +587,9 @@ def gen_mask(bbox, file_path, file_name, im_gray, val, detectron_mask,
 
 # https://stackoverflow.com/questions/31400769/bounding-box-of-numpy-array
 def shrink_bbox(mask):
+    """
+    Finds the bounding box of an image.
+    """
     rows = np.any(mask, axis=1)
     cols = np.any(mask, axis=0)
     rmin, rmax = np.where(rows)[0][[0, -1]]
@@ -510,6 +599,9 @@ def shrink_bbox(mask):
 
 
 def gen_metadata_safe(file_path):
+    """
+    Deals with erroneous metadata generation errors.
+    """
     try:
         return gen_metadata(file_path)
     except Exception as e:
