@@ -1,44 +1,23 @@
-import math
 import json
-import sys
+import math
 import os
-from torch.multiprocessing import Pool
-import pandas as pd
-import numpy as np
-import nrrd
-from PIL import Image
-from functools import partial
-import matplotlib.pyplot as plt
 import pprint
-from copy import copy
-
-import torch
-# torch.multiprocessing.set_start_method('forkserver')
-
-import pycocotools
-import detectron2.structures as structures
-import detectron2.data.datasets.coco as coco
-from detectron2.data.datasets import register_coco_instances
-from detectron2.data import DatasetCatalog, MetadataCatalog, \
-    build_detection_train_loader, \
-    build_detection_test_loader
-from detectron2.engine.defaults import DefaultTrainer, \
-    default_argument_parser
-from detectron2.engine import launch
-import detectron2.data.transforms as T
-from detectron2.data import DatasetMapper
-from detectron2.config import get_cfg
-from detectron2.checkpoint import DetectionCheckpointer
-from detectron2.modeling import build_model
-from detectron2.engine import DefaultPredictor
-from detectron2.data import Metadata
-from detectron2.utils.visualizer import Visualizer
+import sys
+from random import shuffle
 
 import cv2
-
-from skimage import filters
+import numpy as np
+from PIL import Image
+from detectron2.config import get_cfg
+from detectron2.data import Metadata
+from detectron2.engine import DefaultPredictor
+from detectron2.utils.visualizer import Visualizer
+from matplotlib import pyplot as plt
+from skimage import filters, measure
 from skimage.morphology import flood_fill
-from random import shuffle
+from torch.multiprocessing import Pool
+
+# torch.multiprocessing.set_start_method('forkserver')
 
 VAL_SCALE_FAC = 0.5
 
@@ -70,7 +49,24 @@ def gen_metadata(file_path):
     """
     predictor = init_model()
     im = cv2.imread(file_path)
+    lab = cv2.cvtColor(im, cv2.COLOR_BGR2LAB)
+
+    # -----Splitting the LAB image to different channels-------------------------
+    l, a, b = cv2.split(lab)
+
+    # -----Applying CLAHE to L-channel-------------------------------------------
+    clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
+    cl = clahe.apply(l)
+
+    # -----Merge the CLAHE enhanced L-channel with the a and b channel-----------
+    limg = cv2.merge((cl, a, b))
+
+    # -----Converting image from LAB Color model to RGB model--------------------
+    im = cv2.cvtColor(limg, cv2.COLOR_LAB2BGR)
+
     im_gray = cv2.imread(file_path, cv2.IMREAD_GRAYSCALE)
+    clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
+    im_gray = clahe.apply(im_gray)
     metadata = Metadata(evaluator_type='coco', image_root='.',
                         json_file='',
                         name='metadata',
@@ -84,6 +80,7 @@ def gen_metadata(file_path):
     selector = insts.pred_classes == 0
     selector = selector.cumsum(axis=0).cumsum(axis=0) == 1
     results = {}
+    file_name = file_path.split('/')[-1]
     for i in range(1, 5):
         temp = insts.pred_classes == i
         selector += temp.cumsum(axis=0).cumsum(axis=0) == 1
@@ -112,15 +109,15 @@ def gen_metadata(file_path):
     except:
         three = None
     if ruler and two and three:
-        scale = calc_scale(two, three)
+        scale = calc_scale(two, three, file_name)
         results['scale'] = scale
+        results['unit'] = 'cm'
     else:
         scale = None
     visualizer = Visualizer(im[:, :, ::-1], metadata=metadata, scale=1.0)
     # vis = visualizer.draw_instance_predictions(insts[selector].to('cpu'))
     vis = visualizer.draw_instance_predictions(insts.to('cpu'))
     os.makedirs('images', exist_ok=True)
-    file_name = file_path.split('/')[-1]
     print(file_name)
     cv2.imwrite(f'images/gen_mask_prediction_{file_name}.png',
                 vis.get_image()[:, :, ::-1])
@@ -176,19 +173,21 @@ def gen_metadata(file_path):
                 results['fish'][i]['background']['std'] = np.std(bground)
                 results['fish'][i]['bbox'] = list(bbox)
                 results['fish'][i]['pixel_analysis_failed'] = pixel_anal_failed
-                # results['fish'][i]['mask'] = mask.astype('uint8').tolist()
-                results['fish'][i]['mask'] = '[...]'
+                start, code = encoded_mask(mask)
+                results['fish'][i]['mask'] = {}
+                results['fish'][i]['mask']['start_coord'] = list(start)
+                results['fish'][i]['mask']['encoding'] = code
+                # results['fish'][i]['mask'] = '[...]'
 
-                centroid, major, length, width, area = pca(mask, scale)
+                centroid, evecs, length, width, area = pca(mask, scale)
+                major, minor = evecs[0], evecs[1]
                 if scale:
-                    # results['fish'][i]['length'] = fish_length(mask, centroid,
-                    #                                            major, scale)
-                    # results['fish'][i]['width'] = fish_length(mask, centroid,
-                    #                                           minor, scale)
                     results['fish'][i]['length'] = length
                     results['fish'][i]['width'] = width
                     results['fish'][i]['area'] = area
-                    perimeter(mask, scale)
+                    results['fish'][i]['perimeter'] = perimeter(code, scale)
+                    results['fish'][i]['bbox_length'] = fish_box_length(mask, centroid, major, scale)
+                    results['fish'][i]['bbox_width'] = fish_box_length(mask, centroid, minor, scale)
 
                 results['fish'][i]['centroid'] = centroid.tolist()
                 if eye:
@@ -350,9 +349,9 @@ def clock_value(evec, file_name):
     return round(clock)
 
 
-def fish_length(mask, centroid, evec, scale):
+def fish_box_length(mask, centroid, evec, scale):
     """
-    Naive implementation of fish length calculation.
+    Fish bounding box length calculation.
     Parameters:
         mask -- thresholded image.
         centroid -- center of fish in [x, y] format.
@@ -407,7 +406,7 @@ def overlap(fish, eye):
 
 
 # https://alyssaq.github.io/2015/computing-the-axes-or-orientation-of-a-blob/
-def pca(img, glob_scale=None):
+def pca(img, glob_scale=None, visualize=False):
     """
     Performs principle component analysis on a grayscale image.
     Parameters:
@@ -435,28 +434,113 @@ def pca(img, glob_scale=None):
     evals, evecs = np.linalg.eig(cov)
     sort_indices = np.argsort(evals)[::-1]
     x_v1, y_v1 = evecs[:, sort_indices[0]]  # Eigenvector with largest eigenvalue
-    theta = np.arctan(x_v1 / y_v1)
+
+    # theta = np.arctan(x_v1 / y_v1)
+    theta = np.arctan2(y_v1, x_v1)
+    # print(x_v1, y_v1, theta, np.linalg.norm(evecs[:, sort_indices[0]]))
+    # negate for clockwise rotation
+    if y_v1 * theta > 0:
+        theta *= -1
     rotation_mat = np.matrix([[np.cos(theta), -np.sin(theta)],
                               [np.sin(theta), np.cos(theta)]])
     transformed_mat = rotation_mat * coords
     # plot the transformed blob
     x_transformed, y_transformed = transformed_mat.A
-    length = y_transformed.max() - y_transformed.min()
-    width = x_transformed.max() - x_transformed.min()
+    x_round, y_round = x_transformed.round(decimals=0), y_transformed.round(decimals=0)
+    x_vals, x_counts = np.unique(x_round, return_counts=True)
+    y_vals, y_counts = np.unique(y_round, return_counts=True)
+    x_calc, y_calc = x_vals[x_counts.argmax()], y_vals[y_counts.argmax()]
+    x_indices, y_indices = np.where(x_round == x_calc), np.where(y_round == y_calc)
+    width = y_round[x_indices].max() - y_round[x_indices].min()
+    length = x_round[y_indices].max() - x_round[y_indices].min()
+
+    if visualize:
+        x_v2, y_v2 = evecs[:, sort_indices[1]]
+        scale = 300
+        plt.plot([x_v1 * -scale * 2, x_v1 * scale * 2],
+                 [y_v1 * -scale * 2, y_v1 * scale * 2], color='red')
+        plt.plot([x_v2 * -scale, x_v2 * scale],
+                 [y_v2 * -scale, y_v2 * scale], color='blue')
+        plt.plot(x, y, 'y.')
+        plt.axis('equal')
+        plt.gca().invert_yaxis()  # Match the image system with origin at top left
+        plt.axhline(y=y_calc)
+        plt.axvline(x=x_calc)
+        plt.plot(x_transformed, y_transformed, 'g.')
+        plt.show()
+
     area = transformed_mat.shape[1]
     if glob_scale is not None:
         length /= glob_scale
         width /= glob_scale
         area /= glob_scale ** 2
 
-    # return np.array(centroid), major, minor, length, width, area
-    return np.array(centroid), evecs[:, sort_indices[0]], length, width, area
+    return np.array(centroid), evecs[:, sort_indices], length, width, area
 
 
-def perimeter(mask, scale):
-    edges = cv2.Canny(mask, 0, 2, L2gradient=True)
-    contour, _ = cv2.findContours(edges, mode=cv2.RETR_EXTERNAL, method=cv2.CHAIN_APPROX_NONE)
-    print(contour)
+def find_nearest(array, value):
+    '''
+    Find the nearest element of array to the given value
+    '''
+    idx = (np.abs(array - value)).argmin()
+    return array[idx]
+
+
+def encode_freeman(image_contour):
+    '''
+    Encode the image contour in an 8-direction freeman chain code based on angles
+
+    '''
+    freeman_code = ""
+    freeman_dict = {-90: '0', -45: '1', 0: '2', 45: '3', 90: '4', 135: '5', 180: '6', -135: '7'}
+    allowed_directions = np.array([0, 45, 90, 135, 180, -45, -90, -135])
+
+    for i in range(len(image_contour) - 1):
+        delta_x = image_contour[i + 1][1] - image_contour[i][1]
+        delta_y = image_contour[i + 1][0] - image_contour[i][0]
+        angle = allowed_directions[np.abs(allowed_directions - np.rad2deg(np.arctan2(delta_y, delta_x))).argmin()]
+        if not (delta_x == 0 and delta_y == 0):
+            freeman_code += freeman_dict[angle]
+
+    return freeman_code
+
+
+def encoded_mask(mask, visualize=False):
+    # Extract the longest contour in the image
+    contours = measure.find_contours(mask, 0.9)
+    contours_main = np.around(max(contours, key=len), decimals=0)
+
+    if visualize:
+        # Display the image and plot the main contour found
+        fig, ax = plt.subplots()
+        ax.imshow(mask, cmap=plt.cm.gray)
+        ax.plot(contours_main[:, 1], contours_main[:, 0])
+
+    # Extract freeman code from contour
+    return contours_main[0][::-1], encode_freeman(contours_main)
+
+
+def decode_freeman(contours, mask, code, visualize=False):
+    coords = [list(contours[0][::-1])]
+    freeman_dict = {0: [0, -1], 1: [1, -1], 2: [1, 0], 3: [1, 1], 4: [0, 1], 5: [-1, 1], 6: [-1, 0], 7: [-1, -1]}
+    for letter in code:
+        change = freeman_dict[int(letter)]
+        current = coords[-1]
+        coords.append([current[0] + change[0], current[1] + change[1]])
+    coords = np.array(coords)
+    if visualize:
+        fig, ax = plt.subplots()
+        ax.imshow(mask, cmap=plt.cm.gray)
+        ax.plot(coords[:, 0], coords[:, 1])
+        plt.show()
+    return np.array(coords)
+
+
+def perimeter(code, scale):
+    even_numbers = ''.join(filter(lambda x: int(x) % 2 == 0 and int(x) > 0, code.split()))
+    odd_numbers = ''.join(filter(lambda x: int(x) % 2 == 1 and int(x) > 0, code.split()))
+    return (len(even_numbers) + np.sqrt(2) * len(odd_numbers)) / scale
+
 
 def distance(pt1, pt2):
     """
@@ -465,20 +549,32 @@ def distance(pt1, pt2):
     return np.sqrt((pt1[0] - pt2[0]) ** 2 + (pt1[1] - pt2[1]) ** 2)
 
 
-def calc_scale(two, three):
+def calc_scale(two, three, file_name):
     """
     Calculates the pixels per unit.
     Parameters:
         two -- the "two" from the ruler in the image.
         three -- the "three" from the ruler in the image.
+        file_name -- name of Image in file path.
     Returns:
         scale -- pixels between the centers of the "two" and "three".
     """
+    cm_list = ['uwzm']
+    in_list = ['inhs']
+    file_name = file_name.lower()
     pt1 = two.pred_boxes.get_centers()[0]
     pt2 = three.pred_boxes.get_centers()[0]
     scale = distance([float(pt1[0]), float(pt1[1])],
                      [float(pt2[0]), float(pt2[1])])
-    scale /= 2.54
+    if any(name in file_name for name in in_list):
+        scale /= 2.54
+        # print("Converting in to cm")
+    elif any(name in file_name for name in cm_list):
+        pass
+        # print("Already in cm")
+    else:
+        scale /= 2.54
+        print("Unable to determine unit. Defaulting to cm.")
     # print(f'Pixels/cm: {scale}')
     return scale
 
@@ -620,7 +716,7 @@ def main():
     # print(files)
     # predictor = init_model()
     # f = partial(gen_metadata, predictor)
-    with Pool(4) as p:
+    with Pool(3) as p:
         # results = map(gen_metadata, files)
         results = p.map(gen_metadata_safe, files)
     # results = map(gen_metadata, files)
