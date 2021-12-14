@@ -55,6 +55,7 @@ def main():
     #visualize_input(metadata, 1)
 
     cfg = get_cfg()
+    #cfg.OUTPUT_DIR += "/enhance"
     cfg.merge_from_file("config/mask_rcnn_R_50_FPN_3x.yaml")
     cfg.DATASETS.TRAIN = tuple(train)
     cfg.DATASETS.TEST = ()  # no metrics implemented yet
