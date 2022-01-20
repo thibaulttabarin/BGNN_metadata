@@ -12,7 +12,9 @@ from detectron2.config import get_cfg
 from detectron2.data import Metadata
 from detectron2.engine import DefaultPredictor
 from detectron2.utils.visualizer import Visualizer
+from detectron2.structures import Boxes, pairwise_iou, pairwise_ioa
 from matplotlib import pyplot as plt
+from scipy import stats
 from skimage import filters, measure
 from skimage.morphology import flood_fill
 from torch.multiprocessing import Pool
@@ -20,9 +22,11 @@ from torch.multiprocessing import Pool
 # torch.multiprocessing.set_start_method('forkserver')
 
 VAL_SCALE_FAC = 0.5
+enhance = json.load(open('config/enhance.json', 'r'))
+ENHANCE = bool(enhance['ENHANCE'])
 
 
-def init_model():
+def init_model(enhance_contrast=ENHANCE):
     """
     Initialize model using config files for RCNN, the trained weights, and other parameters.
 
@@ -32,13 +36,14 @@ def init_model():
     cfg = get_cfg()
     cfg.merge_from_file("config/mask_rcnn_R_50_FPN_3x.yaml")
     cfg.MODEL.ROI_HEADS.NUM_CLASSES = 5
+    cfg.OUTPUT_DIR += "/non_enhanced" if not enhance_contrast else "/enhanced"
     cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")
     cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.3
     predictor = DefaultPredictor(cfg)
     return predictor
 
 
-def gen_metadata(file_path):
+def gen_metadata(file_path, enhance_contrast=ENHANCE, visualize=False):
     """
     Generates metadata of an image and stores attributes into a Dictionary.
 
@@ -49,24 +54,25 @@ def gen_metadata(file_path):
     """
     predictor = init_model()
     im = cv2.imread(file_path)
-    lab = cv2.cvtColor(im, cv2.COLOR_BGR2LAB)
-
-    # -----Splitting the LAB image to different channels-------------------------
-    l, a, b = cv2.split(lab)
-
-    # -----Applying CLAHE to L-channel-------------------------------------------
-    clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
-    cl = clahe.apply(l)
-
-    # -----Merge the CLAHE enhanced L-channel with the a and b channel-----------
-    limg = cv2.merge((cl, a, b))
-
-    # -----Converting image from LAB Color model to RGB model--------------------
-    im = cv2.cvtColor(limg, cv2.COLOR_LAB2BGR)
-
     im_gray = cv2.imread(file_path, cv2.IMREAD_GRAYSCALE)
-    clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
-    im_gray = clahe.apply(im_gray)
+    if enhance_contrast:
+        lab = cv2.cvtColor(im, cv2.COLOR_BGR2LAB)
+
+        # -----Splitting the LAB image to different channels-------------------------
+        l, a, b = cv2.split(lab)
+
+        # -----Applying CLAHE to L-channel-------------------------------------------
+        clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
+        cl = clahe.apply(l)
+
+        # -----Merge the CLAHE enhanced L-channel with the a and b channel-----------
+        limg = cv2.merge((cl, a, b))
+
+        # -----Converting image from LAB Color model to RGB model--------------------
+        im = cv2.cvtColor(limg, cv2.COLOR_LAB2BGR)
+
+        clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
+        im_gray = clahe.apply(im_gray)
     metadata = Metadata(evaluator_type='coco', image_root='.',
                         json_file='',
                         name='metadata',
@@ -88,8 +94,11 @@ def gen_metadata(file_path):
     # print(fish)
     if len(fish):
         results['fish'] = []
-        for _ in range(len(fish)):
-            results['fish'].append({})
+        # comment when doing multiple fish
+        results['fish'].append({})
+        # uncomment when doing multiple fish
+        # for _ in range(len(fish)):
+        #     results['fish'].append({})
     else:
         fish = None
     results['has_fish'] = bool(fish)
@@ -118,28 +127,64 @@ def gen_metadata(file_path):
     # vis = visualizer.draw_instance_predictions(insts[selector].to('cpu'))
     vis = visualizer.draw_instance_predictions(insts.to('cpu'))
     os.makedirs('images', exist_ok=True)
+    os.makedirs('images/enhanced', exist_ok=True)
+    os.makedirs('images/non_enhanced', exist_ok=True)
+    dirname = 'images/'
+    dirname += 'enhanced/' if ENHANCE else 'non_enhanced/'
     print(file_name)
-    cv2.imwrite(f'images/gen_mask_prediction_{file_name}.png',
+    f_name = file_name.split('.')[0]
+    cv2.imwrite(f'{dirname}/gen_prediction_{f_name}.png',
                 vis.get_image()[:, :, ::-1])
     if fish:
         try:
             eyes = insts[insts.pred_classes == 2]
         except:
             eyes = None
+        # uncomment when multiple fish in image
+        # skippable_fish = []
+        # IOU_PCT = .02
+
+        # comment to get all fish
+        fish = fish[fish.scores > .3]
+        fish = fish[fish.scores.argmax().item()]
+
         for i in range(len(fish)):
             curr_fish = fish[i]
+            # print(curr_fish)
+            # uncomment when multiple fish in image
+            '''
+            if i in skippable_fish:
+                continue
+            fish_ols = [overlap_fish(curr_fish, fish[j]) for j in range(i + 1, len(fish))]
+            for j in range(len(fish_ols)):
+                if i + j + 1 not in skippable_fish and fish_ols[j] > IOU_PCT:
+                    results['fish'].pop(i + j + 1 - len(skippable_fish))
+                    skippable_fish.append(i + j + 1)
+                else:
+                    print(f"Fish {i} and Fish {i + j + 1} do not overlap!")
+            '''
             if eyes:
                 eye_ols = [overlap(curr_fish, eyes[j]) for j in
                            range(len(eyes))]
-                # TODO: Add pred score as a secondary key in event there are
-                #       more than one 1.0 overlap eyes
-                max_ind = max(range(len(eye_ols)), key=eye_ols.__getitem__)
-                eye = eyes[max_ind]
+
+                eye = None
+                if not all(ol == 0 for ol in eye_ols):
+                    full = [i for i in range(len(eye_ols)) if eye_ols[i] >= .95]
+
+                    # if multiple eyes with 95% or greater overlap, pick highest confidence
+                    if len(full) > 1:
+                        eye = eyes[full]
+                        eye = eye[eye.scores.argmax().item()]
+                        print(eye)
+                    else:
+                        max_ind = max(range(len(eye_ols)), key=eye_ols.__getitem__)
+                        eye = eyes[max_ind]
             else:
                 eye = None
+
             results['fish'][i]['has_eye'] = bool(eye)
-            results['fish_count'] = len(insts[(insts.pred_classes == 0).
-                                        logical_and(insts.scores > 0.3)])
+            # results['fish_count'] = len(insts[(insts.pred_classes == 0).logical_and(insts.scores > 0.3)]) - len(
+            # skippable_fish)
 
             # try:
             bbox = [round(x) for x in curr_fish.pred_boxes.tensor.cpu().
@@ -174,10 +219,35 @@ def gen_metadata(file_path):
                 results['fish'][i]['bbox'] = list(bbox)
                 results['fish'][i]['pixel_analysis_failed'] = pixel_anal_failed
                 start, code = encoded_mask(mask)
+                region = measure.regionprops(mask)[0]
+                if visualize:
+                    fig, ax = plt.subplots()
+                    ax.imshow(mask, cmap=plt.cm.gray)
+                    y0, x0 = region.centroid
+                    orientation = region.orientation
+                    x1 = x0 + math.cos(orientation) * 0.5 * region.axis_minor_length
+                    y1 = y0 - math.sin(orientation) * 0.5 * region.axis_minor_length
+                    x2 = x0 - math.sin(orientation) * 0.5 * region.axis_major_length
+                    y2 = y0 - math.cos(orientation) * 0.5 * region.axis_major_length
+
+                    ax.plot((x0, x1), (y0, y1), '-r')
+                    ax.plot((x0, x2), (y0, y2), '-b')
+                    ax.plot(x0, y0, '.g', markersize=15)
+
+                    minr, minc, maxr, maxc = region.bbox
+                    bx = (minc, maxc, maxc, minc, minc)
+                    by = (minr, minr, maxr, maxr, minr)
+                    ax.plot(bx, by, '-b', linewidth=2.5)
+                    plt.show()
+
+                results['fish'][i]['extent'] = region.extent
+                results['fish'][i]['eccentricity'] = region.eccentricity
+                results['fish'][i]['solidity'] = region.solidity
+                results['fish'][i]['skew'] = stats.skew(mask, axis=None)
+                results['fish'][i]['kurtosis'] = stats.kurtosis(mask, axis=None)
                 results['fish'][i]['mask'] = {}
                 results['fish'][i]['mask']['start_coord'] = list(start)
                 results['fish'][i]['mask']['encoding'] = code
-                # results['fish'][i]['mask'] = '[...]'
 
                 centroid, evecs, length, width, area = pca(mask, scale)
                 major, minor = evecs[0], evecs[1]
@@ -185,7 +255,11 @@ def gen_metadata(file_path):
                     results['fish'][i]['length'] = length
                     results['fish'][i]['width'] = width
                     results['fish'][i]['area'] = area
-                    results['fish'][i]['perimeter'] = perimeter(code, scale)
+                    results['fish'][i]['feret_diameter_max'] = region.feret_diameter_max / scale
+                    results['fish'][i]['major_axis_length'] = region.major_axis_length / scale
+                    results['fish'][i]['minor_axis_length'] = region.minor_axis_length / scale
+                    results['fish'][i]['convex_area'] = region.convex_area / (scale ** 2)
+                    results['fish'][i]['perimeter'] = measure.perimeter(mask, neighbourhood=8) / scale
                     results['fish'][i]['bbox_length'] = fish_box_length(mask, centroid, major, scale)
                     results['fish'][i]['bbox_width'] = fish_box_length(mask, centroid, minor, scale)
 
@@ -220,8 +294,10 @@ def gen_metadata(file_path):
                 # print(curr_fish)
                 results['fish'][i]['score'] = float(curr_fish.scores[0].cpu())
                 # print(results['fish'][i]['score'])
+    results['fish_count'] = 1
     # pprint.pprint(results)
-    return {file_name: results}
+    f_name = file_name.split('.')[0]
+    return {f_name: results}
 
 
 def adaptive_threshold(bbox, im_gray):
@@ -420,6 +496,24 @@ def overlap(fish, eye):
     return ol_pct
 
 
+def overlap_eye(fish, eye):
+    """
+    Checks if the fish overlaps with the eye.
+    """
+    fish = Boxes(fish.pred_boxes.tensor)
+    eye = Boxes(eye.pred_boxes.tensor)
+    return pairwise_ioa(fish, eye).item()
+
+
+def overlap_fish(fish1, fish2):
+    """
+    Checks if the two fish overlap.
+    """
+    fish1 = Boxes(fish1.pred_boxes.tensor)
+    fish2 = Boxes(fish2.pred_boxes.tensor)
+    return pairwise_iou(fish1, fish2).item()
+
+
 # https://alyssaq.github.io/2015/computing-the-axes-or-orientation-of-a-blob/
 def pca(img, glob_scale=None, visualize=False):
     """
@@ -494,18 +588,17 @@ def pca(img, glob_scale=None, visualize=False):
 
 
 def find_nearest(array, value):
-    '''
+    """
     Find the nearest element of array to the given value
-    '''
+    """
     idx = (np.abs(array - value)).argmin()
     return array[idx]
 
 
 def encode_freeman(image_contour):
-    '''
+    """
     Encode the image contour in an 8-direction freeman chain code based on angles
-
-    '''
+    """
     freeman_code = ""
     freeman_dict = {-90: '0', -45: '1', 0: '2', 45: '3', 90: '4', 135: '5', 180: '6', -135: '7'}
     allowed_directions = np.array([0, 45, 90, 135, 180, -45, -90, -135])
@@ -520,6 +613,17 @@ def encode_freeman(image_contour):
     return freeman_code
 
 
+def create_svg(contour, shape):
+    with open('image.svg', 'w+') as f:
+        f.write(f'<svg width="{shape[1]}" height="{shape[0]}" xmlns="http://www.w3.org/2000/svg">')
+        f.write('<path d="M')
+        for coords in contour:
+            x, y = coords
+            f.write(f"{int(x)} {int(y)} ")
+        f.write('" stroke="red" fill="none"/>')
+        f.write('</svg>')
+
+
 def encoded_mask(mask, visualize=False):
     # Extract the longest contour in the image
     contours = measure.find_contours(mask, 0.9)
@@ -530,30 +634,33 @@ def encoded_mask(mask, visualize=False):
         fig, ax = plt.subplots()
         ax.imshow(mask, cmap=plt.cm.gray)
         ax.plot(contours_main[:, 1], contours_main[:, 0])
-
+    # a = encode_freeman(contours_main)
+    # b = decode_freeman(contours_main, mask, a)
     # Extract freeman code from contour
     return contours_main[0][::-1], encode_freeman(contours_main)
 
 
-def decode_freeman(contours, mask, code, visualize=False):
-    coords = [list(contours[0][::-1])]
+def decode_freeman(contour, mask, code, visualize=False):
+    coords = [list(contour[0][::-1])]
     freeman_dict = {0: [0, -1], 1: [1, -1], 2: [1, 0], 3: [1, 1], 4: [0, 1], 5: [-1, 1], 6: [-1, 0], 7: [-1, -1]}
     for letter in code:
         change = freeman_dict[int(letter)]
         current = coords[-1]
         coords.append([current[0] + change[0], current[1] + change[1]])
-    coords = np.array(coords)
+    # create_svg(coords, mask.shape)
+    # np.savetxt('foo.csv', coords, delimiter=",", fmt='%f')
     if visualize:
+        cnt = np.array(coords)
         fig, ax = plt.subplots()
         ax.imshow(mask, cmap=plt.cm.gray)
-        ax.plot(coords[:, 0], coords[:, 1])
+        ax.plot(cnt[:, 0], cnt[:, 1])
         plt.show()
-    return np.array(coords)
+    return coords
 
 
 def perimeter(code, scale):
-    even_numbers = ''.join(filter(lambda x: int(x) % 2 == 0 and int(x) > 0, code.split()))
-    odd_numbers = ''.join(filter(lambda x: int(x) % 2 == 1 and int(x) > 0, code.split()))
+    even_numbers = ''.join(filter(lambda x: int(x) % 2 == 0, list(code)))
+    odd_numbers = ''.join(filter(lambda x: int(x) % 2 == 1, list(code)))
     return (len(even_numbers) + np.sqrt(2) * len(odd_numbers)) / scale
 
 
@@ -692,7 +799,10 @@ def gen_mask(bbox, file_path, file_name, im_gray, val, detectron_mask,
     arr4[t, l:r] = 175
     arr4[b, l:r] = 175
     im2 = Image.fromarray(arr4, 'L')
-    im2.save(f'images/gen_mask_mask_{file_name}_{index}.png')
+    dirname = 'images/'
+    dirname += 'enhanced/' if ENHANCE else 'non_enhanced/'
+    f_name = file_name.split('.')[0]
+    im2.save(f'{dirname}/gen_mask_{f_name}_{index}.png')
     return bbox, arr3, failed
 
 
@@ -739,8 +849,13 @@ def main():
     for i in results:
         output[list(i.keys())[0]] = list(i.values())[0]
     # print(output)
+    fname = 'metadata.json'
+    if ENHANCE:
+        fname = 'enhanced_' + fname
+    else:
+        fname = 'non_enhanced_' + fname
     if len(output) > 1:
-        with open('metadata.json', 'w') as f:
+        with open(fname, 'w') as f:
             json.dump(output, f)
     else:
         pprint.pprint(output)

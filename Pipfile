@@ -19,6 +19,11 @@ pytesseract = "*"
 pyenchant = "*"
 pyside6 = "*"
 ninja = "*"
+sqlalchemy = "*"
+plotly = "*"
+pyyaml = "*"
+yq = "*"
+jq = "*"
 
 [dev-packages]
 

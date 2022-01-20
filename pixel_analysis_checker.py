@@ -72,7 +72,7 @@ def init_model():
     cfg = get_cfg()
     cfg.merge_from_file("config/mask_rcnn_R_50_FPN_3x.yaml")
     cfg.MODEL.ROI_HEADS.NUM_CLASSES = 5
-    cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")
+    cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "enhance_model_final.pth")
     cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.3
     predictor = DefaultPredictor(cfg)
     return predictor
@@ -585,7 +585,7 @@ def main():
     #    output[list(i.keys())[0]] = list(i.values())[0]
     #print(output)
     #if len(output) > 1:
-    #    with open('metadata.json', 'w') as f:
+    #    with open('metadata_enhance.json', 'w') as f:
     #        json.dump(output, f)
     #else:
     #    pprint.pprint(output)

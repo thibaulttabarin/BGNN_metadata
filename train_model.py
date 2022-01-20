@@ -13,6 +13,9 @@ from detectron2.engine import DefaultTrainer, DefaultPredictor
 from detectron2.config import get_cfg
 from detectron2.utils.visualizer import ColorMode
 
+enhance = json.load(open('config/enhance.json', 'r'))
+ENHANCE = bool(enhance['ENHANCE'])
+
 
 def visualize_input(metadata, count):
     name = metadata.get("name")
@@ -23,12 +26,16 @@ def visualize_input(metadata, count):
         img = cv2.imread(full_path)
         visualizer = Visualizer(img[:, :, ::-1], metadata=metadata, scale=1.0)
         vis = visualizer.draw_dataset_dict(d)
+        dirname = 'images/'
+        dirname += 'enhanced/' if ENHANCE else 'non_enhanced/'
         os.makedirs('images', exist_ok=True)
-        print(f'images/{name}_{file_name}')
+        os.makedirs('images/enhanced', exist_ok=True)
+        os.makedirs('images/non_enhanced', exist_ok=True)
+        print(f'{dirname}/{name}_{file_name}')
         cv2.imwrite(f'images/{name}_{file_name}', vis.get_image()[:, :, ::-1])
 
 
-def main():
+def main(enhance_contrast=ENHANCE):
     prefix = open('config/overall_prefix.txt').readlines()[0].strip()
     conf = json.load(open('config/training_data_all.json'))
     metadata = None  # Need it in outer block for reuse
@@ -77,6 +84,7 @@ def main():
         128
     )
 
+    cfg.OUTPUT_DIR += "/non_enhanced" if not enhance_contrast else "/enhanced"
     os.makedirs(cfg.OUTPUT_DIR, exist_ok=True)
     trainer = DefaultTrainer(cfg)
     trainer.resume_or_load(resume=True)
@@ -93,6 +101,21 @@ def main():
     outputs = []
     for d in random.sample(names, 10):
         im = cv2.imread(test_images + d)
+        if enhance_contrast:
+            lab = cv2.cvtColor(im, cv2.COLOR_BGR2LAB)
+
+            # -----Splitting the LAB image to different channels-------------------------
+            l, a, b = cv2.split(lab)
+
+            # -----Applying CLAHE to L-channel-------------------------------------------
+            clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
+            cl = clahe.apply(l)
+
+            # -----Merge the CLAHE enhanced L-channel with the a and b channel-----------
+            limg = cv2.merge((cl, a, b))
+
+            # -----Converting image from LAB Color model to RGB model--------------------
+            im = cv2.cvtColor(limg, cv2.COLOR_LAB2BGR)
         outputs.append(predictor(im))
         v = Visualizer(im[:, :, ::-1],
                        metadata=metadata,
@@ -103,9 +126,13 @@ def main():
         v = v.draw_instance_predictions(outputs[-1]["instances"].to("cpu"))
         i += 1
         print(f'{i}: {d}')
+        dirname = 'images/'
+        dirname += 'enhanced' if enhance_contrast else 'non_enhanced'
         os.makedirs('images', exist_ok=True)
-        print(f'images/prediction_{d}')
-        cv2.imwrite(f'images/prediction_{d}', v.get_image()[:, :, ::-1])
+        os.makedirs('images/enhanced', exist_ok=True)
+        os.makedirs('images/non_enhanced', exist_ok=True)
+        print(f'{dirname}/prediction_{d}')
+        cv2.imwrite(f'{dirname}/prediction_{d}', v.get_image()[:, :, ::-1])
     return outputs
 
 

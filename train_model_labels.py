@@ -76,7 +76,7 @@ def main():
     trainer.resume_or_load(resume=True)
     trainer.train()
 
-    cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")
+    cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "enhance_model_final.pth")
     # set the testing threshold for this model
     cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.1
     predictor = DefaultPredictor(cfg)

@@ -54,7 +54,7 @@ def init_model():
     # NOTE THIS SETTING
     # was 5 when I trained current model so has to stay 5 unless retrained
     cfg.MODEL.ROI_HEADS.NUM_CLASSES = 5
-    cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth.ocr")
+    cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "enhance_model_final.pth.ocr")
     cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.3
     predictor = DefaultPredictor(cfg)
     return predictor

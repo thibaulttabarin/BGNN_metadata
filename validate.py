@@ -3,8 +3,19 @@ import pandas as pd
 import numpy as np
 import os
 
-df = pd.read_csv('/home/HDD/bgnn_data/image_quality_metadata_20210208.csv')
-results = json.load(open('metadata.json'))
+df = pd.read_csv('/usr/local/bgnn/image_quality_metadata_20210208.csv')
+results = json.load(open('metadata_enhance.json'))
+inhs_results = {}
+uwzm_results = {}
+for key in results:
+    if "INHS" in key:
+        inhs_results[key] = results[key]
+    elif "UWZM" in key:
+        uwzm_results[key] = results[key]
+    else:
+        print("sum ting wong")
+
+results = inhs_results
 
 #one=set(os.listdir('/home/HDD/bgnn_data/full_imgs/'))
 #two=set(df.image_name)
@@ -75,7 +86,7 @@ print(f'\nRight: {right}')
 print(f'Errored: {errored}')
 print(f'No eye: {no_eye}')
 print(f'No fish: {no_fish}')
-print(f'Wrong wrong: {wrong_wrong}')
+print(f'Clock wrong: {wrong_wrong}')
 print(f'Total: {counter}')
 print(f'Percent right: {right / counter}')
 print(f'Percent right that didn\'t error: {right / (counter - no_eye - no_fish - errored)}')

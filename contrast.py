@@ -7,7 +7,7 @@ from matplotlib import colors
 from matplotlib.ticker import PercentFormatter
 
 prefix = '/home/HDD/bgnn_data/validation_images/'
-results = json.load(open('../metadata.json'))
+results = json.load(open('../metadata_enhance.json'))
 df = pd.read_csv('/home/HDD/bgnn_data/image_quality_metadata_20210208.csv')
 values = []
 #d = []
