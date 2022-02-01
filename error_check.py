@@ -11,9 +11,6 @@ with open('config/enhance.json', 'r') as f:
 
 ENHANCE = bool(enhance['ENHANCE'])
 
-#TRAIN_ENHANCE = False
-#TEST_ENHANCE = False
-
 fname = 'metadata.json'
 if ENHANCE:
     fname = 'enhanced_' + fname
@@ -92,7 +89,10 @@ if __name__ == "__main__":
     if not (df_file == df_data.values).all(1).any():
         df_file = pd.concat([df_file, df_data])
     df_file.to_csv(dfname, index=False, float_format="%.2f")
+    total_count = missing_fish_count + missing_scale_count + multiple_fish_count + missing_ruler_count +\
+                  missing_eye_count
     print(f"Erroneous Image Count: {bad_length}")
+    print(f'Actual Error Count: {total_count}')
     print(f"INHS Image Count: {inhs_count}")
     print(f"UWZM Image Count: {uwzm_count}")
     print(f"Total Image Count: {metadata_length}")

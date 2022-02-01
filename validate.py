@@ -4,7 +4,7 @@ import numpy as np
 import os
 
 df = pd.read_csv('/usr/local/bgnn/image_quality_metadata_20210208.csv')
-results = json.load(open('metadata_enhance.json'))
+results = json.load(open('enhanced_error.json'))
 inhs_results = {}
 uwzm_results = {}
 for key in results:
@@ -58,8 +58,7 @@ for i in results.keys():
                 val = int(me['fish'][0]['clock_value'])
                 #print(yasin)
                 #exit(0)
-                check = val >= (angle - 1) and\
-                        val <= (angle + 1)
+                check = (angle - 1) <= val <= (angle + 1)
                 right += check
                 wrong_wrong += 1 if not check else 0
                 #right += val >= round(yasin.specimen_angled - 1) and\

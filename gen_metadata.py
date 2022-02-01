@@ -43,7 +43,7 @@ def init_model(enhance_contrast=ENHANCE):
     return predictor
 
 
-def gen_metadata(file_path, enhance_contrast=ENHANCE, visualize=False):
+def gen_metadata(file_path, enhance_contrast=ENHANCE, visualize=False, scaled_fish=None, scaled_ruler=None):
     """
     Generates metadata of an image and stores attributes into a Dictionary.
 
@@ -53,26 +53,33 @@ def gen_metadata(file_path, enhance_contrast=ENHANCE, visualize=False):
         {file_name: results} -- dictionary of file and associated results.
     """
     predictor = init_model()
-    im = cv2.imread(file_path)
-    im_gray = cv2.imread(file_path, cv2.IMREAD_GRAYSCALE)
-    if enhance_contrast:
-        lab = cv2.cvtColor(im, cv2.COLOR_BGR2LAB)
+    if scaled_ruler is not None:
+        im = scaled_ruler
+        im_gray = cv2.cvtColor(scaled_ruler, cv2.COLOR_BGR2GRAY)
+    elif scaled_fish is None:
+        im = cv2.imread(file_path)
+        im_gray = cv2.imread(file_path, cv2.IMREAD_GRAYSCALE)
+        if enhance_contrast:
+            lab = cv2.cvtColor(im, cv2.COLOR_BGR2LAB)
 
-        # -----Splitting the LAB image to different channels-------------------------
-        l, a, b = cv2.split(lab)
+            # -----Splitting the LAB image to different channels-------------------------
+            l, a, b = cv2.split(lab)
 
-        # -----Applying CLAHE to L-channel-------------------------------------------
-        clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
-        cl = clahe.apply(l)
+            # -----Applying CLAHE to L-channel-------------------------------------------
+            clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
+            cl = clahe.apply(l)
 
-        # -----Merge the CLAHE enhanced L-channel with the a and b channel-----------
-        limg = cv2.merge((cl, a, b))
+            # -----Merge the CLAHE enhanced L-channel with the a and b channel-----------
+            limg = cv2.merge((cl, a, b))
 
-        # -----Converting image from LAB Color model to RGB model--------------------
-        im = cv2.cvtColor(limg, cv2.COLOR_LAB2BGR)
+            # -----Converting image from LAB Color model to RGB model--------------------
+            im = cv2.cvtColor(limg, cv2.COLOR_LAB2BGR)
 
-        clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
-        im_gray = clahe.apply(im_gray)
+            clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
+            im_gray = clahe.apply(im_gray)
+    else:
+        im = scaled_fish
+        im_gray = cv2.cvtColor(scaled_fish, cv2.COLOR_BGR2GRAY)
     metadata = Metadata(evaluator_type='coco', image_root='.',
                         json_file='',
                         name='metadata',
@@ -91,7 +98,6 @@ def gen_metadata(file_path, enhance_contrast=ENHANCE, visualize=False):
         temp = insts.pred_classes == i
         selector += temp.cumsum(axis=0).cumsum(axis=0) == 1
     fish = insts[insts.pred_classes == 0]
-    # print(fish)
     if len(fish):
         results['fish'] = []
         # comment when doing multiple fish
@@ -126,16 +132,33 @@ def gen_metadata(file_path, enhance_contrast=ENHANCE, visualize=False):
     visualizer = Visualizer(im[:, :, ::-1], metadata=metadata, scale=1.0)
     # vis = visualizer.draw_instance_predictions(insts[selector].to('cpu'))
     vis = visualizer.draw_instance_predictions(insts.to('cpu'))
-    os.makedirs('images', exist_ok=True)
-    os.makedirs('images/enhanced', exist_ok=True)
-    os.makedirs('images/non_enhanced', exist_ok=True)
-    dirname = 'images/'
-    dirname += 'enhanced/' if ENHANCE else 'non_enhanced/'
-    print(file_name)
-    f_name = file_name.split('.')[0]
-    cv2.imwrite(f'{dirname}/gen_prediction_{f_name}.png',
-                vis.get_image()[:, :, ::-1])
-    if fish:
+    if visualize and (scaled_fish is not None or scaled_ruler is not None):
+        cv2.imshow('prediction', np.array(vis.get_image()[:, :, ::-1], dtype=np.uint8))
+        cv2.waitKey(0)
+    if scaled_fish is None and scaled_ruler is None:
+        os.makedirs('images', exist_ok=True)
+        os.makedirs('images/enhanced', exist_ok=True)
+        os.makedirs('images/non_enhanced', exist_ok=True)
+        dirname = 'images/'
+        dirname += 'enhanced/' if ENHANCE else 'non_enhanced/'
+        print(file_name)
+        f_name = file_name.split('.')[0]
+        cv2.imwrite(f'{dirname}/gen_prediction_{f_name}.png',
+                    vis.get_image()[:, :, ::-1])
+    if scale is None and scaled_ruler is None and ruler is not None:
+        '''Ruler detection does not work on upscaled images...'''
+        # print("No scale found.")
+        # factor = 4
+        # scale = upscale(im, [round(x) for x in ruler_bbox], f_name, factor, item='ruler', two=two, three=three)
+        # if two is not None and three is not None:
+        #     results['scale'] = scale
+        #     print("Scale found!")
+        # else:
+        #     print("No scaled found even after scaling!")
+    if scaled_ruler is not None:
+        f_name = file_name.split('.')[0]
+        return {f_name: {'two': two, 'three': three}}
+    elif fish:
         try:
             eyes = insts[insts.pred_classes == 2]
         except:
@@ -175,14 +198,12 @@ def gen_metadata(file_path, enhance_contrast=ENHANCE, visualize=False):
                     if len(full) > 1:
                         eye = eyes[full]
                         eye = eye[eye.scores.argmax().item()]
-                        print(eye)
                     else:
                         max_ind = max(range(len(eye_ols)), key=eye_ols.__getitem__)
                         eye = eyes[max_ind]
             else:
                 eye = None
 
-            results['fish'][i]['has_eye'] = bool(eye)
             # results['fish_count'] = len(insts[(insts.pred_classes == 0).logical_and(insts.scores > 0.3)]) - len(
             # skippable_fish)
 
@@ -251,7 +272,24 @@ def gen_metadata(file_path, enhance_contrast=ENHANCE, visualize=False):
 
                 centroid, evecs, length, width, area = pca(mask, scale)
                 major, minor = evecs[0], evecs[1]
-                if scale:
+                # upscale fish and then rerun
+                need_scaling = False
+                if eye is None and scaled_fish is None:
+                    print("No eye found.")
+                    need_scaling = True
+                    factor = 4
+                    eye_center, side, clock_val = upscale(im, bbox, f_name, factor)
+                    if eye_center is not None and side is not None:
+                        results['fish'][i]['eye_center'] = eye_center
+                        results['fish'][i]['side'] = side
+                        results['fish'][i]['clock_value'] = clock_val
+                        eye = 1  # placeholder, change to something more useful
+                        print("Eye found!")
+                    else:
+                        print("No eye found even after scaling!")
+
+                results['fish'][i]['has_eye'] = bool(eye)
+                if scale and not scaled_fish:
                     results['fish'][i]['length'] = length
                     results['fish'][i]['width'] = width
                     results['fish'][i]['area'] = area
@@ -264,7 +302,7 @@ def gen_metadata(file_path, enhance_contrast=ENHANCE, visualize=False):
                     results['fish'][i]['bbox_width'] = fish_box_length(mask, centroid, minor, scale)
 
                 results['fish'][i]['centroid'] = centroid.tolist()
-                if eye:
+                if eye and not need_scaling:
                     # print(eye.pred_boxes.get_centers())
                     eye_center = [round(x) for x in
                                   eye.pred_boxes.get_centers()[0].cpu().numpy()]
@@ -298,6 +336,60 @@ def gen_metadata(file_path, enhance_contrast=ENHANCE, visualize=False):
     # pprint.pprint(results)
     f_name = file_name.split('.')[0]
     return {f_name: results}
+
+
+def upscale(im, bbox, f_name, factor, item='fish', two=None, three=None):
+    h, w = bbox[3] - bbox[1], bbox[2] - bbox[0]
+    scaled = cv2.resize(im[bbox[1]:bbox[3], bbox[0]:bbox[2]].copy(), (w * factor, h * factor),
+                        interpolation=cv2.INTER_CUBIC)
+    os.makedirs('images/testing', exist_ok=True)
+    cv2.imwrite(f'images/testing/{f_name}.png', scaled)
+    eye_center, side, clock_val, scale = None, None, None, None
+    if item == 'fish':
+        new_data = gen_metadata(f'images/testing/{f_name}.png', scaled_fish=scaled)
+        if 'fish' in new_data[f'{f_name}'] and new_data[f'{f_name}']['fish'][0]['has_eye']:
+            eye_center = new_data[f'{f_name}']['fish'][0]['eye_center']
+            eye_x, eye_y = eye_center
+            eye_y //= factor
+            eye_y += bbox[1]
+            eye_x //= factor
+            eye_x += bbox[0]
+            eye_center = (eye_x, eye_y)
+            side = new_data[f'{f_name}']['fish'][0]['side']
+            clock_val = new_data[f'{f_name}']['fish'][0]['clock_value']
+    else:
+        new_data = gen_metadata(f'images/testing/{f_name}.png', scaled_ruler=scaled)
+        if 'two' in new_data[f'{f_name}'] and 'three' in new_data[f'{f_name}']:
+            if two is None and new_data[f'{f_name}']['two'] is not None:
+                two = new_data[f'{f_name}']['two']
+                c2 = two.pred_boxes.get_centers()[0]
+                c2_x, c2_y = c2
+                c2_y //= factor
+                c2_y += bbox[1]
+                c2_x //= factor
+                c2_x += bbox[0]
+                c2 = (c2_x, c2_y)
+            elif two is not None:
+                c2 = two.pred_boxes.get_centers()[0]
+            if three is not None and new_data[f'{f_name}']['three']:
+                three = new_data[f'{f_name}']['three']
+                c3 = three.pred_boxes.get_centers()[0]
+                c3_x, c3_y = c3
+                c3_y //= factor
+                c3_y += bbox[1]
+                c3_x //= factor
+                c3_x += bbox[0]
+                c3 = (c3_x, c3_y)
+            elif three is not None:
+                c3 = three.pred_boxes.get_centers()[0]
+            if two is not None and three is not None:
+                scale = distance([float(*c2)], [float(*c3)])
+    if os.path.isfile(f'images/testing/{f_name}.png'):
+        os.remove(f'images/testing/{f_name}.png')
+    if item == 'fish':
+        return eye_center, side, clock_val
+    else:
+        return scale
 
 
 def adaptive_threshold(bbox, im_gray):
@@ -690,10 +782,8 @@ def calc_scale(two, three, file_name):
                      [float(pt2[0]), float(pt2[1])])
     if any(name in file_name for name in in_list):
         scale /= 2.54
-        # print("Converting in to cm")
     elif any(name in file_name for name in cm_list):
         pass
-        # print("Already in cm")
     else:
         scale /= 2.54
         print("Unable to determine unit. Defaulting to cm.")
