@@ -92,8 +92,7 @@ def gen_metadata(file_path):
                         json_file='',
                         name='metadata',
                         thing_classes=['fish', 'ruler', 'eye', 'two', 'three'],
-                        thing_dataset_id_to_contiguous_id=
-                        # {1: 0}
+                        thing_dataset_id_to_contiguous_id=# {1: 0}
                         {1: 0, 2: 1, 3: 2, 4: 3, 5: 4}
                         )
     output = predictor(im)
@@ -159,11 +158,11 @@ def gen_metadata(file_path):
                 eye = None
             results['fish'][i]['has_eye'] = bool(eye)
             results['fish_count'] = len(insts[(insts.pred_classes == 0).
-                                        logical_and(insts.scores > 0.3)])
+                                              logical_and(insts.scores > 0.3)])
 
             # try:
             bbox = [round(x) for x in curr_fish.pred_boxes.tensor.cpu().
-                numpy().astype('float64')[0]]
+                    numpy().astype('float64')[0]]
             im_crop = im_gray[bbox[1]:bbox[3], bbox[0]:bbox[2]]
             detectron_mask = curr_fish.pred_masks[0].cpu().numpy()
             val = adaptive_threshold(bbox, im_gray)

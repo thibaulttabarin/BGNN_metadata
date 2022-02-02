@@ -26,8 +26,8 @@ for file in results.keys():
         pass
 
 #values.sort(key=lambda x: x[1], reverse=True)
-#print(values)
-#exit(0)
+# print(values)
+# exit(0)
 
 print(np.mean([x[1] for x in values]))
 print(np.std([x[1] for x in values]))

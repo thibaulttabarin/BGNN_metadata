@@ -36,7 +36,7 @@ for file in results.keys():
             m = back - fore
             if m > 0:
                 m = fore
-                #mm.append(m)
+                # mm.append(m)
                 f.write(f'{bright},{m}\n')
                 """
                 if m < 78.5:
@@ -47,13 +47,13 @@ for file in results.keys():
                     guess = 2
                 mm.append((guess, bright))
                 """
-                #if brightness == 'dark':
-                    #d.append(m)
-                #elif brightness == 'normal':
-                    #n.append(m)
-                #elif brightness == 'bright':
-                    #b.append(m)
-                #else:
+                # if brightness == 'dark':
+                # d.append(m)
+                # elif brightness == 'normal':
+                # n.append(m)
+                # elif brightness == 'bright':
+                # b.append(m)
+                # else:
     except:
         pass
 

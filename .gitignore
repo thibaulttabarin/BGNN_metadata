@@ -168,4 +168,3 @@ detectron2/
 *.sqlite
 idigbio/
 /opencv_models/
-/opencv_models/

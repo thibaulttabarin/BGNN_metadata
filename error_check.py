@@ -32,7 +32,8 @@ for key in metadata:
         missing_ruler_count += int(not metadata[key]['has_ruler'])
     except:
         print(metadata[key])
-    multiple_fish_count += int(metadata[key]['has_fish'] and metadata[key]['fish_count'] > 1)
+    multiple_fish_count += int(metadata[key]['has_fish']
+                               and metadata[key]['fish_count'] > 1)
     missing_fish_count += int(not metadata[key]['has_fish'])
     missing_scale_count += int('scale' not in metadata[key])
     missing_eye_count += int(sum([not fish['has_eye'] for fish in metadata[key]['fish']]) ==
@@ -68,7 +69,8 @@ bad_length = len(list(faulty_images.keys()))
 
 
 if __name__ == "__main__":
-    csv_columns = ['Iters', 'Total', 'No Fish', 'No Ruler', 'No Eye', 'Multiple Fish', 'No Scale']
+    csv_columns = ['Iters', 'Total', 'No Fish',
+                   'No Ruler', 'No Eye', 'Multiple Fish', 'No Scale']
     data = {
         'Iters': iters,
         'Total': bad_length,
@@ -85,12 +87,13 @@ if __name__ == "__main__":
     else:
         dfname = 'non_enhanced_' + dfname
 
-    df_file = pd.read_csv(dfname, header=0) if os.path.isfile(dfname) else pd.DataFrame(columns=csv_columns)
+    df_file = pd.read_csv(dfname, header=0) if os.path.isfile(
+        dfname) else pd.DataFrame(columns=csv_columns)
     if not (df_file == df_data.values).all(1).any():
         df_file = pd.concat([df_file, df_data])
     df_file.to_csv(dfname, index=False, float_format="%.2f")
     total_count = missing_fish_count + missing_scale_count + multiple_fish_count + missing_ruler_count +\
-                  missing_eye_count
+        missing_eye_count
     print(f"Erroneous Image Count: {bad_length}")
     print(f'Actual Error Count: {total_count}')
     print(f"INHS Image Count: {inhs_count}")

@@ -49,8 +49,7 @@ def main():
                                     json_file=json_file,
                                     name=name,
                                     thing_classes=['label'],
-                                    thing_dataset_id_to_contiguous_id=
-                                    {1: 0}
+                                    thing_dataset_id_to_contiguous_id={1: 0}
                                     )
             register_coco_instances(name, {}, json_file, ims)
 

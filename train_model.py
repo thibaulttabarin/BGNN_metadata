@@ -55,9 +55,10 @@ def main(enhance_contrast=ENHANCE):
                 metadata = Metadata(evaluator_type='coco', image_root=ims,
                                     json_file=json_file,
                                     name=name,
-                                    thing_classes=['fish', 'ruler', 'eye', 'two', 'three'],
-                                    thing_dataset_id_to_contiguous_id=
-                                    {1: 0, 2: 1, 3: 2, 4: 3, 5: 4}
+                                    thing_classes=[
+                                        'fish', 'ruler', 'eye', 'two', 'three'],
+                                    thing_dataset_id_to_contiguous_id={
+                                        1: 0, 2: 1, 3: 2, 4: 3, 5: 4}
                                     )
             register_coco_instances(name, {}, json_file, ims)
 

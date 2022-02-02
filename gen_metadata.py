@@ -84,8 +84,7 @@ def gen_metadata(file_path, enhance_contrast=ENHANCE, visualize=False, scaled_fi
                         json_file='',
                         name='metadata',
                         thing_classes=['fish', 'ruler', 'eye', 'two', 'three'],
-                        thing_dataset_id_to_contiguous_id=
-                        # {1: 0}
+                        thing_dataset_id_to_contiguous_id=  # {1: 0}
                         {1: 0, 2: 1, 3: 2, 4: 3, 5: 4}
                         )
     output = predictor(im)
@@ -133,7 +132,8 @@ def gen_metadata(file_path, enhance_contrast=ENHANCE, visualize=False, scaled_fi
     # vis = visualizer.draw_instance_predictions(insts[selector].to('cpu'))
     vis = visualizer.draw_instance_predictions(insts.to('cpu'))
     if visualize and (scaled_fish is not None or scaled_ruler is not None):
-        cv2.imshow('prediction', np.array(vis.get_image()[:, :, ::-1], dtype=np.uint8))
+        cv2.imshow('prediction', np.array(
+            vis.get_image()[:, :, ::-1], dtype=np.uint8))
         cv2.waitKey(0)
     if scaled_fish is None and scaled_ruler is None:
         os.makedirs('images', exist_ok=True)
@@ -192,14 +192,16 @@ def gen_metadata(file_path, enhance_contrast=ENHANCE, visualize=False, scaled_fi
 
                 eye = None
                 if not all(ol == 0 for ol in eye_ols):
-                    full = [i for i in range(len(eye_ols)) if eye_ols[i] >= .95]
+                    full = [i for i in range(
+                        len(eye_ols)) if eye_ols[i] >= .95]
 
                     # if multiple eyes with 95% or greater overlap, pick highest confidence
                     if len(full) > 1:
                         eye = eyes[full]
                         eye = eye[eye.scores.argmax().item()]
                     else:
-                        max_ind = max(range(len(eye_ols)), key=eye_ols.__getitem__)
+                        max_ind = max(range(len(eye_ols)),
+                                      key=eye_ols.__getitem__)
                         eye = eyes[max_ind]
             else:
                 eye = None
@@ -209,7 +211,7 @@ def gen_metadata(file_path, enhance_contrast=ENHANCE, visualize=False, scaled_fi
 
             # try:
             bbox = [round(x) for x in curr_fish.pred_boxes.tensor.cpu().
-                numpy().astype('float64')[0]]
+                    numpy().astype('float64')[0]]
             im_crop = im_gray[bbox[1]:bbox[3], bbox[0]:bbox[2]]
             detectron_mask = curr_fish.pred_masks[0].cpu().numpy()
             val = adaptive_threshold(bbox, im_gray)
@@ -221,16 +223,11 @@ def gen_metadata(file_path, enhance_contrast=ENHANCE, visualize=False, scaled_fi
                 print('Mask failed: {file_name}')
                 results['errored'] = True
             else:
-                # print(mask)
                 im_crop = im_gray[bbox[1]:bbox[3], bbox[0]:bbox[2]].reshape(-1)
                 mask_crop = mask[bbox[1]:bbox[3], bbox[0]:bbox[2]].reshape(-1)
-                # print(list(zip(list(im_crop),list(mask_crop))))
-                # print(np.count_nonzero(mask_crop))
+                mask_coords = np.argwhere(mask != 0)[:, [1, 0]]
                 fground = im_crop[np.where(mask_crop)]
                 bground = im_crop[np.where(np.logical_not(mask_crop))]
-                # print(im_crop.shape)
-                # print(fground.shape)
-                # print(bground.shape)
                 results['fish'][i]['foreground'] = {}
                 results['fish'][i]['foreground']['mean'] = np.mean(fground)
                 results['fish'][i]['foreground']['std'] = np.std(fground)
@@ -246,10 +243,14 @@ def gen_metadata(file_path, enhance_contrast=ENHANCE, visualize=False, scaled_fi
                     ax.imshow(mask, cmap=plt.cm.gray)
                     y0, x0 = region.centroid
                     orientation = region.orientation
-                    x1 = x0 + math.cos(orientation) * 0.5 * region.axis_minor_length
-                    y1 = y0 - math.sin(orientation) * 0.5 * region.axis_minor_length
-                    x2 = x0 - math.sin(orientation) * 0.5 * region.axis_major_length
-                    y2 = y0 - math.cos(orientation) * 0.5 * region.axis_major_length
+                    x1 = x0 + math.cos(orientation) * 0.5 * \
+                        region.axis_minor_length
+                    y1 = y0 - math.sin(orientation) * 0.5 * \
+                        region.axis_minor_length
+                    x2 = x0 - math.sin(orientation) * 0.5 * \
+                        region.axis_major_length
+                    y2 = y0 - math.cos(orientation) * 0.5 * \
+                        region.axis_major_length
 
                     ax.plot((x0, x1), (y0, y1), '-r')
                     ax.plot((x0, x2), (y0, y2), '-b')
@@ -264,29 +265,29 @@ def gen_metadata(file_path, enhance_contrast=ENHANCE, visualize=False, scaled_fi
                 results['fish'][i]['extent'] = region.extent
                 results['fish'][i]['eccentricity'] = region.eccentricity
                 results['fish'][i]['solidity'] = region.solidity
-                results['fish'][i]['skew'] = stats.skew(mask, axis=None)
-                results['fish'][i]['kurtosis'] = stats.kurtosis(mask, axis=None)
+                results['fish'][i]['skew'] = list(stats.skew(mask_coords))
+                results['fish'][i]['kurtosis'] = list(
+                    stats.kurtosis(mask_coords))
+                results['fish'][i]['std'] = list(np.std(mask_coords, axis=0))
                 results['fish'][i]['mask'] = {}
                 results['fish'][i]['mask']['start_coord'] = list(start)
                 results['fish'][i]['mask']['encoding'] = code
 
-                centroid, evecs, length, width, area = pca(mask, scale)
+                centroid, evecs, length, width, area, oriented_bbox = pca(
+                    mask, scale, scaled=scaled_fish)
                 major, minor = evecs[0], evecs[1]
                 # upscale fish and then rerun
                 need_scaling = False
                 if eye is None and scaled_fish is None:
-                    print("No eye found.")
                     need_scaling = True
                     factor = 4
-                    eye_center, side, clock_val = upscale(im, bbox, f_name, factor)
+                    eye_center, side, clock_val = upscale(
+                        im, bbox, f_name, factor)
                     if eye_center is not None and side is not None:
                         results['fish'][i]['eye_center'] = eye_center
                         results['fish'][i]['side'] = side
                         results['fish'][i]['clock_value'] = clock_val
                         eye = 1  # placeholder, change to something more useful
-                        print("Eye found!")
-                    else:
-                        print("No eye found even after scaling!")
 
                 results['fish'][i]['has_eye'] = bool(eye)
                 if scale and not scaled_fish:
@@ -296,11 +297,20 @@ def gen_metadata(file_path, enhance_contrast=ENHANCE, visualize=False, scaled_fi
                     results['fish'][i]['feret_diameter_max'] = region.feret_diameter_max / scale
                     results['fish'][i]['major_axis_length'] = region.major_axis_length / scale
                     results['fish'][i]['minor_axis_length'] = region.minor_axis_length / scale
-                    results['fish'][i]['convex_area'] = region.convex_area / (scale ** 2)
-                    results['fish'][i]['perimeter'] = measure.perimeter(mask, neighbourhood=8) / scale
-                    results['fish'][i]['bbox_length'] = fish_box_length(mask, centroid, major, scale)
-                    results['fish'][i]['bbox_width'] = fish_box_length(mask, centroid, minor, scale)
-
+                    results['fish'][i]['convex_area'] = region.convex_area / \
+                        (scale ** 2)
+                    results['fish'][i]['perimeter'] = measure.perimeter(
+                        mask, neighbourhood=8) / scale
+                    results['fish'][i]['bbox_length'] = fish_box_length(
+                        mask, centroid, major, scale)
+                    results['fish'][i]['bbox_width'] = fish_box_length(
+                        mask, centroid, minor, scale)
+                    results['fish'][i]['oriented_bbox'] = {}
+                    results['fish'][i]['oriented_bbox']['center'] = list(
+                        oriented_bbox[0])
+                    results['fish'][i]['oriented_bbox']['width'] = oriented_bbox[1][0]
+                    results['fish'][i]['oriented_bbox']['length'] = oriented_bbox[1][1]
+                    results['fish'][i]['oriented_bbox']['angle'] = oriented_bbox[2]
                 results['fish'][i]['centroid'] = centroid.tolist()
                 if eye and not need_scaling:
                     # print(eye.pred_boxes.get_centers())
@@ -329,9 +339,7 @@ def gen_metadata(file_path, enhance_contrast=ENHANCE, visualize=False, scaled_fi
                         results['fish'][i]['clock_value'] = \
                             clock_value(snout_vec, file_name)
                 results['fish'][i]['primary_axis'] = list(major)
-                # print(curr_fish)
                 results['fish'][i]['score'] = float(curr_fish.scores[0].cpu())
-                # print(results['fish'][i]['score'])
     results['fish_count'] = 1
     # pprint.pprint(results)
     f_name = file_name.split('.')[0]
@@ -346,7 +354,8 @@ def upscale(im, bbox, f_name, factor, item='fish', two=None, three=None):
     cv2.imwrite(f'images/testing/{f_name}.png', scaled)
     eye_center, side, clock_val, scale = None, None, None, None
     if item == 'fish':
-        new_data = gen_metadata(f'images/testing/{f_name}.png', scaled_fish=scaled)
+        new_data = gen_metadata(
+            f'images/testing/{f_name}.png', scaled_fish=scaled)
         if 'fish' in new_data[f'{f_name}'] and new_data[f'{f_name}']['fish'][0]['has_eye']:
             eye_center = new_data[f'{f_name}']['fish'][0]['eye_center']
             eye_x, eye_y = eye_center
@@ -358,7 +367,8 @@ def upscale(im, bbox, f_name, factor, item='fish', two=None, three=None):
             side = new_data[f'{f_name}']['fish'][0]['side']
             clock_val = new_data[f'{f_name}']['fish'][0]['clock_value']
     else:
-        new_data = gen_metadata(f'images/testing/{f_name}.png', scaled_ruler=scaled)
+        new_data = gen_metadata(
+            f'images/testing/{f_name}.png', scaled_ruler=scaled)
         if 'two' in new_data[f'{f_name}'] and 'three' in new_data[f'{f_name}']:
             if two is None and new_data[f'{f_name}']['two'] is not None:
                 two = new_data[f'{f_name}']['two']
@@ -607,7 +617,7 @@ def overlap_fish(fish1, fish2):
 
 
 # https://alyssaq.github.io/2015/computing-the-axes-or-orientation-of-a-blob/
-def pca(img, glob_scale=None, visualize=False):
+def pca(img, glob_scale=None, visualize=False, scaled=None):
     """
     Performs principle component analysis on a grayscale image.
     Parameters:
@@ -634,8 +644,13 @@ def pca(img, glob_scale=None, visualize=False):
     cov = np.cov(coords)
     evals, evecs = np.linalg.eig(cov)
     sort_indices = np.argsort(evals)[::-1]
-    x_v1, y_v1 = evecs[:, sort_indices[0]]  # Eigenvector with largest eigenvalue
-
+    # Eigenvector with largest eigenvalue
+    x_v1, y_v1 = evecs[:, sort_indices[0]]
+    contours, _ = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    cnt = contours[0]
+    rect = cv2.minAreaRect(cnt)
+    # box = cv2.boxPoints(rect)
+    # oriented_bbox = np.int0(box)
     # theta = np.arctan(x_v1 / y_v1)
     theta = np.arctan2(y_v1, x_v1)
     # print(x_v1, y_v1, theta, np.linalg.norm(evecs[:, sort_indices[0]]))
@@ -647,11 +662,13 @@ def pca(img, glob_scale=None, visualize=False):
     transformed_mat = rotation_mat * coords
     # plot the transformed blob
     x_transformed, y_transformed = transformed_mat.A
-    x_round, y_round = x_transformed.round(decimals=0), y_transformed.round(decimals=0)
+    x_round, y_round = x_transformed.round(
+        decimals=0), y_transformed.round(decimals=0)
     x_vals, x_counts = np.unique(x_round, return_counts=True)
     y_vals, y_counts = np.unique(y_round, return_counts=True)
     x_calc, y_calc = x_vals[x_counts.argmax()], y_vals[y_counts.argmax()]
-    x_indices, y_indices = np.where(x_round == x_calc), np.where(y_round == y_calc)
+    x_indices, y_indices = np.where(
+        x_round == x_calc), np.where(y_round == y_calc)
     width = y_round[x_indices].max() - y_round[x_indices].min()
     length = x_round[y_indices].max() - x_round[y_indices].min()
 
@@ -676,7 +693,7 @@ def pca(img, glob_scale=None, visualize=False):
         width /= glob_scale
         area /= glob_scale ** 2
 
-    return np.array(centroid), evecs[:, sort_indices], length, width, area
+    return np.array(centroid), evecs[:, sort_indices], length, width, area, rect
 
 
 def find_nearest(array, value):
@@ -692,13 +709,15 @@ def encode_freeman(image_contour):
     Encode the image contour in an 8-direction freeman chain code based on angles
     """
     freeman_code = ""
-    freeman_dict = {-90: '0', -45: '1', 0: '2', 45: '3', 90: '4', 135: '5', 180: '6', -135: '7'}
+    freeman_dict = {-90: '0', -45: '1', 0: '2',
+                    45: '3', 90: '4', 135: '5', 180: '6', -135: '7'}
     allowed_directions = np.array([0, 45, 90, 135, 180, -45, -90, -135])
 
     for i in range(len(image_contour) - 1):
         delta_x = image_contour[i + 1][1] - image_contour[i][1]
         delta_y = image_contour[i + 1][0] - image_contour[i][0]
-        angle = allowed_directions[np.abs(allowed_directions - np.rad2deg(np.arctan2(delta_y, delta_x))).argmin()]
+        angle = allowed_directions[np.abs(
+            allowed_directions - np.rad2deg(np.arctan2(delta_y, delta_x))).argmin()]
         if not (delta_x == 0 and delta_y == 0):
             freeman_code += freeman_dict[angle]
 
@@ -707,7 +726,8 @@ def encode_freeman(image_contour):
 
 def create_svg(contour, shape):
     with open('image.svg', 'w+') as f:
-        f.write(f'<svg width="{shape[1]}" height="{shape[0]}" xmlns="http://www.w3.org/2000/svg">')
+        f.write(
+            f'<svg width="{shape[1]}" height="{shape[0]}" xmlns="http://www.w3.org/2000/svg">')
         f.write('<path d="M')
         for coords in contour:
             x, y = coords
@@ -734,7 +754,8 @@ def encoded_mask(mask, visualize=False):
 
 def decode_freeman(contour, mask, code, visualize=False):
     coords = [list(contour[0][::-1])]
-    freeman_dict = {0: [0, -1], 1: [1, -1], 2: [1, 0], 3: [1, 1], 4: [0, 1], 5: [-1, 1], 6: [-1, 0], 7: [-1, -1]}
+    freeman_dict = {0: [0, -1], 1: [1, -1], 2: [1, 0],
+                    3: [1, 1], 4: [0, 1], 5: [-1, 1], 6: [-1, 0], 7: [-1, -1]}
     for letter in code:
         change = freeman_dict[int(letter)]
         current = coords[-1]
