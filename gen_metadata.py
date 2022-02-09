@@ -888,7 +888,7 @@ def gen_mask_upscale(bbox, file_path, file_name, im_gray, val, detectron_mask):
     im = im_gray.copy() 
     im_crop = im[t:b, l:r] 
     thresh = np.where(im_crop < val, 1, 0).astype(np.uint8)
-    new_mask = np.full(shape, 0).astype(np.uint8)
+    new_mask = np.full(im.shape, 0).astype(np.uint8)
     new_mask[t:b, l:r] = thresh
     if np.count_nonzero(thresh) / im_crop.size < .1:
         print(f'{file_name}: Using detectron mask and bbox')
