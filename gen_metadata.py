@@ -794,7 +794,7 @@ def gen_mask(bbox, file_path, file_name, im_gray, val, detectron_mask,
     im = im_gray.copy()
     shape = im.shape
     done = False
-    im_crop = im_gray[t:b, l:r]
+    im_crop = im[t:b, l:r]
     fish_pix = None
 
     thresh = np.where(im_crop < val, 1, 0).astype(np.uint8)
@@ -826,7 +826,7 @@ def gen_mask(bbox, file_path, file_name, im_gray, val, detectron_mask,
             break
     while not done:
         done = True
-        im_crop = im_gray[t:b, l:r]
+        im_crop = im[t:b, l:r]
         thresh = np.where(im_crop < val, 1, 0).astype(np.uint8)
         new_mask = np.full(shape, 0).astype(np.uint8)
         new_mask[t:b, l:r] = thresh
@@ -886,7 +886,7 @@ def gen_mask_upscale(bbox, file_path, file_name, im_gray, val, detectron_mask):
     bbox = (l, t, r, b)
 
     im = im_gray.copy() 
-    im_crop = im_gray[t:b, l:r] 
+    im_crop = im[t:b, l:r] 
     thresh = np.where(im_crop < val, 1, 0).astype(np.uint8)
     new_mask = np.full(shape, 0).astype(np.uint8)
     new_mask[t:b, l:r] = thresh
