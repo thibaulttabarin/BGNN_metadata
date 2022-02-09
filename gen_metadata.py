@@ -143,8 +143,8 @@ def gen_metadata(file_path, enhance_contrast=ENHANCE, visualize=False, multiple_
         except:
             eyes = None
 
+        fish = fish[fish.scores > .3]
         if not multiple_fish:
-            fish = fish[fish.scores > .3]
             fish = fish[fish.scores.argmax().item()]
         for i in range(len(fish)):
             curr_fish = fish[i]
@@ -791,62 +791,61 @@ def gen_mask(bbox, file_path, file_name, im_gray, val, detectron_mask,
     bbox_orig = bbox
     bbox = (l, t, r, b)
 
-    im = Image.open(file_path).convert('L')
-    arr2 = np.array(im)
-    shape = arr2.shape
+    im = im_gray.copy()
+    shape = im.shape
     done = False
     im_crop = im_gray[t:b, l:r]
     fish_pix = None
+
+    thresh = np.where(im_crop < val, 1, 0).astype(np.uint8)
+    indices = list(zip(*np.where(thresh == 1)))
+    shuffle(indices)
+    count = 0
+    for ind in indices:
+        if fish_pix is not None:
+            ind = fish_pix
+        count += 1
+        # if 10k pass and fish not found
+        if count > 10000:
+            if fish_pix is not None:
+                fish_pix = None
+            else:
+                print(f'ERROR on flood fill: {file_name}')
+                return bbox_orig, detectron_mask.astype('uint8'), True
+        temp = flood_fill(thresh, ind, 2)
+        temp = np.where(temp == 2, 1, 0)
+        percent = np.count_nonzero(temp) / im_crop.size 
+        if percent > 0.1:
+            fish_pix = ind
+            # Flood fills from each of the bbox corners
+            for i in (0, temp.shape[0] - 1):
+                for j in (0, temp.shape[1] - 1):
+                    temp = flood_fill(temp, (i, j), 2)
+
+            thresh = np.where(temp != 2, 1, 0).astype(np.uint8)
+            break
     while not done:
         done = True
-        arr0 = np.array(im.crop(bbox))
-        bb_size = arr0.size
-
-        arr1 = np.where(arr0 < val, 1, 0).astype(np.uint8)
-        indices = list(zip(*np.where(arr1 == 1)))
-        shuffle(indices)
-        count = 0
-        for ind in indices:
-            if fish_pix is not None:
-                ind = fish_pix
-            count += 1
-            # if 10k pass and fish not found
-            if count > 10000:
-                if fish_pix is not None:
-                    fish_pix = None
-                else:
-                    print(f'ERROR on flood fill: {file_name}')
-                    return bbox_orig, detectron_mask.astype('uint8'), True
-            temp = flood_fill(arr1, ind, 2)
-            temp = np.where(temp == 2, 1, 0)
-            percent = np.count_nonzero(temp) / bb_size
-            if percent > 0.1:
-                fish_pix = ind
-                # Flood fills from each of the bbox corners
-                for i in (0, temp.shape[0] - 1):
-                    for j in (0, temp.shape[1] - 1):
-                        temp = flood_fill(temp, (i, j), 2)
-
-                arr1 = np.where(temp != 2, 1, 0).astype(np.uint8)
-                break
-        arr3 = np.full(shape, 0).astype(np.uint8)
-        arr3[t:b, l:r] = arr1
+        im_crop = im_gray[t:b, l:r]
+        thresh = np.where(im_crop < val, 1, 0).astype(np.uint8)
+        new_mask = np.full(shape, 0).astype(np.uint8)
+        new_mask[t:b, l:r] = thresh
 
         # Expands the bounding box
         try:
-            if np.any(arr3[t:b, l] != 0) and l > 0:
+            if np.any(new_mask[t:b, l] != 0) and l > 0:
                 l -= 1
                 l = max(0, l)
                 done = False
-            if np.any(arr3[t:b, r] != 0) and r < shape[1] - 1:
+            if np.any(new_mask[t:b, r] != 0) and r < shape[1] - 1:
                 r += 1
                 r = min(shape[1] - 1, r)
                 done = False
-            if np.any(arr3[t, l:r] != 0) and t > 0:
+            if np.any(new_mask[t, l:r] != 0) and t > 0:
                 t -= 1
                 t = max(0, t)
                 done = False
-            if np.any(arr3[b, l:r] != 0) and b < shape[0] - 1:
+            if np.any(new_mask[b, l:r] != 0) and b < shape[0] - 1:
                 b += 1
                 b = min(shape[0] - 1, b)
                 done = False
@@ -858,13 +857,13 @@ def gen_mask(bbox, file_path, file_name, im_gray, val, detectron_mask,
         bbox = (l, t, r, b)
         # New threshold
         val = adaptive_threshold(bbox, im_gray)
-    if np.count_nonzero(arr1) / bb_size < .1:
+    if np.count_nonzero(thresh) / im_crop.size < .1:
         print(f'{file_name}: Using detectron mask and bbox')
-        arr3 = detectron_mask.astype('uint8')
+        new_mask = detectron_mask.astype('uint8')
         bbox = bbox_orig
         failed = True
-    arr4 = np.where(arr3 == 1, 255, 0).astype(np.uint8)
-    (l, t, r, b) = shrink_bbox(arr3)
+    '''arr4 = np.where(new_mask == 1, 255, 0).astype(np.uint8)
+    (l, t, r, b) = shrink_bbox(new_mask)
     arr4[t:b, l] = 175
     arr4[t:b, r] = 175
     arr4[t, l:r] = 175
@@ -873,8 +872,8 @@ def gen_mask(bbox, file_path, file_name, im_gray, val, detectron_mask,
     dirname = 'images/'
     dirname += 'enhanced/' if ENHANCE else 'non_enhanced/'
     f_name = file_name.split('.')[0]
-    im2.save(f'{dirname}/gen_mask_{f_name}_{index}.png')
-    return bbox, arr3, failed
+    im2.save(f'{dirname}/gen_mask_{f_name}_{index}.png')'''
+    return bbox, new_mask, failed
 
 
 def gen_mask_upscale(bbox, file_path, file_name, im_gray, val, detectron_mask):
@@ -886,20 +885,17 @@ def gen_mask_upscale(bbox, file_path, file_name, im_gray, val, detectron_mask):
     bbox_orig = bbox
     bbox = (l, t, r, b)
 
-    im = Image.open(file_path).convert('L')
-    arr0 = np.array(im.crop(bbox))
-    bb_size = arr0.size
-    arr1 = np.where(arr0 < val, 1, 0).astype(np.uint8)
-    arr2 = np.array(im)
-    shape = arr2.shape
-    arr3 = np.full(shape, 0).astype(np.uint8)
-    arr3[t:b, l:r] = arr1
-    if np.count_nonzero(arr1) / bb_size < .1:
+    im = im_gray.copy() 
+    im_crop = im_gray[t:b, l:r] 
+    thresh = np.where(im_crop < val, 1, 0).astype(np.uint8)
+    new_mask = np.full(shape, 0).astype(np.uint8)
+    new_mask[t:b, l:r] = thresh
+    if np.count_nonzero(thresh) / im_crop.size < .1:
         print(f'{file_name}: Using detectron mask and bbox')
-        arr3 = detectron_mask.astype('uint8')
+        new_mask = detectron_mask.astype('uint8')
         bbox = bbox_orig
         failed = True
-    return bbox, arr3, failed
+    return bbox, new_mask, failed
 
 
 # https://stackoverflow.com/questions/31400769/bounding-box-of-numpy-array
@@ -923,7 +919,7 @@ def gen_metadata_safe(file_path):
         return gen_metadata(file_path)
     except Exception as e:
         print(f'{file_path}: Errored out ({e})')
-        return {file_path: {'errored': True}}
+        return {file_path: {'errored': str(e)}}
 
 
 def main():
@@ -934,17 +930,11 @@ def main():
             files = files[:int(sys.argv[2])]
     else:
         files = [direct]
-    # print(files)
-    # predictor = init_model()
-    # f = partial(gen_metadata, predictor)
     with Pool(3) as p:
-        # results = map(gen_metadata, files)
         results = p.map(gen_metadata_safe, files)
-    # results = map(gen_metadata, files)
     output = {}
     for i in results:
         output[list(i.keys())[0]] = list(i.values())[0]
-    # print(output)
     fname = 'metadata.json'
     if ENHANCE:
         fname = 'enhanced_' + fname
@@ -958,5 +948,4 @@ def main():
 
 
 if __name__ == '__main__':
-    # gen_metadata(sys.argv[1])
     main()
