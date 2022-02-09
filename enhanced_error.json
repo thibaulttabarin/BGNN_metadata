@@ -1,911 +1,181 @@
 {
-    "INHS_FISH_61669": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_86359": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_83999": {
-        "missing_fish": false,
-        "missing_scale": true,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": false
-    },
     "UWZM-F-0004387": {
         "missing_fish": false,
         "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_77614": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_56967": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_85143": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_84273": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
         "missing_ruler": false,
         "missing_eye": true
     },
     "UWZM-F-0003455": {
         "missing_fish": false,
         "missing_scale": false,
-        "multiple_fish": false,
         "missing_ruler": false,
         "missing_eye": true
-    },
-    "INHS_FISH_76838": {
-        "missing_fish": false,
-        "missing_scale": true,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": false
     },
     "UWZM-F-0003457": {
         "missing_fish": false,
         "missing_scale": false,
-        "multiple_fish": false,
         "missing_ruler": false,
         "missing_eye": true
-    },
-    "INHS_FISH_84422": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_84247": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_52049": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_84321": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_73682": {
-        "missing_fish": false,
-        "missing_scale": true,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": false
-    },
-    "INHS_FISH_83747": {
-        "missing_fish": false,
-        "missing_scale": true,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": false
     },
     "UWZM-F-0004491": {
         "missing_fish": false,
         "missing_scale": false,
-        "multiple_fish": false,
         "missing_ruler": false,
         "missing_eye": true
-    },
-    "INHS_FISH_42890": {
-        "missing_fish": false,
-        "missing_scale": true,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": false
-    },
-    "INHS_FISH_75184": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_84473": {
-        "missing_fish": false,
-        "missing_scale": true,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": false
     },
     "UWZM-F-0000780": {
         "missing_fish": false,
         "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_80512": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
         "missing_ruler": false,
         "missing_eye": true
     },
     "UWZM-F-0001625": {
         "missing_fish": false,
         "missing_scale": false,
-        "multiple_fish": false,
         "missing_ruler": false,
         "missing_eye": true
-    },
-    "INHS_FISH_60892": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_80987": {
-        "missing_fish": false,
-        "missing_scale": true,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": false
     },
     "UWZM-F-0001898": {
         "missing_fish": false,
         "missing_scale": false,
-        "multiple_fish": false,
         "missing_ruler": false,
         "missing_eye": true
-    },
-    "INHS_FISH_56835": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_55892": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_6273": {
-        "missing_fish": false,
-        "missing_scale": true,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": false
     },
     "UWZM-F-0003405": {
         "missing_fish": false,
         "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_74211": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
         "missing_ruler": false,
         "missing_eye": true
     },
     "UWZM-F-0004276": {
         "missing_fish": false,
         "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_79721": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_5720": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_10116": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_84378": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_63709": {
-        "missing_fish": false,
-        "missing_scale": true,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": false
-    },
-    "INHS_FISH_58782": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
         "missing_ruler": false,
         "missing_eye": true
     },
     "UWZM-F-0004483": {
         "missing_fish": false,
         "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_58571": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
         "missing_ruler": false,
         "missing_eye": true
     },
     "UWZM-F-0003433": {
         "missing_fish": false,
         "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_62984": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
         "missing_ruler": false,
         "missing_eye": true
     },
     "UWZM-F-0002607": {
         "missing_fish": false,
         "missing_scale": false,
-        "multiple_fish": false,
         "missing_ruler": false,
         "missing_eye": true
-    },
-    "INHS_FISH_84368": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_81302": {
-        "missing_fish": false,
-        "missing_scale": true,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": false
     },
     "UWZM-F-0002605": {
         "missing_fish": false,
         "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_101907": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_81900": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
         "missing_ruler": false,
         "missing_eye": true
     },
     "UWZM-F-0003428": {
         "missing_fish": false,
         "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_65046": {
-        "missing_fish": true,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_60956": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_55970": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_42857": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_75293": {
-        "missing_fish": false,
-        "missing_scale": true,
-        "multiple_fish": false,
-        "missing_ruler": true,
-        "missing_eye": false
-    },
-    "INHS_FISH_84249": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_80049": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
         "missing_ruler": false,
         "missing_eye": true
     },
     "UWZM-F-0003976": {
         "missing_fish": false,
         "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_81452": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_7021": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_81469": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
         "missing_ruler": false,
         "missing_eye": true
     },
     "UWZM-F-0003423": {
         "missing_fish": false,
         "missing_scale": false,
-        "multiple_fish": false,
         "missing_ruler": false,
         "missing_eye": true
     },
     "UWZM-F-0003443": {
         "missing_fish": false,
         "missing_scale": false,
-        "multiple_fish": false,
         "missing_ruler": false,
         "missing_eye": true
     },
     "UWZM-F-0003471": {
         "missing_fish": false,
         "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_84903": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
         "missing_ruler": false,
         "missing_eye": true
     },
     "UWZM-F-0004560": {
         "missing_fish": false,
         "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_51422": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_80511": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_12048": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_61813": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_85025": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
         "missing_ruler": false,
         "missing_eye": true
     },
     "UWZM-F-0003532": {
         "missing_fish": false,
         "missing_scale": false,
-        "multiple_fish": false,
         "missing_ruler": false,
         "missing_eye": true
-    },
-    "INHS_FISH_64418": {
-        "missing_fish": false,
-        "missing_scale": true,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_79952": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_101493": {
-        "missing_fish": false,
-        "missing_scale": true,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": false
     },
     "UWZM-F-0004182": {
         "missing_fish": false,
         "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_6701": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_84598": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_62604": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_84826": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_84656": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
         "missing_ruler": false,
         "missing_eye": true
     },
     "UWZM-F-0004420": {
         "missing_fish": false,
         "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_50943": {
-        "missing_fish": false,
-        "missing_scale": true,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": false
-    },
-    "INHS_FISH_73746": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_54458": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_81522": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
         "missing_ruler": false,
         "missing_eye": true
     },
     "UWZM-F-0003264": {
         "missing_fish": true,
         "missing_scale": false,
-        "multiple_fish": false,
         "missing_ruler": false,
         "missing_eye": true
     },
     "UWZM-F-0003531": {
         "missing_fish": false,
         "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_64457": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_55885": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_74251": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_7180": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_64086": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
         "missing_ruler": false,
         "missing_eye": true
     },
     "UWZM-F-0003522": {
         "missing_fish": false,
         "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_16862": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_78306": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_76378": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_63556": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_75191": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_74508": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
         "missing_ruler": false,
         "missing_eye": true
     },
     "UWZM-F-0004384": {
         "missing_fish": false,
         "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_50140": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_13699": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
         "missing_ruler": false,
         "missing_eye": true
     },
     "UWZM-F-0003499": {
         "missing_fish": false,
         "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_6844": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
         "missing_ruler": false,
         "missing_eye": true
     },
     "UWZM-F-0003521": {
         "missing_fish": false,
         "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_85477": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_79997": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_52803": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_85502": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_84859": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
         "missing_ruler": false,
         "missing_eye": true
     },
     "UWZM-F-0001992": {
         "missing_fish": false,
         "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_84752": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_64230": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_8177": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_57242": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_42897": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_6267": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_44506": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
         "missing_ruler": false,
         "missing_eye": true
     },
     "UWZM-F-0003503": {
         "missing_fish": false,
         "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_76886": {
-        "missing_fish": false,
-        "missing_scale": true,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": false
-    },
-    "INHS_FISH_57264": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_85181": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_64419": {
-        "missing_fish": false,
-        "missing_scale": true,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": false
-    },
-    "INHS_FISH_62136": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_50441": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_82558": {
-        "missing_fish": false,
-        "missing_scale": true,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": false
-    },
-    "INHS_FISH_52038": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_58706": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
-        "missing_ruler": false,
-        "missing_eye": true
-    },
-    "INHS_FISH_84736": {
-        "missing_fish": false,
-        "missing_scale": false,
-        "multiple_fish": false,
         "missing_ruler": false,
         "missing_eye": true
     }

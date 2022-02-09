@@ -43,7 +43,7 @@ def init_model(enhance_contrast=ENHANCE):
     return predictor
 
 
-def gen_metadata(file_path, enhance_contrast=ENHANCE, visualize=False, scaled_fish=None, scaled_ruler=None):
+def gen_metadata(file_path, enhance_contrast=ENHANCE, visualize=False, multiple_fish=False):
     """
     Generates metadata of an image and stores attributes into a Dictionary.
 
@@ -53,33 +53,26 @@ def gen_metadata(file_path, enhance_contrast=ENHANCE, visualize=False, scaled_fi
         {file_name: results} -- dictionary of file and associated results.
     """
     predictor = init_model()
-    if scaled_ruler is not None:
-        im = scaled_ruler
-        im_gray = cv2.cvtColor(scaled_ruler, cv2.COLOR_BGR2GRAY)
-    elif scaled_fish is None:
-        im = cv2.imread(file_path)
-        im_gray = cv2.imread(file_path, cv2.IMREAD_GRAYSCALE)
-        if enhance_contrast:
-            lab = cv2.cvtColor(im, cv2.COLOR_BGR2LAB)
+    im = cv2.imread(file_path)
+    im_gray = cv2.imread(file_path, cv2.IMREAD_GRAYSCALE)
+    if enhance_contrast:
+        lab = cv2.cvtColor(im, cv2.COLOR_BGR2LAB)
 
-            # -----Splitting the LAB image to different channels-------------------------
-            l, a, b = cv2.split(lab)
+        # -----Splitting the LAB image to different channels-------------------------
+        l, a, b = cv2.split(lab)
 
-            # -----Applying CLAHE to L-channel-------------------------------------------
-            clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
-            cl = clahe.apply(l)
+        # -----Applying CLAHE to L-channel-------------------------------------------
+        clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
+        cl = clahe.apply(l)
 
-            # -----Merge the CLAHE enhanced L-channel with the a and b channel-----------
-            limg = cv2.merge((cl, a, b))
+        # -----Merge the CLAHE enhanced L-channel with the a and b channel-----------
+        limg = cv2.merge((cl, a, b))
 
-            # -----Converting image from LAB Color model to RGB model--------------------
-            im = cv2.cvtColor(limg, cv2.COLOR_LAB2BGR)
+        # -----Converting image from LAB Color model to RGB model--------------------
+        im = cv2.cvtColor(limg, cv2.COLOR_LAB2BGR)
 
-            clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
-            im_gray = clahe.apply(im_gray)
-    else:
-        im = scaled_fish
-        im_gray = cv2.cvtColor(scaled_fish, cv2.COLOR_BGR2GRAY)
+        clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
+        im_gray = clahe.apply(im_gray)
     metadata = Metadata(evaluator_type='coco', image_root='.',
                         json_file='',
                         name='metadata',
@@ -99,11 +92,11 @@ def gen_metadata(file_path, enhance_contrast=ENHANCE, visualize=False, scaled_fi
     fish = insts[insts.pred_classes == 0]
     if len(fish):
         results['fish'] = []
-        # comment when doing multiple fish
-        results['fish'].append({})
-        # uncomment when doing multiple fish
-        # for _ in range(len(fish)):
-        #     results['fish'].append({})
+        if not multiple_fish:
+            results['fish'].append({})
+        else:
+            for _ in range(len(fish)):
+                results['fish'].append({})
     else:
         fish = None
     results['has_fish'] = bool(fish)
@@ -129,67 +122,45 @@ def gen_metadata(file_path, enhance_contrast=ENHANCE, visualize=False, scaled_fi
     else:
         scale = None
     visualizer = Visualizer(im[:, :, ::-1], metadata=metadata, scale=1.0)
-    # vis = visualizer.draw_instance_predictions(insts[selector].to('cpu'))
     vis = visualizer.draw_instance_predictions(insts.to('cpu'))
-    if visualize and (scaled_fish is not None or scaled_ruler is not None):
-        cv2.imshow('prediction', np.array(
-            vis.get_image()[:, :, ::-1], dtype=np.uint8))
+    f_name = file_name.split('.')[0]
+    if visualize:
+        cv2.imshow('prediction', np.array(vis.get_image()[:, :, ::-1], dtype=np.uint8))
         cv2.waitKey(0)
-    if scaled_fish is None and scaled_ruler is None:
-        os.makedirs('images', exist_ok=True)
-        os.makedirs('images/enhanced', exist_ok=True)
-        os.makedirs('images/non_enhanced', exist_ok=True)
-        dirname = 'images/'
-        dirname += 'enhanced/' if ENHANCE else 'non_enhanced/'
-        print(file_name)
-        f_name = file_name.split('.')[0]
-        cv2.imwrite(f'{dirname}/gen_prediction_{f_name}.png',
-                    vis.get_image()[:, :, ::-1])
-    if scale is None and scaled_ruler is None and ruler is not None:
-        '''Ruler detection does not work on upscaled images...'''
-        # print("No scale found.")
-        # factor = 4
-        # scale = upscale(im, [round(x) for x in ruler_bbox], f_name, factor, item='ruler', two=two, three=three)
-        # if two is not None and three is not None:
-        #     results['scale'] = scale
-        #     print("Scale found!")
-        # else:
-        #     print("No scaled found even after scaling!")
-    if scaled_ruler is not None:
-        f_name = file_name.split('.')[0]
-        return {f_name: {'two': two, 'three': three}}
-    elif fish:
+    os.makedirs('images', exist_ok=True)
+    os.makedirs('images/enhanced', exist_ok=True)
+    os.makedirs('images/non_enhanced', exist_ok=True)
+    dirname = 'images/'
+    dirname += 'enhanced/' if ENHANCE else 'non_enhanced/'
+    print(file_name)
+    cv2.imwrite(f'{dirname}/gen_prediction_{f_name}.png',
+                vis.get_image()[:, :, ::-1])
+    skippable_fish = []
+    IOU_PCT = .02
+    if fish:
         try:
             eyes = insts[insts.pred_classes == 2]
         except:
             eyes = None
-        # uncomment when multiple fish in image
-        # skippable_fish = []
-        # IOU_PCT = .02
 
-        # comment to get all fish
-        fish = fish[fish.scores > .3]
-        fish = fish[fish.scores.argmax().item()]
-
+        if not multiple_fish:
+            fish = fish[fish.scores > .3]
+            fish = fish[fish.scores.argmax().item()]
         for i in range(len(fish)):
             curr_fish = fish[i]
-            # print(curr_fish)
-            # uncomment when multiple fish in image
-            '''
-            if i in skippable_fish:
-                continue
-            fish_ols = [overlap_fish(curr_fish, fish[j]) for j in range(i + 1, len(fish))]
-            for j in range(len(fish_ols)):
-                if i + j + 1 not in skippable_fish and fish_ols[j] > IOU_PCT:
-                    results['fish'].pop(i + j + 1 - len(skippable_fish))
-                    skippable_fish.append(i + j + 1)
-                else:
-                    print(f"Fish {i} and Fish {i + j + 1} do not overlap!")
-            '''
+            if multiple_fish:
+                if i in skippable_fish:
+                    continue
+                fish_ols = [overlap_fish(curr_fish, fish[j]) for j in range(i + 1, len(fish))]
+                for j in range(len(fish_ols)):
+                    if i + j + 1 not in skippable_fish and fish_ols[j] > IOU_PCT:
+                        results['fish'].pop(i + j + 1 - len(skippable_fish))
+                        skippable_fish.append(i + j + 1)
+                    else:
+                        print(f"Fish {i} and Fish {i + j + 1} do not overlap!")
             if eyes:
                 eye_ols = [overlap(curr_fish, eyes[j]) for j in
                            range(len(eyes))]
-
                 eye = None
                 if not all(ol == 0 for ol in eye_ols):
                     full = [i for i in range(
@@ -205,20 +176,15 @@ def gen_metadata(file_path, enhance_contrast=ENHANCE, visualize=False, scaled_fi
                         eye = eyes[max_ind]
             else:
                 eye = None
-
-            # results['fish_count'] = len(insts[(insts.pred_classes == 0).logical_and(insts.scores > 0.3)]) - len(
-            # skippable_fish)
-
-            # try:
-            bbox = [round(x) for x in curr_fish.pred_boxes.tensor.cpu().
-                    numpy().astype('float64')[0]]
-            im_crop = im_gray[bbox[1]:bbox[3], bbox[0]:bbox[2]]
+            bbox = [round(x) for x in curr_fish.pred_boxes.tensor.cpu().numpy().astype('float64')[0]]
+            need_scaling = False
             detectron_mask = curr_fish.pred_masks[0].cpu().numpy()
             val = adaptive_threshold(bbox, im_gray)
             bbox, mask, pixel_anal_failed = gen_mask(bbox, file_path,
                                                      file_name, im_gray, val, detectron_mask, index=i)
-            # except:
-            # return {file_name: {'errored': True}}
+            centroid, evecs, length, width, area, oriented_bbox = pca(mask, scale)
+            major, minor = evecs[0], evecs[1]
+
             if not np.count_nonzero(mask):
                 print('Mask failed: {file_name}')
                 results['errored'] = True
@@ -244,13 +210,13 @@ def gen_metadata(file_path, enhance_contrast=ENHANCE, visualize=False, scaled_fi
                     y0, x0 = region.centroid
                     orientation = region.orientation
                     x1 = x0 + math.cos(orientation) * 0.5 * \
-                        region.axis_minor_length
+                         region.axis_minor_length
                     y1 = y0 - math.sin(orientation) * 0.5 * \
-                        region.axis_minor_length
+                         region.axis_minor_length
                     x2 = x0 - math.sin(orientation) * 0.5 * \
-                        region.axis_major_length
+                         region.axis_major_length
                     y2 = y0 - math.cos(orientation) * 0.5 * \
-                        region.axis_major_length
+                         region.axis_major_length
 
                     ax.plot((x0, x1), (y0, y1), '-r')
                     ax.plot((x0, x2), (y0, y2), '-b')
@@ -273,12 +239,8 @@ def gen_metadata(file_path, enhance_contrast=ENHANCE, visualize=False, scaled_fi
                 results['fish'][i]['mask']['start_coord'] = list(start)
                 results['fish'][i]['mask']['encoding'] = code
 
-                centroid, evecs, length, width, area, oriented_bbox = pca(
-                    mask, scale, scaled=scaled_fish)
-                major, minor = evecs[0], evecs[1]
                 # upscale fish and then rerun
-                need_scaling = False
-                if eye is None and scaled_fish is None:
+                if eye is None:
                     need_scaling = True
                     factor = 4
                     eye_center, side, clock_val = upscale(
@@ -288,9 +250,7 @@ def gen_metadata(file_path, enhance_contrast=ENHANCE, visualize=False, scaled_fi
                         results['fish'][i]['side'] = side
                         results['fish'][i]['clock_value'] = clock_val
                         eye = 1  # placeholder, change to something more useful
-
-                results['fish'][i]['has_eye'] = bool(eye)
-                if scale and not scaled_fish:
+                if scale:
                     results['fish'][i]['length'] = length
                     results['fish'][i]['width'] = width
                     results['fish'][i]['area'] = area
@@ -298,7 +258,7 @@ def gen_metadata(file_path, enhance_contrast=ENHANCE, visualize=False, scaled_fi
                     results['fish'][i]['major_axis_length'] = region.major_axis_length / scale
                     results['fish'][i]['minor_axis_length'] = region.minor_axis_length / scale
                     results['fish'][i]['convex_area'] = region.convex_area / \
-                        (scale ** 2)
+                                                        (scale ** 2)
                     results['fish'][i]['perimeter'] = measure.perimeter(
                         mask, neighbourhood=8) / scale
                     results['fish'][i]['bbox_length'] = fish_box_length(
@@ -312,94 +272,123 @@ def gen_metadata(file_path, enhance_contrast=ENHANCE, visualize=False, scaled_fi
                     results['fish'][i]['oriented_bbox']['length'] = oriented_bbox[1][1]
                     results['fish'][i]['oriented_bbox']['angle'] = oriented_bbox[2]
                 results['fish'][i]['centroid'] = centroid.tolist()
-                if eye and not need_scaling:
-                    # print(eye.pred_boxes.get_centers())
-                    eye_center = [round(x) for x in
-                                  eye.pred_boxes.get_centers()[0].cpu().numpy()]
-                    results['fish'][i]['eye_center'] = list(eye_center)
-                    dist1 = distance(centroid, eye_center + major)
-                    dist2 = distance(centroid, eye_center - major)
-                    if dist2 > dist1:
-                        # print("HERE")
-                        # print(evec)
-                        major *= -1
-                        # print(evec)
-                    if major[0] <= 0.0:
-                        results['fish'][i]['side'] = 'left'
-                    else:
-                        results['fish'][i]['side'] = 'right'
-                    x_mid = int(bbox[0] + (bbox[2] - bbox[0]) / 2)
-                    y_mid = int(bbox[1] + (bbox[3] - bbox[1]) / 2)
-                    # snout_vec = find_snout_vec(np.array([x_mid, y_mid]), eye_center, mask)
-                    snout_vec = major
-                    if snout_vec is None:
-                        results['fish'][i]['clock_value'] = \
-                            clock_value(major, file_name)
-                    else:
-                        results['fish'][i]['clock_value'] = \
-                            clock_value(snout_vec, file_name)
+            results['fish'][i]['has_eye'] = bool(eye)
+            if eye and not need_scaling:
+                eye_center = [round(x) for x in eye.pred_boxes.get_centers()[0].cpu().numpy()]
+                results['fish'][i]['eye_center'] = list(eye_center)
+                dist1 = distance(centroid, eye_center + major)
+                dist2 = distance(centroid, eye_center - major)
+                if dist2 > dist1:
+                    major *= -1
+                if major[0] <= 0.0:
+                    results['fish'][i]['side'] = 'left'
+                else:
+                    results['fish'][i]['side'] = 'right'
+                snout_vec = major
+                if snout_vec is None:
+                    results['fish'][i]['clock_value'] = \
+                        clock_value(major, file_name)
+                else:
+                    results['fish'][i]['clock_value'] = \
+                        clock_value(snout_vec, file_name)
                 results['fish'][i]['primary_axis'] = list(major)
                 results['fish'][i]['score'] = float(curr_fish.scores[0].cpu())
-    results['fish_count'] = 1
-    # pprint.pprint(results)
-    f_name = file_name.split('.')[0]
+    results['fish_count'] = len(insts[(insts.pred_classes == 0).logical_and(insts.scores > 0.3)]) - \
+                            len(skippable_fish) if multiple_fish else bool(results['has_fish'])
     return {f_name: results}
 
 
-def upscale(im, bbox, f_name, factor, item='fish', two=None, three=None):
+def gen_metadata_upscale(file_path, fish):
+    predictor = init_model()
+    im = fish
+    im_gray = cv2.cvtColor(fish, cv2.COLOR_BGR2GRAY)
+    output = predictor(im)
+    insts = output['instances']
+    selector = insts.pred_classes == 0
+    selector = selector.cumsum(axis=0).cumsum(axis=0) == 1
+    results = {}
+    file_name = file_path.split('/')[-1]
+    f_name = file_name.split('.')[0]
+    for i in range(1, 5):
+        temp = insts.pred_classes == i
+        selector += temp.cumsum(axis=0).cumsum(axis=0) == 1
+    fish = insts[insts.pred_classes == 0]
+    if len(fish):
+        results['fish'] = []
+        results['fish'].append({})
+    else:
+        fish = None
+    results['has_fish'] = bool(fish)
+    if fish:
+        try:
+            eyes = insts[insts.pred_classes == 2]
+        except:
+            eyes = None
+
+        fish = fish[fish.scores > .3]
+        fish = fish[fish.scores.argmax().item()]
+        for i in range(len(fish)):
+            curr_fish = fish[i]
+            if eyes:
+                eye_ols = [overlap(curr_fish, eyes[j]) for j in
+                           range(len(eyes))]
+                eye = None
+                if not all(ol == 0 for ol in eye_ols):
+                    full = [i for i in range(
+                        len(eye_ols)) if eye_ols[i] >= .95]
+
+                    # if multiple eyes with 95% or greater overlap, pick highest confidence
+                    if len(full) > 1:
+                        eye = eyes[full]
+                        eye = eye[eye.scores.argmax().item()]
+                    else:
+                        max_ind = max(range(len(eye_ols)),
+                                      key=eye_ols.__getitem__)
+                        eye = eyes[max_ind]
+            else:
+                eye = None
+            bbox = [round(x) for x in curr_fish.pred_boxes.tensor.cpu().numpy().astype('float64')[0]]
+            detectron_mask = curr_fish.pred_masks[0].cpu().numpy()
+            val = adaptive_threshold(bbox, im_gray)
+            bbox, mask, pixel_anal_failed = gen_mask_upscale(bbox, file_path,
+                                                             file_name, im_gray, val, detectron_mask)
+            centroid, evecs, length, width, area, oriented_bbox = pca(mask)
+            major, minor = evecs[0], evecs[1]
+            results['fish'][i]['has_eye'] = bool(eye)
+            if eye:
+                eye_center = [round(x) for x in eye.pred_boxes.get_centers()[0].cpu().numpy()]
+                results['fish'][i]['eye_center'] = list(eye_center)
+                dist1 = distance(centroid, eye_center + major)
+                dist2 = distance(centroid, eye_center - major)
+                if dist2 > dist1:
+                    major *= -1
+                results['fish'][i]['side'] = 'left' if major[0] <= 0.0 else 'right'
+                snout_vec = major
+                results['fish'][i]['clock_value'] = clock_value(major if snout_vec is None else snout_vec, file_name)
+    return {f_name: results}
+
+
+def upscale(im, bbox, f_name, factor):
     h, w = bbox[3] - bbox[1], bbox[2] - bbox[0]
     scaled = cv2.resize(im[bbox[1]:bbox[3], bbox[0]:bbox[2]].copy(), (w * factor, h * factor),
                         interpolation=cv2.INTER_CUBIC)
     os.makedirs('images/testing', exist_ok=True)
     cv2.imwrite(f'images/testing/{f_name}.png', scaled)
     eye_center, side, clock_val, scale = None, None, None, None
-    if item == 'fish':
-        new_data = gen_metadata(
-            f'images/testing/{f_name}.png', scaled_fish=scaled)
-        if 'fish' in new_data[f'{f_name}'] and new_data[f'{f_name}']['fish'][0]['has_eye']:
-            eye_center = new_data[f'{f_name}']['fish'][0]['eye_center']
-            eye_x, eye_y = eye_center
-            eye_y //= factor
-            eye_y += bbox[1]
-            eye_x //= factor
-            eye_x += bbox[0]
-            eye_center = (eye_x, eye_y)
-            side = new_data[f'{f_name}']['fish'][0]['side']
-            clock_val = new_data[f'{f_name}']['fish'][0]['clock_value']
-    else:
-        new_data = gen_metadata(
-            f'images/testing/{f_name}.png', scaled_ruler=scaled)
-        if 'two' in new_data[f'{f_name}'] and 'three' in new_data[f'{f_name}']:
-            if two is None and new_data[f'{f_name}']['two'] is not None:
-                two = new_data[f'{f_name}']['two']
-                c2 = two.pred_boxes.get_centers()[0]
-                c2_x, c2_y = c2
-                c2_y //= factor
-                c2_y += bbox[1]
-                c2_x //= factor
-                c2_x += bbox[0]
-                c2 = (c2_x, c2_y)
-            elif two is not None:
-                c2 = two.pred_boxes.get_centers()[0]
-            if three is not None and new_data[f'{f_name}']['three']:
-                three = new_data[f'{f_name}']['three']
-                c3 = three.pred_boxes.get_centers()[0]
-                c3_x, c3_y = c3
-                c3_y //= factor
-                c3_y += bbox[1]
-                c3_x //= factor
-                c3_x += bbox[0]
-                c3 = (c3_x, c3_y)
-            elif three is not None:
-                c3 = three.pred_boxes.get_centers()[0]
-            if two is not None and three is not None:
-                scale = distance([float(*c2)], [float(*c3)])
+    new_data = gen_metadata_upscale(f'images/testing/{f_name}.png', scaled)
+    if 'fish' in new_data[f'{f_name}'] and new_data[f'{f_name}']['fish'][0]['has_eye']:
+        eye_center = new_data[f'{f_name}']['fish'][0]['eye_center']
+        eye_x, eye_y = eye_center
+        eye_y //= factor
+        eye_y += bbox[1]
+        eye_x //= factor
+        eye_x += bbox[0]
+        eye_center = (eye_x, eye_y)
+        side = new_data[f'{f_name}']['fish'][0]['side']
+        clock_val = new_data[f'{f_name}']['fish'][0]['clock_value']
     if os.path.isfile(f'images/testing/{f_name}.png'):
         os.remove(f'images/testing/{f_name}.png')
-    if item == 'fish':
-        return eye_center, side, clock_val
-    else:
-        return scale
+    return eye_center, side, clock_val
 
 
 def adaptive_threshold(bbox, im_gray):
@@ -411,24 +400,14 @@ def adaptive_threshold(bbox, im_gray):
     Returns:
         val -- new threshold.
     """
-    # bbox_d = [round(x) for x in curr_fish.pred_boxes.tensor.cpu().
-    # numpy().astype('float64')[0]]
     im_crop = im_gray[bbox[1]:bbox[3], bbox[0]:bbox[2]]
     val = filters.threshold_otsu(im_crop)
     mask = np.where(im_crop > val, 1, 0).astype(np.uint8)
-    # f_bbox_crop = curr_fish.pred_masks[0].cpu().numpy()\
-    # [bbox_d[1]:bbox_d[3],bbox_d[0]:bbox_d[2]]
     flat_mask = mask.reshape(-1)
-    # fground = im_crop.reshape(-1)[np.where(flat_mask)]
     bground = im_crop.reshape(-1)[np.where(np.logical_not(flat_mask))]
     mean_b = np.mean(bground)
-    # mean_f = np.mean(fground)
-    # print(f'b: {mean_b} | f: {mean_f}')
-    # flipped = mean_b < mean_f
     flipped = False
     diff = abs(mean_b - val)
-    # print(diff)
-    # val = (mean_b + mean_f) / 2
     if flipped:
         val -= diff * VAL_SCALE_FAC
     else:
@@ -450,15 +429,10 @@ def find_snout_vec(centroid, eye_center, mask):
     eye_dir = eye_center - centroid
     x1 = centroid[0]
     y1 = centroid[1]
-    # print(centroid)
-    # print(eye_center)
-    # print(eye_dir)
     max_len = 0
-    # fallback = np.array([-1,0])
     max_vec = None
     for x in range(mask.shape[1]):
         for y in range(mask.shape[0]):
-            # print((x, y))
             if mask[y, x]:
                 x2 = x
                 y2 = y
@@ -471,13 +445,10 @@ def find_snout_vec(centroid, eye_center, mask):
                     max_len = curr_len
                     if curr_len > np.linalg.norm(curr_eye_dir):
                         max_vec = curr_dir
-    # print(max_vec)
     if max_len == 0:
-        # return np.array([-1,0])
         return None
     if max_vec is None:
         print(f'Failed snout')
-        # max_vec = fallback
         return None
     return max_vec / max_len
 
@@ -499,7 +470,6 @@ def clock_value(evec, file_name):
     Returns:
         round(clock) -- rounded off clock value, ranging from 1-12.
     """
-    # print(evec)
     if evec[0] < 0:
         if evec[1] > 0:
             comp = np.array([-1, 0])
@@ -514,16 +484,12 @@ def clock_value(evec, file_name):
         else:
             comp = np.array([0, 1])
             start = 0
-    # print(comp)
     ang = angle(comp, evec)
-    # print(ang / (2 * math.pi) * 12)
     clock = start + (ang / (2 * math.pi) * 12)
-    # print(clock)
     if clock > 11.5:
         clock = 12
     elif clock < 0.5:
         clock = 12
-    # print(evec)
     return round(clock)
 
 
@@ -617,7 +583,7 @@ def overlap_fish(fish1, fish2):
 
 
 # https://alyssaq.github.io/2015/computing-the-axes-or-orientation-of-a-blob/
-def pca(img, glob_scale=None, visualize=False, scaled=None):
+def pca(img, glob_scale=None, visualize=False):
     """
     Performs principle component analysis on a grayscale image.
     Parameters:
@@ -630,11 +596,9 @@ def pca(img, glob_scale=None, visualize=False, scaled=None):
         width -- width of fish.
         area -- area of fish.
     """
-    # print(np.count_nonzero(img))
     moments = cv2.moments(img)
     centroid = (int(moments["m10"] / moments["m00"]),
                 int(moments["m01"] / moments["m00"]))
-    # print(centroid)
     y, x = np.nonzero(img)
 
     x = x - np.mean(x)
@@ -649,18 +613,14 @@ def pca(img, glob_scale=None, visualize=False, scaled=None):
     contours, _ = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     cnt = contours[0]
     rect = cv2.minAreaRect(cnt)
-    # box = cv2.boxPoints(rect)
-    # oriented_bbox = np.int0(box)
-    # theta = np.arctan(x_v1 / y_v1)
+    # negate eigenvector
+    if x_v1 < 0:
+        x_v1 *= -1
+        y_v1 *= -1
     theta = np.arctan2(y_v1, x_v1)
-    # print(x_v1, y_v1, theta, np.linalg.norm(evecs[:, sort_indices[0]]))
-    # negate for clockwise rotation
-    if y_v1 * theta > 0:
-        theta *= -1
     rotation_mat = np.matrix([[np.cos(theta), -np.sin(theta)],
                               [np.sin(theta), np.cos(theta)]])
     transformed_mat = rotation_mat * coords
-    # plot the transformed blob
     x_transformed, y_transformed = transformed_mat.A
     x_round, y_round = x_transformed.round(
         decimals=0), y_transformed.round(decimals=0)
@@ -914,6 +874,31 @@ def gen_mask(bbox, file_path, file_name, im_gray, val, detectron_mask,
     dirname += 'enhanced/' if ENHANCE else 'non_enhanced/'
     f_name = file_name.split('.')[0]
     im2.save(f'{dirname}/gen_mask_{f_name}_{index}.png')
+    return bbox, arr3, failed
+
+
+def gen_mask_upscale(bbox, file_path, file_name, im_gray, val, detectron_mask):
+    failed = False
+    l = round(bbox[0])
+    r = round(bbox[2])
+    t = round(bbox[1])
+    b = round(bbox[3])
+    bbox_orig = bbox
+    bbox = (l, t, r, b)
+
+    im = Image.open(file_path).convert('L')
+    arr0 = np.array(im.crop(bbox))
+    bb_size = arr0.size
+    arr1 = np.where(arr0 < val, 1, 0).astype(np.uint8)
+    arr2 = np.array(im)
+    shape = arr2.shape
+    arr3 = np.full(shape, 0).astype(np.uint8)
+    arr3[t:b, l:r] = arr1
+    if np.count_nonzero(arr1) / bb_size < .1:
+        print(f'{file_name}: Using detectron mask and bbox')
+        arr3 = detectron_mask.astype('uint8')
+        bbox = bbox_orig
+        failed = True
     return bbox, arr3, failed
 
 
