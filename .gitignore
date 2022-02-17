@@ -163,7 +163,9 @@ test_images/
 results/
 check_labels.json
 *.csv
-metadata_enhance.json
+*metadata*.json
+*error*.json
+enhanced_metadata.json
 detectron2/
 *.sqlite
 idigbio/

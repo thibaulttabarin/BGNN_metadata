@@ -1,6 +1,7 @@
 import json
 import random
 import os
+import yaml
 
 import numpy as np
 import cv2
@@ -13,8 +14,11 @@ from detectron2.engine import DefaultTrainer, DefaultPredictor
 from detectron2.config import get_cfg
 from detectron2.utils.visualizer import ColorMode
 
-enhance = json.load(open('config/enhance.json', 'r'))
+enhance = json.load(open('config/config.json', 'r'))
 ENHANCE = bool(enhance['ENHANCE'])
+
+with open('config/mask_rcnn_R_50_FPN_3x.yaml', 'r') as f:
+    iters = yaml.load(f, Loader=yaml.FullLoader)["SOLVER"]["MAX_ITER"]
 
 
 def visualize_input(metadata, count):
@@ -36,6 +40,7 @@ def visualize_input(metadata, count):
 
 
 def main(enhance_contrast=ENHANCE):
+    print(f"{ENHANCE=} {iters=}")
     prefix = open('config/overall_prefix.txt').readlines()[0].strip()
     conf = json.load(open('config/training_data_all.json'))
     metadata = None  # Need it in outer block for reuse
@@ -86,7 +91,7 @@ def main(enhance_contrast=ENHANCE):
         128
     )
 
-    cfg.OUTPUT_DIR += "/non_enhanced" if not enhance_contrast else "/enhanced"
+    cfg.OUTPUT_DIR += f"/non_enhanced_{iters}" if not enhance_contrast else f"/enhanced_{iters}"
     os.makedirs(cfg.OUTPUT_DIR, exist_ok=True)
     trainer = DefaultTrainer(cfg)
     trainer.resume_or_load(resume=True)

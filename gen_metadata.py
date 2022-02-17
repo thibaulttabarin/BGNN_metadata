@@ -3,11 +3,13 @@ import math
 import os
 import pprint
 import sys
+import yaml
 from random import shuffle
 
+import gc
+import torch
 import cv2
 import numpy as np
-from PIL import Image
 from detectron2.config import get_cfg
 from detectron2.data import Metadata
 from detectron2.engine import DefaultPredictor
@@ -22,11 +24,17 @@ from torch.multiprocessing import Pool
 # torch.multiprocessing.set_start_method('forkserver')
 
 VAL_SCALE_FAC = 0.5
-enhance = json.load(open('config/enhance.json', 'r'))
-ENHANCE = bool(enhance['ENHANCE'])
+conf = json.load(open('config/config.json', 'r'))
+ENHANCE = bool(conf['ENHANCE'])
+JOEL = bool(conf['JOEL'])
+IOU_PCT = .02
+
+with open('config/mask_rcnn_R_50_FPN_3x.yaml', 'r') as f:
+    # iters = yaml.load(f, Loader=yaml.FullLoader)["SOLVER"]["MAX_ITER"]
+    iters = 100000
 
 
-def init_model(enhance_contrast=ENHANCE):
+def init_model(enhance_contrast=ENHANCE, joel=JOEL):
     """
     Initialize model using config files for RCNN, the trained weights, and other parameters.
 
@@ -36,7 +44,8 @@ def init_model(enhance_contrast=ENHANCE):
     cfg = get_cfg()
     cfg.merge_from_file("config/mask_rcnn_R_50_FPN_3x.yaml")
     cfg.MODEL.ROI_HEADS.NUM_CLASSES = 5
-    cfg.OUTPUT_DIR += "/non_enhanced" if not enhance_contrast else "/enhanced"
+    if not joel:
+        cfg.OUTPUT_DIR += f"/non_enhanced_{iters}" if not enhance_contrast else f"/enhanced_{iters}"
     cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")
     cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.3
     predictor = DefaultPredictor(cfg)
@@ -77,8 +86,7 @@ def gen_metadata(file_path, enhance_contrast=ENHANCE, visualize=False, multiple_
                         json_file='',
                         name='metadata',
                         thing_classes=['fish', 'ruler', 'eye', 'two', 'three'],
-                        thing_dataset_id_to_contiguous_id=  # {1: 0}
-                        {1: 0, 2: 1, 3: 2, 4: 3, 5: 4}
+                        thing_dataset_id_to_contiguous_id={1: 0, 2: 1, 3: 2, 4: 3, 5: 4}
                         )
     output = predictor(im)
     insts = output['instances']
@@ -131,12 +139,11 @@ def gen_metadata(file_path, enhance_contrast=ENHANCE, visualize=False, multiple_
     os.makedirs('images/enhanced', exist_ok=True)
     os.makedirs('images/non_enhanced', exist_ok=True)
     dirname = 'images/'
-    dirname += 'enhanced/' if ENHANCE else 'non_enhanced/'
+    dirname += 'enhanced/' if enhance_contrast else 'non_enhanced/'
     print(file_name)
     cv2.imwrite(f'{dirname}/gen_prediction_{f_name}.png',
                 vis.get_image()[:, :, ::-1])
     skippable_fish = []
-    IOU_PCT = .02
     if fish:
         try:
             eyes = insts[insts.pred_classes == 2]
@@ -181,8 +188,8 @@ def gen_metadata(file_path, enhance_contrast=ENHANCE, visualize=False, multiple_
             detectron_mask = curr_fish.pred_masks[0].cpu().numpy()
             val = adaptive_threshold(bbox, im_gray)
             bbox, mask, pixel_anal_failed = gen_mask(bbox, file_path,
-                                                     file_name, im_gray, val, detectron_mask, index=i)
-            centroid, evecs, length, width, area, oriented_bbox = pca(mask, scale)
+                                                     file_name, im_gray, val, detectron_mask)
+            centroid, evecs, cont_length, cont_width, length, width, area = pca(mask, scale)
             major, minor = evecs[0], evecs[1]
 
             if not np.count_nonzero(mask):
@@ -251,8 +258,8 @@ def gen_metadata(file_path, enhance_contrast=ENHANCE, visualize=False, multiple_
                         results['fish'][i]['clock_value'] = clock_val
                         eye = 1  # placeholder, change to something more useful
                 if scale:
-                    results['fish'][i]['length'] = length
-                    results['fish'][i]['width'] = width
+                    results['fish'][i]['cont_length'] = cont_length
+                    results['fish'][i]['cont_width'] = cont_width
                     results['fish'][i]['area'] = area
                     results['fish'][i]['feret_diameter_max'] = region.feret_diameter_max / scale
                     results['fish'][i]['major_axis_length'] = region.major_axis_length / scale
@@ -261,16 +268,8 @@ def gen_metadata(file_path, enhance_contrast=ENHANCE, visualize=False, multiple_
                                                         (scale ** 2)
                     results['fish'][i]['perimeter'] = measure.perimeter(
                         mask, neighbourhood=8) / scale
-                    results['fish'][i]['bbox_length'] = fish_box_length(
-                        mask, centroid, major, scale)
-                    results['fish'][i]['bbox_width'] = fish_box_length(
-                        mask, centroid, minor, scale)
-                    results['fish'][i]['oriented_bbox'] = {}
-                    results['fish'][i]['oriented_bbox']['center'] = list(
-                        oriented_bbox[0])
-                    results['fish'][i]['oriented_bbox']['width'] = oriented_bbox[1][0]
-                    results['fish'][i]['oriented_bbox']['length'] = oriented_bbox[1][1]
-                    results['fish'][i]['oriented_bbox']['angle'] = oriented_bbox[2]
+                    results['fish'][i]['oriented_length'] = length / scale
+                    results['fish'][i]['oriented_width'] = width / scale
                 results['fish'][i]['centroid'] = centroid.tolist()
             results['fish'][i]['has_eye'] = bool(eye)
             if eye and not need_scaling:
@@ -294,11 +293,13 @@ def gen_metadata(file_path, enhance_contrast=ENHANCE, visualize=False, multiple_
                 results['fish'][i]['primary_axis'] = list(major)
                 results['fish'][i]['score'] = float(curr_fish.scores[0].cpu())
     results['fish_count'] = len(insts[(insts.pred_classes == 0).logical_and(insts.scores > 0.3)]) - \
-                            len(skippable_fish) if multiple_fish else bool(results['has_fish'])
+                            len(skippable_fish) if multiple_fish else int(results['has_fish'])
     return {f_name: results}
 
 
 def gen_metadata_upscale(file_path, fish):
+    gc.collect()
+    torch.cuda.empty_cache()
     predictor = init_model()
     im = fish
     im_gray = cv2.cvtColor(fish, cv2.COLOR_BGR2GRAY)
@@ -352,7 +353,7 @@ def gen_metadata_upscale(file_path, fish):
             val = adaptive_threshold(bbox, im_gray)
             bbox, mask, pixel_anal_failed = gen_mask_upscale(bbox, file_path,
                                                              file_name, im_gray, val, detectron_mask)
-            centroid, evecs, length, width, area, oriented_bbox = pca(mask)
+            centroid, evecs = pca(mask)[:2]
             major, minor = evecs[0], evecs[1]
             results['fish'][i]['has_eye'] = bool(eye)
             if eye:
@@ -383,7 +384,7 @@ def upscale(im, bbox, f_name, factor):
         eye_y += bbox[1]
         eye_x //= factor
         eye_x += bbox[0]
-        eye_center = (eye_x, eye_y)
+        eye_center = [eye_x, eye_y]
         side = new_data[f'{f_name}']['fish'][0]['side']
         clock_val = new_data[f'{f_name}']['fish'][0]['clock_value']
     if os.path.isfile(f'images/testing/{f_name}.png'):
@@ -610,9 +611,6 @@ def pca(img, glob_scale=None, visualize=False):
     sort_indices = np.argsort(evals)[::-1]
     # Eigenvector with largest eigenvalue
     x_v1, y_v1 = evecs[:, sort_indices[0]]
-    contours, _ = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    cnt = contours[0]
-    rect = cv2.minAreaRect(cnt)
     # negate eigenvector
     if x_v1 < 0:
         x_v1 *= -1
@@ -629,8 +627,10 @@ def pca(img, glob_scale=None, visualize=False):
     x_calc, y_calc = x_vals[x_counts.argmax()], y_vals[y_counts.argmax()]
     x_indices, y_indices = np.where(
         x_round == x_calc), np.where(y_round == y_calc)
-    width = y_round[x_indices].max() - y_round[x_indices].min()
-    length = x_round[y_indices].max() - x_round[y_indices].min()
+    cont_width = y_round[x_indices].max() - y_round[x_indices].min()
+    cont_length = x_round[y_indices].max() - x_round[y_indices].min()
+    width = y_vals.max() - y_vals.min()
+    length = x_vals.max() - x_vals.min()
 
     if visualize:
         x_v2, y_v2 = evecs[:, sort_indices[1]]
@@ -649,11 +649,13 @@ def pca(img, glob_scale=None, visualize=False):
 
     area = transformed_mat.shape[1]
     if glob_scale is not None:
+        cont_length /= glob_scale
+        cont_width /= glob_scale
         length /= glob_scale
         width /= glob_scale
         area /= glob_scale ** 2
 
-    return np.array(centroid), evecs[:, sort_indices], length, width, area, rect
+    return np.array(centroid), evecs[:, sort_indices], cont_length, cont_width, length, width, area
 
 
 def find_nearest(array, value):
@@ -768,7 +770,6 @@ def calc_scale(two, three, file_name):
     else:
         scale /= 2.54
         print("Unable to determine unit. Defaulting to cm.")
-    # print(f'Pixels/cm: {scale}')
     return scale
 
 
@@ -778,83 +779,78 @@ def check(arr, val, flipped):
     return arr < val
 
 
-def gen_mask(bbox, file_path, file_name, im_gray, val, detectron_mask,
-             index=0, flipped=False):
+def gen_mask(bbox, file_path, file_name, im_gray, val, detectron_mask, flipped=False):
     """
     Generates the mask for the fish and floodfills to make a whole image.
     """
     failed = False
-    l = round(bbox[0])
-    r = round(bbox[2])
-    t = round(bbox[1])
-    b = round(bbox[3])
+    left = round(bbox[0])
+    right = round(bbox[2])
+    top = round(bbox[1])
+    bottom = round(bbox[3])
     bbox_orig = bbox
-    bbox = (l, t, r, b)
+    bbox = (left, top, right, bottom)
 
     im = im_gray.copy()
     shape = im.shape
     done = False
-    im_crop = im[t:b, l:r]
-    fish_pix = None
+    im_crop = im[top:bottom, left:right]
+    fish_pix, thresh, new_mask = None, None, None
 
-    thresh = np.where(im_crop < val, 1, 0).astype(np.uint8)
-    indices = list(zip(*np.where(thresh == 1)))
-    shuffle(indices)
-    count = 0
-    for ind in indices:
-        if fish_pix is not None:
-            ind = fish_pix
-        count += 1
-        # if 10k pass and fish not found
-        if count > 10000:
-            if fish_pix is not None:
-                fish_pix = None
-            else:
-                print(f'ERROR on flood fill: {file_name}')
-                return bbox_orig, detectron_mask.astype('uint8'), True
-        temp = flood_fill(thresh, ind, 2)
-        temp = np.where(temp == 2, 1, 0)
-        percent = np.count_nonzero(temp) / im_crop.size 
-        if percent > 0.1:
-            fish_pix = ind
-            # Flood fills from each of the bbox corners
-            for i in (0, temp.shape[0] - 1):
-                for j in (0, temp.shape[1] - 1):
-                    temp = flood_fill(temp, (i, j), 2)
-
-            thresh = np.where(temp != 2, 1, 0).astype(np.uint8)
-            break
     while not done:
         done = True
-        im_crop = im[t:b, l:r]
+        im_crop = im[top:bottom, left:right]
+        count = 0
         thresh = np.where(im_crop < val, 1, 0).astype(np.uint8)
+        indices = list(zip(*np.where(thresh == 1)))
+        shuffle(indices)
+        for ind in indices:
+            if fish_pix is not None:
+                ind = fish_pix
+            count += 1
+            # if 10k pass and fish not found
+            if count > 10000:
+                if fish_pix is not None:
+                    fish_pix = None
+                else:
+                    print(f'ERROR on flood fill: {file_name}')
+                    return bbox_orig, detectron_mask.astype('uint8'), True
+            temp = flood_fill(thresh, ind, 2)
+            temp = np.where(temp == 2, 1, 0)
+            percent = np.count_nonzero(temp) / im_crop.size
+            if percent > 0.1:
+                fish_pix = ind
+                for i in (0, temp.shape[0] - 1):
+                    for j in (0, temp.shape[1] - 1):
+                        temp = flood_fill(temp, (i, j), 2)
+                thresh = np.where(temp != 2, 1, 0).astype(np.uint8)
+                break
         new_mask = np.full(shape, 0).astype(np.uint8)
-        new_mask[t:b, l:r] = thresh
-
+        new_mask[top:bottom, left:right] = thresh
         # Expands the bounding box
         try:
-            if np.any(new_mask[t:b, l] != 0) and l > 0:
-                l -= 1
-                l = max(0, l)
+            if np.any(new_mask[top:bottom, left] != 0) and left > 0:
+                left -= 1
+                left = max(0, left)
                 done = False
-            if np.any(new_mask[t:b, r] != 0) and r < shape[1] - 1:
-                r += 1
-                r = min(shape[1] - 1, r)
+            if np.any(new_mask[top:bottom, right] != 0) and right < shape[1] - 1:
+                right += 1
+                right = min(shape[1] - 1, right)
                 done = False
-            if np.any(new_mask[t, l:r] != 0) and t > 0:
-                t -= 1
-                t = max(0, t)
+            if np.any(new_mask[top, left:right] != 0) and top > 0:
+                top -= 1
+                top = max(0, top)
                 done = False
-            if np.any(new_mask[b, l:r] != 0) and b < shape[0] - 1:
-                b += 1
-                b = min(shape[0] - 1, b)
+            if np.any(new_mask[bottom, left:right] != 0) and bottom < shape[0] - 1:
+                bottom += 1
+                bottom = min(shape[0] - 1, bottom)
                 done = False
         except:
             print(f'{file_name}: Error expanding bounding box')
             # done = True
             return bbox_orig, detectron_mask.astype('uint8'), True
         # New bbox
-        bbox = (l, t, r, b)
+        bbox = (left, top, right, bottom)
         # New threshold
         val = adaptive_threshold(bbox, im_gray)
     if np.count_nonzero(thresh) / im_crop.size < .1:
@@ -862,17 +858,17 @@ def gen_mask(bbox, file_path, file_name, im_gray, val, detectron_mask,
         new_mask = detectron_mask.astype('uint8')
         bbox = bbox_orig
         failed = True
-    '''arr4 = np.where(new_mask == 1, 255, 0).astype(np.uint8)
-    (l, t, r, b) = shrink_bbox(new_mask)
-    arr4[t:b, l] = 175
-    arr4[t:b, r] = 175
-    arr4[t, l:r] = 175
-    arr4[b, l:r] = 175
-    im2 = Image.fromarray(arr4, 'L')
-    dirname = 'images/'
-    dirname += 'enhanced/' if ENHANCE else 'non_enhanced/'
-    f_name = file_name.split('.')[0]
-    im2.save(f'{dirname}/gen_mask_{f_name}_{index}.png')'''
+    # arr4 = np.where(new_mask == 1, 255, 0).astype(np.uint8)
+    # (left, top, right, bottom) = shrink_bbox(new_mask)
+    # arr4[top:bottom, left] = 175
+    # arr4[top:bottom, right] = 175
+    # arr4[top, left:right] = 175
+    # arr4[bottom, left:right] = 175
+    # im2 = Image.fromarray(arr4, 'L')
+    # dirname = 'images/'
+    # dirname += 'enhanced/' if ENHANCE else 'non_enhanced/'
+    # f_name = file_name.split('.')[0]
+    # im2.save(f'{dirname}/gen_mask_{f_name}.png')
     return bbox, new_mask, failed
 
 
@@ -885,8 +881,8 @@ def gen_mask_upscale(bbox, file_path, file_name, im_gray, val, detectron_mask):
     bbox_orig = bbox
     bbox = (l, t, r, b)
 
-    im = im_gray.copy() 
-    im_crop = im[t:b, l:r] 
+    im = im_gray.copy()
+    im_crop = im[t:b, l:r]
     thresh = np.where(im_crop < val, 1, 0).astype(np.uint8)
     new_mask = np.full(im.shape, 0).astype(np.uint8)
     new_mask[t:b, l:r] = thresh
@@ -919,7 +915,7 @@ def gen_metadata_safe(file_path):
         return gen_metadata(file_path)
     except Exception as e:
         print(f'{file_path}: Errored out ({e})')
-        return {file_path: {'errored': str(e)}}
+        return {file_path: {'errored': True}}
 
 
 def main():
@@ -930,12 +926,13 @@ def main():
             files = files[:int(sys.argv[2])]
     else:
         files = [direct]
-    with Pool(3) as p:
+    with Pool(2) as p:
         results = p.map(gen_metadata_safe, files)
+    # results = map(gen_metadata_safe, files)
     output = {}
     for i in results:
         output[list(i.keys())[0]] = list(i.values())[0]
-    fname = 'metadata.json'
+    fname = f'metadata_{iters}.json' if not JOEL else 'metadata.json'
     if ENHANCE:
         fname = 'enhanced_' + fname
     else:
