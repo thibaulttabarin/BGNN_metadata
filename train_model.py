@@ -41,6 +41,7 @@ def visualize_input(metadata, count):
 
 def main(enhance_contrast=ENHANCE):
     print(f"{ENHANCE=} {iters=}")
+    
     prefix = open('config/overall_prefix.txt').readlines()[0].strip()
     conf = json.load(open('config/training_data_all.json'))
     metadata = None  # Need it in outer block for reuse
@@ -92,6 +93,7 @@ def main(enhance_contrast=ENHANCE):
     )
 
     cfg.OUTPUT_DIR += f"/non_enhanced_{iters}" if not enhance_contrast else f"/enhanced_{iters}"
+    print(f"{cfg.OUTPUT_DIR}")
     os.makedirs(cfg.OUTPUT_DIR, exist_ok=True)
     trainer = DefaultTrainer(cfg)
     trainer.resume_or_load(resume=True)

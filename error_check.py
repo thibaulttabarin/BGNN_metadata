@@ -5,7 +5,7 @@ import yaml
 
 with open('config/mask_rcnn_R_50_FPN_3x.yaml', 'r') as f:
     # iters = yaml.load(f, Loader=yaml.FullLoader)["SOLVER"]["MAX_ITER"]
-    iters = 100000
+    iters = 15000
 
 with open('config/config.json', 'r') as f:
     conf = json.load(f)
@@ -23,6 +23,7 @@ with open(fname, 'r') as f:
     metadata = json.load(f)
 
 missing_fish_count, missing_scale_count, multiple_fish_count, missing_ruler_count, missing_eye_count = 0, 0, 0, 0, 0
+detected_count = 0
 metadata_length = len(list(metadata.keys()))
 inhs_count, uwzm_count, errored = 0, 0, 0
 
@@ -35,17 +36,20 @@ for key in metadata:
         continue
     missing_fish_change, missing_scale_change, multiple_fish_change, missing_ruler_change, missing_eye_change = \
         missing_fish_count, missing_scale_count, multiple_fish_count, missing_ruler_count, missing_eye_count
+    detected_change = detected_count
     missing_ruler_count += int('has_ruler' not in metadata[key] or not metadata[key]['has_ruler'])
     missing_fish_count += int('has_fish' not in metadata[key] or not metadata[key]['has_fish'])
     missing_scale_count += int('scale' not in metadata[key])
     missing_eye_count += int(sum(['has_eye' not in fish or not fish['has_eye'] for fish in metadata[key]['fish']]) ==
                              len(metadata[key]['fish'])) if 'fish' in metadata[key] else 1
+    detected_count += int(metadata[key]['detected_fish_count'] > 1)
     missing_fish_change -= missing_fish_count
     missing_scale_change -= missing_scale_count
     # multiple_fish_change -= multiple_fish_count
     missing_ruler_change -= missing_ruler_count
     missing_eye_change -= missing_eye_count
-    if missing_fish_change or missing_scale_change or missing_ruler_change or missing_eye_change:
+    detected_change -= detected_count
+    if missing_fish_change or missing_scale_change or missing_ruler_change or missing_eye_change or detected_change:
         if 'inhs' in key.lower():
             inhs_count += 1
         elif 'uwzm' in key.lower():
@@ -55,7 +59,8 @@ for key in metadata:
             "missing_scale": bool(missing_scale_change),
             # "multiple_fish": bool(multiple_fish_change),
             "missing_ruler": bool(missing_ruler_change),
-            "missing_eye": bool(missing_eye_change)
+            "missing_eye": bool(missing_eye_change),
+            "detected_fish": bool(detected_change)
         }
 
 efname = f'error_{iters}.json' if not JOEL else 'error.json'
@@ -117,6 +122,7 @@ def main():
     print(f"UWZM Image Count: {uwzm_count}")
     print(f"Total Image Count: {metadata_length}")
     print(f'Errored: {errored}')
+    print(f'Detected: {detected_count}')
     # compare()
 
 

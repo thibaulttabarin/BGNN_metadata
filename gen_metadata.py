@@ -31,7 +31,7 @@ IOU_PCT = .02
 
 with open('config/mask_rcnn_R_50_FPN_3x.yaml', 'r') as f:
     # iters = yaml.load(f, Loader=yaml.FullLoader)["SOLVER"]["MAX_ITER"]
-    iters = 100000
+    iters = 15000
 
 
 def init_model(enhance_contrast=ENHANCE, joel=JOEL):
@@ -45,7 +45,8 @@ def init_model(enhance_contrast=ENHANCE, joel=JOEL):
     cfg.merge_from_file("config/mask_rcnn_R_50_FPN_3x.yaml")
     cfg.MODEL.ROI_HEADS.NUM_CLASSES = 5
     if not joel:
-        cfg.OUTPUT_DIR += f"/non_enhanced_{iters}" if not enhance_contrast else f"/enhanced_{iters}"
+        cfg.OUTPUT_DIR += f"/non_enhanced" if not enhance_contrast else f"/enhanced"
+        # cfg.OUTPUT_DIR += f"/non_enhanced_{iters}" if not enhance_contrast else f"/enhanced_{iters}"
     cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")
     cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.3
     predictor = DefaultPredictor(cfg)
@@ -144,6 +145,7 @@ def gen_metadata(file_path, enhance_contrast=ENHANCE, visualize=False, multiple_
     cv2.imwrite(f'{dirname}/gen_prediction_{f_name}.png',
                 vis.get_image()[:, :, ::-1])
     skippable_fish = []
+    fish_length = 0
     if fish:
         try:
             eyes = insts[insts.pred_classes == 2]
@@ -151,6 +153,7 @@ def gen_metadata(file_path, enhance_contrast=ENHANCE, visualize=False, multiple_
             eyes = None
 
         fish = fish[fish.scores > .3]
+        fish_length = len(fish)
         if not multiple_fish:
             fish = fish[fish.scores.argmax().item()]
         for i in range(len(fish)):
@@ -294,6 +297,7 @@ def gen_metadata(file_path, enhance_contrast=ENHANCE, visualize=False, multiple_
                 results['fish'][i]['score'] = float(curr_fish.scores[0].cpu())
     results['fish_count'] = len(insts[(insts.pred_classes == 0).logical_and(insts.scores > 0.3)]) - \
                             len(skippable_fish) if multiple_fish else int(results['has_fish'])
+    results['detected_fish_count'] = fish_length
     return {f_name: results}
 
 
