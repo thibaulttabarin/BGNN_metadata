@@ -30,8 +30,7 @@ JOEL = bool(conf['JOEL'])
 IOU_PCT = .02
 
 with open('config/mask_rcnn_R_50_FPN_3x.yaml', 'r') as f:
-    # iters = yaml.load(f, Loader=yaml.FullLoader)["SOLVER"]["MAX_ITER"]
-    iters = 15000
+    iters = yaml.load(f, Loader=yaml.FullLoader)["SOLVER"]["MAX_ITER"]
 
 
 def init_model(enhance_contrast=ENHANCE, joel=JOEL):
