@@ -1,0 +1,34 @@
+# Info from Kevin meeting 22nd of Mar 2022
+
+# New weights from Enhance and not enhance
+
++ model_final_non_enhanced.pth :
+
+    location : googledrive BGNN/BGNN_workflow/Model_weights/Drexel/
+    https://drive.google.com/file/d/1YHGUkY1EUAfeHHd3crZToQMIrseW6INo/view?usp=sharing
+    new weights form kevin work without the CLAHE (histogram equalization enhancement)
+    
++ model_final_enhanced.pth :
+
+    location : googledrive BGNN/BGNN_workflow/Model_weights/Drexel/
+    https://drive.google.com/file/d/13pa5E5odN_gWNZYkA12u8ZEnEjzWGxFL/view?usp=sharing
+    
+    new weights form kevin work with the CLAHE (histogram equalization enhancement)
+    
+    
+    
+# Training
+
+Dataset coco jason *.json
+To generate the "cococ.json" dataset format use makesense.ai
+1- load the image
+2- load the txt file with cataegory/class/instance (i.e.: fish, eye, ruler, two, three) or create manual in the API
+3- label your images
+4- export the coco.json file (contained the annotation of your images)
+
+Use train_model.sh
+change or create a file like "training_data_all.json"
+change the prefix file overall_prefix.txt
+checkpoint resume true
+
+
