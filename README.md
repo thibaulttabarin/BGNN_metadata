@@ -117,5 +117,6 @@ pipenv run python3 gen_metadata.py [file_or_dir_name]
 ## Authors
 
 Joel Pepper
+
 Kevin Karnani
 
