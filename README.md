@@ -114,3 +114,8 @@ pipenv run python3 gen_metadata.py [file_or_dir_name]
 | solidity             | Per Fish                 | Float             | The ratio of pixels in the fish to pixels of the convex hull image.                                                              |
 | std             | Per Fish                 | Float             | The standard deviation of the mask pixel coordinate distribution. |
 
+## Authors
+
+Joel Pepper
+Kevin Karnani
+
