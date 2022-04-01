@@ -1,4 +1,5 @@
 {
   "ENHANCE": 1,
-  "JOEL": 1
+  "JOEL": 0,
+  "PROCESSOR": "cpu"
 }

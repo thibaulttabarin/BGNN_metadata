@@ -2,7 +2,7 @@ BootStrap: docker
 From: python:3.8-slim-buster
 
 %setup
-  mkdir -p ${SINGULARITY_ROOTFS}/pipeline/scripts
+  mkdir -p ${SINGULARITY_ROOTFS}/pipeline/
 
 %post
   apt-get update
@@ -18,14 +18,11 @@ From: python:3.8-slim-buster
   #pip install -U fvcore
   pip install numpy pandas pynrrd pillow scikit-image jedi==0.17.2 opencv-python-headless
 
-
-
-
 %labels
   MAINTAINER thibaulttabarin
   version v0.1
 %help
-  This container runs environ for detectron2 from bgnn project. 
-  
+  This container runs environ for detectron2 from bgnn project.
+
   Usage:
-  singularity shell <singularity_image.sif> 
+  singularity shell <singularity_image.sif>
