@@ -1,0 +1,28 @@
+BootStrap: docker
+From: python:3.8-slim-buster
+
+%setup
+  mkdir -p ${SINGULARITY_ROOTFS}/pipeline/
+
+%post
+  apt-get update
+  # gcc compiler and opencv prerequisites
+  apt-get -y install nano git build-essential libglib2.0-0 libsm6 libxext6 libxrender-dev sudo cmake ninja-build
+  # Detectron2 prerequisites
+  pip install torch==1.6.0+cpu torchvision==0.7.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
+  pip install cython
+  pip install -U 'git+https://github.com/cocodataset/cocoapi.git#subdirectory=PythonAPI'
+
+  python -m pip install detectron2==0.4 -f https://dl.fbaipublicfiles.com/detectron2/wheels/cpu/torch1.6/index.html
+  #pip install -U 'git+https://github.com/facebookresearch/fvcore'
+  #pip install -U fvcore
+  pip install numpy pandas pynrrd pillow scikit-image jedi==0.17.2 opencv-python-headless
+
+%labels
+  MAINTAINER thibaulttabarin
+  version v0.1
+%help
+  This container runs environ for detectron2 from bgnn project.
+
+  Usage:
+  singularity shell <singularity_image.sif>

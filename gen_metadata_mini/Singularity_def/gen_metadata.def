@@ -1,0 +1,24 @@
+BootStrap: library
+From: thibaulttabarin/bgnn/detectron2_env:v1
+
+
+%post
+  chmod +x /pipeline/gen_metadata.py
+  echo 'export PATH=$PATH:/pipeline' >> $SINGULARITY_ENVIRONMENT
+  pip install gdown
+  /usr/local/bin/gdown https://drive.google.com/uc?id=13pa5E5odN_gWNZYkA12u8ZEnEjzWGxFL -O /pipeline/output/enhanced/
+  mv /pipeline/output/enhanced/* /pipeline/output/enhanced/model_final.pth
+
+%files
+  ../scripts/config/* /pipeline/config/
+  ../scripts/gen_metadata.py /pipeline/gen_metadata.py
+
+%labels
+MAINTAINER tabarin@battelleecology.org
+
+%help
+  This container runs gen_metadata developped by drexel group for bgnn project.
+  The weights are "enhanced version" by Kevin Karnani
+
+  Usage:
+  singularity exec gen_metadata_v2.sif gen_metadata.py <fish_image> <metadata_result.json> <mask.png>
