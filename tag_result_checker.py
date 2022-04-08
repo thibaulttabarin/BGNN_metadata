@@ -26,13 +26,15 @@ with open('./check_labels.json') as f:
 
 LEV_DIST_CUTOFF = 3
 
-#engine = create_engine('sqlite:///label_checking.sqlite')#, echo=True)
-engine = create_engine('sqlite:////usr/local/bgnn/label_checking.sqlite')#, echo=True)
+# engine = create_engine('sqlite:///label_checking.sqlite')#, echo=True)
+engine = create_engine(
+    'sqlite:////usr/local/bgnn/label_checking.sqlite')  # , echo=True)
 conn = engine.connect()
 Session = sessionmaker(bind=engine)
 session = Session()
 
 Base = declarative_base()
+
 
 class ErrTypes(enum.Enum):
     auto_wrong_ocr = 1
@@ -44,6 +46,7 @@ class ErrTypes(enum.Enum):
     both_right = 7
     both_right_ocr_failed = 8
     both_right_tag_issue = 9
+
 
 class Record(Base):
     __tablename__ = 'results'
@@ -57,7 +60,9 @@ class Record(Base):
     def __repr__(self):
         return f'User {self.name}'
 
+
 Base.metadata.create_all(engine)
+
 
 def load_next():
     fname_gen = get_filename()
@@ -68,12 +73,12 @@ def load_next():
     curr_metadata = metadata[filename]
     if 'errored' not in curr_metadata.keys():
         pixmap = QPixmap('{}/check_labels_prediction_{}.png'
-                .format(IMAGE_DIR, filename))
+                         .format(IMAGE_DIR, filename))
         window.label_text.setPlainText(curr_metadata['tag_text'])
         del curr_metadata['tag_text']
     else:
         pixmap = QPixmap('{}/{}'
-                .format(ERR_IMAGE_DIR, filename))
+                         .format(ERR_IMAGE_DIR, filename))
         window.label_text.clear()
         window.metadata.clear()
     window.metadata.setPlainText(pprint.pformat(curr_metadata))
@@ -86,22 +91,25 @@ def load_next():
                                     '\n\tErrored: {}\n\tDidn\'t Match: {}' +
                                     '\n\tLev Dist > {}: {}\nDone: {}' +
                                     '\nRemaining: {}')
-            .format(total, count, errored, didnt_match, LEV_DIST_CUTOFF,
-                    lev_dist_above, done, count - done))
+                                   .format(total, count, errored, didnt_match, LEV_DIST_CUTOFF,
+                                           lev_dist_above, done, count - done))
+
 
 def both_corr_tag_issue():
     name = Record(filename=filename, sci_name=curr_metadata['metadata_name'].capitalize(),
-            err_type=ErrTypes.both_right_tag_issue, description=window.further_descr.toPlainText())
+                  err_type=ErrTypes.both_right_tag_issue, description=window.further_descr.toPlainText())
     session.add(name)
     session.commit()
     load_next()
 
+
 def both_corr_ocr_failed():
     name = Record(filename=filename, sci_name=curr_metadata['metadata_name'].capitalize(),
-            err_type=ErrTypes.both_right_ocr_failed, description=window.further_descr.toPlainText())
+                  err_type=ErrTypes.both_right_ocr_failed, description=window.further_descr.toPlainText())
     session.add(name)
     session.commit()
     load_next()
+
 
 def wrong_other():
     try:
@@ -109,43 +117,48 @@ def wrong_other():
     except KeyError:
         name = "Errored out, must run program to debug"
     name = Record(filename=filename, sci_name=name,
-            err_type=ErrTypes.auto_wrong_other, description=window.further_descr.toPlainText())
+                  err_type=ErrTypes.auto_wrong_other, description=window.further_descr.toPlainText())
     session.add(name)
     session.commit()
     load_next()
+
 
 def ocr_mistake():
     name = Record(filename=filename, sci_name=curr_metadata['metadata_name'].capitalize(),
-            err_type=ErrTypes.auto_wrong_ocr, description=window.further_descr.toPlainText())
+                  err_type=ErrTypes.auto_wrong_ocr, description=window.further_descr.toPlainText())
     session.add(name)
     session.commit()
     load_next()
+
 
 def both_correct():
     name = Record(filename=filename, sci_name=curr_metadata['metadata_name'].capitalize(),
-            err_type=ErrTypes.both_right, description=window.further_descr.toPlainText())
+                  err_type=ErrTypes.both_right, description=window.further_descr.toPlainText())
     session.add(name)
     session.commit()
     load_next()
 
+
 def auto_correct():
     name = Record(filename=filename, sci_name=curr_metadata['best_name'].capitalize(),
-            err_type=ErrTypes.auto_right, description=window.further_descr.toPlainText())
+                  err_type=ErrTypes.auto_right, description=window.further_descr.toPlainText())
     session.add(name)
     session.commit()
     load_next()
+
 
 def get_filename():
     for filename in metadata.keys():
         if 'errored' in metadata[filename].keys() or\
                 ((not metadata[filename]['matched_metadata'])
-                or metadata[filename]['lev_dist'] > LEV_DIST_CUTOFF):
+                 or metadata[filename]['lev_dist'] > LEV_DIST_CUTOFF):
 
             #s = select(Base)
             #s = select(Record).filter_by(filename=filename)
             result = session.query(Record).filter_by(filename=filename).all()
             if not result:
                 yield filename
+
 
 def main():
     app = QApplication(sys.argv)
@@ -195,7 +208,7 @@ def main():
     session.close()
     sys.exit(exit_code)
 
-if __name__ == "__main__":
-#if True:
-    main()
 
+if __name__ == "__main__":
+    # if True:
+    main()

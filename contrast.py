@@ -7,7 +7,7 @@ from matplotlib import colors
 from matplotlib.ticker import PercentFormatter
 
 prefix = '/home/HDD/bgnn_data/validation_images/'
-results = json.load(open('../metadata.json'))
+results = json.load(open('../metadata_enhance.json'))
 df = pd.read_csv('/home/HDD/bgnn_data/image_quality_metadata_20210208.csv')
 values = []
 #d = []
@@ -26,8 +26,8 @@ for file in results.keys():
         pass
 
 #values.sort(key=lambda x: x[1], reverse=True)
-#print(values)
-#exit(0)
+# print(values)
+# exit(0)
 
 print(np.mean([x[1] for x in values]))
 print(np.std([x[1] for x in values]))

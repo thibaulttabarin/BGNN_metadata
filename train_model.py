@@ -1,6 +1,7 @@
 import json
 import random
 import os
+import yaml
 
 import numpy as np
 import cv2
@@ -13,6 +14,13 @@ from detectron2.engine import DefaultTrainer, DefaultPredictor
 from detectron2.config import get_cfg
 from detectron2.utils.visualizer import ColorMode
 
+enhance = json.load(open('config/config.json', 'r'))
+ENHANCE = bool(enhance['ENHANCE'])
+
+with open('config/mask_rcnn_R_50_FPN_3x.yaml', 'r') as f:
+    iters = yaml.load(f, Loader=yaml.FullLoader)["SOLVER"]["MAX_ITER"]
+
+
 def visualize_input(metadata, count):
     name = metadata.get("name")
     dataset_dicts = DatasetCatalog.get(name)
@@ -22,16 +30,23 @@ def visualize_input(metadata, count):
         img = cv2.imread(full_path)
         visualizer = Visualizer(img[:, :, ::-1], metadata=metadata, scale=1.0)
         vis = visualizer.draw_dataset_dict(d)
+        dirname = 'images/'
+        dirname += 'enhanced/' if ENHANCE else 'non_enhanced/'
         os.makedirs('images', exist_ok=True)
-        print(f'images/{name}_{file_name}')
+        os.makedirs('images/enhanced', exist_ok=True)
+        os.makedirs('images/non_enhanced', exist_ok=True)
+        print(f'{dirname}/{name}_{file_name}')
         cv2.imwrite(f'images/{name}_{file_name}', vis.get_image()[:, :, ::-1])
 
-def main():
+
+def main(enhance_contrast=ENHANCE):
+    print(f"{ENHANCE=} {iters=}")
+    
     prefix = open('config/overall_prefix.txt').readlines()[0].strip()
-    conf = json.load(open('config/training_data.json'))
-    metadata = None # Need it in outer block for reuse
+    conf = json.load(open('config/training_data_all.json'))
+    metadata = None  # Need it in outer block for reuse
     train = []
-    test_images = f'{prefix}idigbio_images/'
+    test_images = f'{prefix}tulane/'
 
     for img_dir in conf.keys():
         ims = f'{prefix}{img_dir}'
@@ -44,15 +59,16 @@ def main():
             # Otherwise, any of the datasets will work.
             if name == '1':
                 metadata = Metadata(evaluator_type='coco', image_root=ims,
-                        json_file=json_file,
-                        name=name,
-                        thing_classes=['fish', 'ruler', 'eye', 'two', 'three'],
-                        thing_dataset_id_to_contiguous_id=
-                            {1: 0, 2: 1, 3: 2, 4: 3, 5: 4}
-                        )
+                                    json_file=json_file,
+                                    name=name,
+                                    thing_classes=[
+                                        'fish', 'ruler', 'eye', 'two', 'three'],
+                                    thing_dataset_id_to_contiguous_id={
+                                        1: 0, 2: 1, 3: 2, 4: 3, 5: 4}
+                                    )
             register_coco_instances(name, {}, json_file, ims)
 
-    #visualize_input(metadata, 1)
+    # visualize_input(metadata, 1)
 
     cfg = get_cfg()
     #cfg.OUTPUT_DIR += "/enhance"
@@ -64,9 +80,9 @@ def main():
     cfg.MODEL.WEIGHTS = "detectron2://COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x/137849600/model_final_f10217.pkl"
     cfg.SOLVER.IMS_PER_BATCH = 2
     cfg.SOLVER.BASE_LR = 0.02
-    #cfg.SOLVER.MAX_ITER = (
-        #50000
-    #)
+    # cfg.SOLVER.MAX_ITER = (
+    # 50000
+    # )
 
     ################
     cfg.MODEL.ROI_HEADS.NUM_CLASSES = 5
@@ -76,6 +92,8 @@ def main():
         128
     )
 
+    cfg.OUTPUT_DIR += f"/non_enhanced_{iters}" if not enhance_contrast else f"/enhanced_{iters}"
+    print(f"{cfg.OUTPUT_DIR}")
     os.makedirs(cfg.OUTPUT_DIR, exist_ok=True)
     trainer = DefaultTrainer(cfg)
     trainer.resume_or_load(resume=True)
@@ -92,20 +110,40 @@ def main():
     outputs = []
     for d in random.sample(names, 10):
         im = cv2.imread(test_images + d)
+        if enhance_contrast:
+            lab = cv2.cvtColor(im, cv2.COLOR_BGR2LAB)
+
+            # -----Splitting the LAB image to different channels-------------------------
+            l, a, b = cv2.split(lab)
+
+            # -----Applying CLAHE to L-channel-------------------------------------------
+            clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
+            cl = clahe.apply(l)
+
+            # -----Merge the CLAHE enhanced L-channel with the a and b channel-----------
+            limg = cv2.merge((cl, a, b))
+
+            # -----Converting image from LAB Color model to RGB model--------------------
+            im = cv2.cvtColor(limg, cv2.COLOR_LAB2BGR)
         outputs.append(predictor(im))
         v = Visualizer(im[:, :, ::-1],
                        metadata=metadata,
                        scale=0.8,
                        # remove the colors of unsegmented pixels
                        instance_mode=ColorMode.IMAGE_BW
-        )
+                       )
         v = v.draw_instance_predictions(outputs[-1]["instances"].to("cpu"))
-        i+=1
+        i += 1
         print(f'{i}: {d}')
+        dirname = 'images/'
+        dirname += 'enhanced' if enhance_contrast else 'non_enhanced'
         os.makedirs('images', exist_ok=True)
-        print(f'images/prediction_{d}')
-        cv2.imwrite(f'images/prediction_{d}', v.get_image()[:, :, ::-1])
+        os.makedirs('images/enhanced', exist_ok=True)
+        os.makedirs('images/non_enhanced', exist_ok=True)
+        print(f'{dirname}/prediction_{d}')
+        cv2.imwrite(f'{dirname}/prediction_{d}', v.get_image()[:, :, ::-1])
     return outputs
+
 
 if __name__ == '__main__':
     main()
