@@ -6,7 +6,6 @@ import os
 from torch.multiprocessing import Pool
 import pandas as pd
 import numpy as np
-import nrrd
 from PIL import Image
 from functools import partial
 import matplotlib.pyplot as plt
@@ -56,7 +55,7 @@ def init_model():
     # was 5 when I trained current model so has to stay 5 unless retrained
     cfg.MODEL.ROI_HEADS.NUM_CLASSES = 5
     cfg.MODEL.WEIGHTS = os.path.join(
-        cfg.OUTPUT_DIR, "enhance_model_final.pth.ocr")
+        cfg.OUTPUT_DIR, "model_final.pth.ocr")
     cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.3
     predictor = DefaultPredictor(cfg)
     return predictor
@@ -186,10 +185,10 @@ def main():
     names = [i.strip()
              for i in csv_df['ScientificName'].unique() if ' ' in i.strip()]
     f = partial(gen_metadata, names)
-    with Pool(3) as p:
-        results = p.map(f, files_names)
+    #with Pool(3) as p:
+    #    results = p.map(f, files_names)
         #results = p.map(gen_metadata_safe, files_names)
-    #results = map(gen_metadata, files)
+    results = map(f, files_names)
     output = {}
     for i in results:
         output[list(i.keys())[0]] = list(i.values())[0]

@@ -929,9 +929,9 @@ def main():
             files = files[:int(sys.argv[2])]
     else:
         files = [direct]
-    with Pool(2) as p:
-        results = p.map(gen_metadata_safe, files)
-    # results = map(gen_metadata_safe, files)
+    #with Pool(2) as p:
+    #    results = p.map(gen_metadata_safe, files)
+    results = map(gen_metadata_safe, files)
     output = {}
     for i in results:
         output[list(i.keys())[0]] = list(i.values())[0]
