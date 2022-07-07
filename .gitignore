@@ -170,3 +170,4 @@ detectron2/
 *.sqlite
 idigbio/
 /opencv_models/
+poetry.lock
