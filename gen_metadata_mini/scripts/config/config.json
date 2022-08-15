@@ -1,5 +1,10 @@
 {
   "ENHANCE": 1,
   "JOEL": 0,
-  "PROCESSOR": "cpu"
+  "PROCESSOR": "cpu",
+  "NUM_CLASSES": 5,
+  "VAL_SCALE_FAC": 0.5,
+  "MODEL_WEIGHT" : "output/enhanced/model_final.pth",
+  "IOU_PCT": 0.2
 }
+
