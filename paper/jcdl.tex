@@ -62,30 +62,7 @@ Philadelphia, PA\hspace{3mm}USA\\
 %abstract can be shortened a good bit.
 %can offer an alternative manana..
 \begin{abstract}
-Metadata is a key data source, particularly for researchers seeking to apply machine learning (ML) to the vast collections of digitized specimens. Unfortunately, the available metadata is often sparse and, at times, erroneous. Additionally, it is prohibitively expensive to address these limitations through traditional, manual means.
-This paper reports on research that applies machine-driven approaches to
-analyzing digitized fish images and extracting various important
-features from them. The digitized fish specimens are being analyzed as part of the Biology Guided Neural Networks (BGNN) initiative, which is developing a novel class of artificial neural networks using phylogenies and anatomy ontologies. Automatically generated metadata is crucial for identifying
-the high-quality images needed for the neural network's predictive analytics.
-%predictive analytics?
-Methods that  combine ML and image informatics techniques allow us to rapidly enrich the existing metadata associated with the
-7,244 images from the Illinois Natural History Survey (INHS) used in our
-study. The sample
-images also have 22 manually generated metadata properties, which
-can be used for comparison.  Results show we can accurately generate many key metadata properties relevant to the
-BGNN project such as: fish quantity and orientation,  image scaling based on
-ruler identification and measurement, and general image quality metrics
-(e.g.\ brightness and contrast). Results also show we can also accurately generate bounding boxes and segmentation masks for fish, which are needed for subsequent machine learning analysis.
-%to confirm list of six properties.
-%x, y, z = any other key results. jg will add from results section, unless someone else does first. 
-The automatic process out-performs humans in terms of time and labor cost,
-as well as accuracy, and provides a novel solution for leveraging digitized
-specimens in ML. This research demonstrates the ability of computational
-methods to enhance the digital library services associated with
-the tens of thousands of digitized specimens stored in open-access
-repositories world-wide.
-%world wide [*across the globe] or we may not even need this part as open access is global access
-
+Metadata are key descriptors of research data, particularly for researchers seeking to apply machine learning (ML) to the vast collections of digitized specimens. Unfortunately, the available metadata is often sparse and, at times, erroneous. Additionally, it is prohibitively expensive to address these limitations through traditional, manual means. This paper reports on research that applies machine-driven approaches to analyzing digitized fish images and extracting various important features from them. The digitized fish specimens are being analyzed as part of the Biology Guided Neural Networks (BGNN) initiative, which is developing a novel class of artificial neural networks using phylogenies and anatomy ontologies. Automatically generated metadata is crucial for identifying the high-quality images needed for the neural network's predictive analytics. Methods that combine ML and image informatics techniques allow us to rapidly enrich the existing metadata associated with the 7,244 images from the Illinois Natural History Survey (INHS) used in our study. Results show we can accurately generate many key metadata properties relevant to the BGNN project, as well as general image quality metrics (e.g.\ brightness and contrast). Results also show that we can accurately generate bounding boxes and segmentation masks for fish, which are needed for subsequent machine learning analyses. The automatic process outperforms humans in terms of time and accuracy, and provides a novel solution for leveraging digitized specimens in ML. This research demonstrates the ability of computational methods to enhance the digital library services associated with the tens of thousands of digitized specimens stored in open-access repositories world-wide.
 % OLD text - Over the last several decades advances in computing, imaging, and cyberinfrastructure have had a major impact on scientific research and discovery. One area of considerable activity is the digitization of the biological specimens that have been acquired worldwide by museums and other research institutions, undertakings that have produced large image collections.The metadata that is vital for subsequent ML, analysis and scientific discovery based on these specimen image repositories is often unavailable, sparse or incorrect. As a step towards improving metadata in specimen research image collections, our team is developing methods for automatically analyzing fish images to extract a variety of important features. These fish specimens are being studied for a larger project entitled Biology Guided Neural Networks (BGNN), which is developing a novel class of artificial neural networks that can exploit the machine readable and predictive knowledge about biology that is available in specimen images, phylogenies and anatomy ontologies. Using a combination of ML and image informatics tools and techniques, we can accurately determine metadata such as fish quantity and location within images, fish orientation and other quantitative fish features, image scaling based on ruler identification and measurement, and general image quality metrics for a substantial number of the images being used in the BGNN project.Our goal is to develop image metadata generation methods that both support the research underway within the BGNN project, and provide a framework for future technology developments that can be deployed by repository curators to improve and bolster the metadata they provide with their specimen images. A longer term goal is to extend the image analysis methods for computing quantitative features in support of specific biological investigations.
 \end{abstract}
 
@@ -98,26 +75,26 @@ bioinformatics, metadata, image analysis, applied machine learning
 Over the last several decades advances in computing, imaging, and cyberinfrastructure have supported the growth of digital natural history collections, many of which contain specimen images~\cite{beaman2012mass}. Additionally, initiatives, such as the National Science Foundation’s Advancing Digitization of Biodiversity Collections (ADBC) program,
 % (which ran for nearly a decade),
 have supported the digitization and curation of tens of thousands of biological specimens~\cite{page2015digitization}. These digitized specimens are generally accessible through global, open-access repositories that support digital library services, such as browsing, search and retrieval, and preservation. The digitized renderings of these rich collections permit researchers, educators, students, and the general public to examine biological specimens
-on a previously unattainable scale. Moreover, the digitized instantiations present a pathway for applying ML and making new scientific discoveries. 
+on a previously unattainable scale. Moreover, the digitized instantiations present a pathway  for making new scientific discoveries via the application of machine learning (ML). 
 
 Unfortunately, potential scientific advances are hindered by image quality
 problems and the lack of accurate and pertinent metadata
 associated with the image collections.
 Poor quality images (e.g.\ low contrast, inadequate lighting,
-out-of-focus or cluttered visual arrangements) provide inadequate input
+out-of-focus or cluttered visual arrangements) are inadequate
 for automated
-image analysis and ML algorithms and lead to inferior
+image analysis by ML algorithms and lead to inferior
 computational results.
 In order to perform quantitative morphometric analysis of the specimens,
 the physical scale of the images (\(\frac{\mathrm{pixels}}{\mathrm{cm}}\)) is needed; thus
-requiring the ability to identify and measure rulers in the images.
+requiring the ability to identify and take measurements using rulers in the images.
 Many specimen collections do include Darwin Core metadata~\cite{biodiv_info_standards}, detailing
-specimen taxon, geographic location, and several other descriptive aspects.
+specimen taxon, geographic location, and several other specimen-related aspects.
 Additionally, some digitization efforts record technical metadata, detailing imaging specifications. While these types of metadata are helpful for a
 human examining several images at a time, they are insufficient for researchers seeking to apply computational methods %ML? or okay here
 to examine thousands of images
 to determine if, for example, a specific fish grows to different lengths
-in different habitats, or the temporal evolution of an anatomical feature,
+in different habitats, or to study differences in the size of a particular anatomical feature,
 e.g.~the size of a dorsal fin.
 \begin{figure}[t]
   \centering
@@ -130,7 +107,7 @@ e.g.~the size of a dorsal fin.
   \label{fig:INHS_examples}
 \end{figure}
 
-Since digital collections may each contain tens of thousands of images, manually producing image-related metadata for each digitized specimen is both labor- and time-intensive and prohibitively expensive. Methods for automatically computing metadata are therefore needed to fully exploit biological image repositories for scientific discovery.
+Since digital collections may each contain tens of thousands of images, manually producing image-related metadata for each digitized specimen is prohibitively expensive. Methods for automatically computing metadata are therefore needed to fully exploit biological image repositories for scientific discovery.
 %we are both extracting and calculating. Just to double check then, our definition/understanding of computing here includes both of these, or should we focus on extraction, with the idea that calculating is the extra novel thing added, the application of math-the groovy stuff you guys added.  
 As a step towards improving metadata in research specimen image collections, members of Drexel University's Metadata Research Center are developing methods to automatically analyze fish images and
 extract a set of data features that provide important metadata about the
@@ -139,12 +116,12 @@ The research is being conducted as part of the Biology Guided Neural Networks (B
 Using a combination of ML and image informatics 
 techniques,
 %tools and [okay to just say image informatics techniques instead of "image informatics tools and techniques" - thinking techniques implies tools.]
-we can accurately determine general image quality and metadata, such as fish quantity and location within images, fish orientation, and
+we can accurately determine general image quality and metadata, such as fish quantity, location and orientation, and
 image scaling based on ruler identification and measurement. Image scaling
 allows us to compute quantitative features about the fish specimens, such
 as their length and area.  In order to test and validate our methods, they
 have been  applied to a set of \(7,244\)
-images drawn from the Illinois Natural History Survey (INHS) Collection~\cite{INHS}.
+images drawn from the Illinois Natural History Survey (INHS) Collection of fish specimens~\cite{INHS}.
 Figure \ref{fig:INHS_examples} presents a typical image used in our
 study.
 %Dave/Joel, the section above, from "we can accurately ..." to the figures" to me is more results. I guess it's okay to give this in introduction. Just wanted to raise this point. I sometimes give a paraphrase too, but just good to see if it is a little too much or okay with you both. I think it's okay as I re-read it, but good to have someone check.
@@ -153,17 +130,16 @@ The following section of the paper provides contextual background for this work,
 \section{Related Work}
 \subsection{Metadata for Natural History Image Collection}
 %question/comment - we need to keep in mind we are deal with digitized specimens, not simply digital, in other words, the artifacts themselves are digital version of physical, not like an x-ray, where the image is digital from the start.  
-A number of different metadata standards have been applied to support the description and access of digitized scientific images. The Darwin Core (DwC)~\cite{biodiv_info_standards}, developed specifically to describe biological diversity data, is one of the most popular standards for such efforts. It is an extension of the Dublin Core's DCMI Metadata Terms~\cite{dc_terms}.
-The Audubon Core~\cite{audub_core}, which supports the discoverability, dissemination, and use of data related to biological organisms (including 3--D digitized specimens), is a DwC extension that has become more popular. All of these descriptive standards and extensions include metadata properties for taxon, geographic location, and other important specimen content, and have been developed primarily from the perspective of a human curator. In other words, their application anticipates that a curator or data entry staff will manually generate metadata, drawn from acquisition logs or original specimen labels. This task is labor intensive, and the metadata associated with each digital rendering is generally sparse and more prone to human error, placing limitations on a researcher seeking to apply ML to the image and the metadata for scientific research.
+A number of different metadata standards have been applied to support the description and access of digital images of scientific specimens. The Darwin Core (DwC)~\cite{biodiv_info_standards}, developed specifically to describe biological diversity data, is one of the most popular standards for such efforts. It is an extension of the Dublin Core's DCMI Metadata Terms~\cite{dc_terms}.
+The Audubon Core~\cite{audub_core}, which supports the discoverability, dissemination, and use of data related to biological organisms (including 3--D digitized specimens), is a DwC extension that has become the popular metadata standard for biodiversity multimedia resources and collections. All of these descriptive standards and extensions include metadata properties for taxon, geographic location, and other important specimen content, and have been developed primarily from the perspective of a human curator. In other words, their application anticipates that a curator or data entry staff will manually generate metadata, drawn from acquisition logs or original specimen labels. The generated metadata associated with each digital rendering is generally sparse and prone to human error, placing limitations on a researcher seeking to apply ML to the image and the metadata for scientific research.
 
 This limitation is magnified when trying to assess the actual quality of the digitized specimen. Descriptive-oriented standards support search and retrieval, and the biodiversity community has advocated for data fitness standards \cite{chapman2020developing}. This point is also emphasized by
 Wieczorek et al.~\cite{wieczorek2012darwin} in their report on the variety of DwC metadata extensions needed to meet growing community concerns and
 requirements, including data quality and fitness. Even so, metadata describing image quality is severely limited and generally missing. This point is addressed in detail by Leipzig et al.~\cite{leipzig2021biodiversity} and serves as the rationale for Tulane University's effort to manually capture
-content for 22 metadata properties that characterize digitized specimen image quality. Their work is being conducted in connection with the larger BGNN initiative, and the current process is costly in terms of labor and time, prone to human error and inconsistencies, and underscores the need to
-explore automatic metadata generation methods.
+content for 22 metadata properties that characterize digitized specimen image quality. Their work is being conducted in connection with the larger BGNN initiative, and the difficulties encountered during the process underscore the need to explore automatic metadata generation methods.
 %Fish species dataset in Pakistan Shah 2019 \cite{Shah2019FishPakFS}
 \subsection{Automatic Metadata Generation}
-Automatic metadata generation advances covering both descriptive and technical metadata are relevant to the research presented in this paper. Automatic metadata generation of descriptive bibliographic data has been a research focus for close to 20 years \cite{liddy2002automatic,greenberg2004metadata,cardinaels2005automating,paynter2005developing}. Researchers have applied support vector machine (SVM) approaches~\cite{han2003automatic}, and associated networks to address sparse and incomplete metadata~\cite{rodriguez2009automatic}, and various successes are integrated into day-to-day workflows. Heidorn, et al.~\cite{heidorn2008automatic} demonstrated the use of optical character recognition (OCR) to extract specimen information from the original typed and often hand-annotated labels that are digitized along with herbarium collection holdings. The extracted information was encoded in the DwC metadata associated with the specimen's digitized rendering. There has also been some success with extracting descriptive cartographic information from maps~\cite{manso2004automatic}. While descriptive metadata covers taxon, geographic location, and other important aspects, and may even record the image format; extensive use of automatic processes are still limited. More significantly, descriptive metadata does not sufficiently addressed data quality.
+Advances in automatic metadata generation of both descriptive and technical metadata are relevant to the research presented in this paper. Automatic metadata generation of descriptive bibliographic data has been a research focus for close to 20 years \cite{liddy2002automatic,greenberg2004metadata,cardinaels2005automating,paynter2005developing}. Researchers have applied support vector machine (SVM) approaches~\cite{han2003automatic}, and associated networks to address sparse and incomplete metadata~\cite{rodriguez2009automatic}, and various successes are integrated into day-to-day workflows. Heidorn, et al.~\cite{heidorn2008automatic} demonstrated the use of optical character recognition (OCR) to extract specimen information from the original typed and often hand-annotated labels that are digitized along with herbarium collection holdings. The extracted information was encoded in the DwC metadata associated with the specimen's digitized rendering. There has also been some success with extracting descriptive cartographic information from maps~\cite{manso2004automatic}. While descriptive metadata covers taxon, geographic location, and other important aspects, and may even record the image format; uses of automatic processes are still limited. More significantly, descriptive metadata does not sufficiently addressed data quality.
 
 Technical metadata, such as camera settings and temporal information (date and time) are automatically generated during a digitization sequence, following standards such as Exchangeable image file format (Exif)~\cite{Exif}. The camera's technical metadata is automatically captured and inserted into digital image files at the time of acquisition. Some of this metadata may be useful when selecting a ML sample. A researcher may desire images with specific properties, such as being captured chiefly with a certain aperture setting. Even so, the majority of automatically registered technical metadata associated with digitized specimens is also insufficient for computational research, leaving researchers to rely on manually generated descriptive metadata, which itself is sparse and prone to human error.
 Fish image analysis research, as reviewed below, demonstrates the
@@ -173,7 +149,7 @@ potential of automated computational methods to address current metadata shortco
 
 Image analysis has been utilized to examine and process images of fish
 for well over two decades~\cite{Zion2000InvivoFS,Saberioon2017ApplicationOM}. It is an important
-application of technology both for marine science, in the study of aquatic
+application of technology for marine science, in the study of aquatic
 species, habitats and ecosystems, and for the seafood industry, in the
 development of automated fish sorting and grading systems, as well as
 fisheries management. Many of these computational analyses focus on
@@ -191,9 +167,9 @@ that could discriminate between four different fishes.
 % utilized a Random Forest method \cite{Breiman2001RF} on manually-derived
 % geometric, Bag of visual words (BoVW) and color features 
 Rodrigues et al.~\cite{RodriguesMarcoT.A2015Ecda} explored several
-combinations of features extraction, input classifiers and clustering
+combinations of feature extractions, input classifiers and clustering
 algorithms to produce a method that could distinguish between 10 different
-types of fish with a 92\% accuracy.
+types of fish with 92\% accuracy.
 %  Again, not too impressive. Let's leave out.
 % Ogunlana 2015 \cite{Ogunlana2015FCU},
 % In this paper, a Support Vector Machine (SVM)-based technique for the elimination of the limitations of some existing techniques and improved classification of fish species is proposed. The technique is based on the shape features of fish that was divided into two subsets with the first comprising 76 fish as training set while the second comprises of 74 fish as testing set. The body and the five fin lengths; namely anal, caudal, dorsal, pelvic and pectoral were extracted in centimeter (cm). Results based on the new technique show a classification accuracy of 78.59%, which is significantly higher than what obtained for ANN, KNN and K-mean clustering-based algorithms.
@@ -201,7 +177,7 @@ Salman et al.~\cite{Salman2016FishSC} employed a deep Convolution Neural
 Networks (CNN) \cite{LeCun2004LMG} together with classification based on
 K-Nearest Neighbor and Support Vector Machines trained on the features
 extracted by the CNN. They achieved 90\%
-accuracy when identifying 15 different fish in challenging underwater
+accuracy when identifying 15 different fish species in challenging underwater
 digital images.
 % Unimpressive. Do not include.
 % Sung 2017 \cite{Sung2017VisionBR},
@@ -254,6 +230,7 @@ Azarmdel et al.~\cite{Azarmdel2019DevelopingAO} developed a system
 capable of determining the orientation of a trout and segmenting its fins,
 which are used as cutting points, with an accuracy over 99\%.
 % Fish processing in small and medium fish supplying centers requires an intelligent system to operate on different sizes. Therefore, an image processing algorithm was developed to extract the proper head and belly cutting points according to the trout dimensions. The algorithm detects the fish orientation and location of pectoral, anal, pelvic, and caudal fins. In this study, each of the trout images was divided into slices along its length in order to segment the fins and extract cutting points. The channel ‘B’ of RGB color space was considered in both initial segmentation and fin detection stages among the examined channels of RGB, HSV, and L*a*b* color spaces. The back-belly and head-tail sides were detected with an accuracy of 100% based on gray intensity values and head to tail ratio, respectively. Furthermore, performing an analysis of variance (ANOVA) resulted in an F-value of 64.82 among the fins. Conducting a t-test among the mean intensity values of the fins and non-fin regions of channel ‘B’ resulted in the highest distinction with t-values of 90.30, 78.07, 74.28, and 86.01 with p < 0.01 for the pectoral, pelvic, anal, and caudal fins paired with the corresponding non-fin region, respectively. The results showed that the selected ‘B’ channel is the adequate one for fin segmentation. The fin detection process showed an overall sensitivity, specificity, and accuracy of 86.05%, 99.97%, and 99.87%, respectively. By solving the line determination error in 8.24% and the extra object error in 4.12% of the samples, the overall fin identification accuracy was 100%. Finally, after extracting the fin regions, the start point of the pectoral fin and the end point of the anal fin will be applied in the trout processing system as the head and belly cutting points, respectively.
+\begin{comment}
 Another application of image analysis to fish images is the evaluation of
 fish freshness, a computation usually performed on the color features of
 the images.
@@ -267,8 +244,16 @@ freshness categories with 93\% accuracy.
 % In the current research, the potential of a novel method based on the artificial neural network was investigated to diagnose the freshness of common carp (Cyprinus carpio) during ice storage. Fish as an aquaculture product has high nutrients and low-fat content. So, people have consumed it as a safe and high-value foodstuff in their daily diet. Investigation of fish freshness is proposed as a significant issue in the aquaculture industry since fish spoils rapidly. The applied system of this study is comprised of the following steps: First, images of samples were captured and the pre-processing operation was done on the images. Then, particular channels including R, G, B, H, S, I, L*, a*, and b* were computed. Next, feature extraction was performed to obtain 6 types of texture features from each channel. Afterward, the hybrid Artificial Bee Colony-Artificial Neural Network (ABC-ANN) algorithm was applied to select the best features. Finally, the Support Vector Machine (SVM), K-Nearest Neighbor (K-NN) and Artificial Neural Network (ANN) algorithms as the most common methods were used to classify fish images. The best performance of the K-NN classifier was calculated in the k = 8 neighborhood size with the accuracy of 90.48. The best kernel function for the SVM algorithm was polynomial with C, sigma, and accuracy of 1, 2 and 91.52 percent, respectively. In this system, the input layer has consisted of 22 neurons based on the feature selection operation and 4 classes including most fresh, fresh, fairly fresh and spoiled have been used as the number of output layer. At the end, the best results of the MLP networks were achieved by LM learning algorithm and 6 neurons in the hidden layer with the 22–10–4 topology and accuracy of 93.01 percent.
 % The achieved results demonstrate the high performance of the ANN classifier for evaluation of common carp freshness during ice storage as a rapid, accurate, non-destructive, real-time and automated method. It shows the potential of computer vision method in combination with artificial neural networks as an intelligent technique for evaluation of fish freshness.
 A similar approach was developed by Lalabadi et al.~\cite{Lalabadi2020FishFC}.
+\end{comment}
 
+The research reviewed above demonstrates the application of image feature extraction and
+machine learning algorithms to fish images; although researchers have not applied these approaches to the numerous collections of digitized specimens accessible in open repositories.  Our research addresses this need by applying ML and informatics techniques to extract key metadata properties from the images.
+% further computing higher-level metadata based on these initial results.
+The availability of general and powerful
+off-the-shelf ML tools make the usage of previous special-purpose techniques unnecessary.
+% Our goals and objectives are presented in the following section.
 
+\begin{comment}
 The research reviewed above involves image features extraction and
 artificial intelligence; although the researchers have not applied these
 approaches to the burgeoning collections of digitized specimens
@@ -278,7 +263,6 @@ metadata properties from fish specimen images and computing
 higher-level metadata based on these initial results.
 Our goals and objectives our presented below.
 
-\begin{comment}
 Our work stands apart from previous work in that we are
 addressing a different need: lack of metadata is impeding scientific studies.
 Our focus and motivation are different.
@@ -327,8 +311,8 @@ The overall goal of our work addresses this need by
 % combining ML and image informatics techniques to produce
 developing a computational
 % . The overall goal of our research is to offer a machine-driven [*novel/innovative?? blah...]
-alternative to the current manual metadata generation process, one that is
-prohibitively costly in both terms of labor and time. Additionally, our
+alternative to the current manual metadata generation process, which is
+prohibitively costly both in terms of labor and time. Additionally, our
 methods collectively provide a novel and general approach to computing
 higher-level metadata that will support scientific inquiry based
 on the analysis of specimen image collections.
@@ -345,7 +329,7 @@ aims are to use \verb|detectron| to identify study-specific objects.
 % Figure \ref{fig:teaser}.
 
 \item Investigate image processing at the pixel level.
-Pilot testing found that \verb|detectron| under-segmented the detected objects
+Pilot testing found that \verb|detectron| undersegmented the detected objects
 with tightly enclosing bounding boxes. We will determine if
 pixel analysis methods commonly found in image informatics may produce
 more accurate bounding boxes and object masks.
@@ -369,19 +353,11 @@ Compute a more accurate bounding box from the updated mask.
 % Jane confused here, if this belongs here, or below
 
 \item
-Automatically determine when modified methods fail and detectron values
+Automatically determine when modified methods fail and \verb|detectron| values
 should be used as is.
 % Developing a fallback approach for when flood fill operations behave unexpectedly the image is too washed out.
 \end{enumerate}
 
-\begin{figure}[t]
-  \centering
- % \includegraphics[width=.45\linewidth]{images/teaser1_crop}
-  % \hspace{5mm}
-  \includegraphics[width=.95\linewidth]{images/teaser2_crop}
-  \caption{Initial object detection on a specimen image using Detectron2~\cite{wu2019detectron2}.}
-  \label{fig:teaser}
-\end{figure}
 
 \item Compute a number of high-level metadata properties from the detected objects and image quality metrics.
 % [*Test our ability to calculate] the following set of
@@ -401,8 +377,16 @@ methods.
 %Given the many thousands of images that have and will be acquired of biological specimens, it is infeasible to generate the needed metadata via manual, i.e. via human input, methods.  It is critical to deploy computational techniques that will automate the process of generating the metatdata that is essential for downstream analyses and studies.
 
 %In order to address the need for fish specimen image metadata that can support scientific investigations we have begun the deployment of both off-the-shelf and custom-written software that automatically generates a variety of metadata from a publicly-available biological image repository.  The types of metadata being produced are related to image quality, content and scale, and should provide the information necessary for advanced quantitative studies of the digitized specimens.
+\begin{figure}[t]
+  \centering
+ % \includegraphics[width=.45\linewidth]{images/teaser1_crop}
+  % \hspace{5mm}
+  \includegraphics[width=.95\linewidth]{images/teaser2_crop}
+  \caption{Initial object detection on a specimen image using Detectron2~\cite{wu2019detectron2}.}
+  \label{fig:teaser}
+\end{figure}
 
-The automated metadata generation methods for our project were developed to work on a specific set of images, the INHS\ Fish Collection~\cite{INHS}.  Most of these images have been configured, produced and acquired with a standard procedure.  The images used for our study contain one fish placed on a bright, white background and contain an information tag and the same ruler.  See Figure \ref{fig:INHS_examples} for an example image from the collection. While training and focusing our system on images with very similar compositions and visual properties may limit its immediate applicability, our efforts demonstrate the potential that ML and image informatics techniques have for automatically generating metadata for biological specimen image collections in general.
+The automated metadata generation methods for our project were developed to work on a specific set of images from the INHS\ Fish Collection~\cite{INHS}.  Most of these images have been configured, produced and acquired with a standard procedure.  The images used for our study contain one fish placed on a bright, white background and contain an information tag and the same ruler.  See Figure \ref{fig:INHS_examples} for an example image from the collection. While training and focusing our system on images with very similar compositions and visual properties may limit its immediate applicability, our efforts demonstrate the potential that ML and image informatics techniques have for automatically generating metadata for biological specimen image collections in general.
 
 \section{Methods}
 Our process for metadata generation can be divided into three steps: 1) object detection with Facebook's Detectron2 ML library (referred to as \verb|detectron|), 2) image processing at the pixel level, and 3) calculations on the results of the previous steps to determine higher level metadata properties.
@@ -413,7 +397,8 @@ A prerequisite task to performing any advanced metadata property generation
 is finding the specimens (and other relevant objects) within the collection
 images. Object detection has been a broadly active field of study in recent
 years \cite{zou2019object}, and has resulted in a number of well-tested, purpose-built architectures. We elected to use Facebook AI Research's (FAIR)
-\verb|detectron| tool \cite{wu2019detectron2}, and specifically its implementation of the Mask R-CNN architecture \cite{he2018mask}, for object detection in our project, given its many flexible and robust capabilities.
+\verb|detectron| tool \cite{wu2019detectron2}, and specifically its implementation of the Mask R-CNN architecture \cite{he2018mask}, for object detection in our project, given its many flexible and robust capabilities. Most importantly, following a review of the literature and available tools, we determined that there were no other machine learning packages that returned pixel by pixel masks over detected objects in a comparable fashion.
+
 \verb|detectron| is built on \verb|pytorch|~\cite{NEURIPS2019_9015} and provides a relatively straightforward method for training on COCO~\cite{DBLP:journals/corr/LinMBHPRDZ14} format datasets. It is able to handle any number of object classes, and can classify an arbitrary number of objects within a given image. We chose \verb|detectron| for its relative ease of use compared to lower level libraries, and its implementation of powerful architectures developed by FAIR.
 For our project, we use it to identify five object classes: fish, fish eyes, rulers, and the numbers 2 and 3 on rulers,
 as shown in Figure \ref{fig:teaser}. Objects with a 30\% confidence score or higher are maintained for analysis.
@@ -508,7 +493,7 @@ informatics to produce more accurate object masks and bounding boxes.
         \verb|centroid| & Per Fish & 4 Tuple & The centroid of a given fish's bitmask.\\
         \verb|primary_axis|* & Per Fish & 2D Vector & The unit length primary axis (eigenvector) for the bitmask of a given fish.\\
         \verb|clock_value|* & Per Fish & Integer & Fish's primary axis converted into an integer ``clock value'' between 1 and 12.\\
-        \verb|length|* & Per Fish & Float & The length of a fish in \(\frac{\mathrm{pixels}}{\mathrm{cm}}\).\\
+        \verb|length|* & Per Fish & Float & The length of a fish in centimeters.\\
         \verb|mask| & Per Fish & 2D Matrix & The bitmask of a fish in 0's and 1's.\\
         \verb|pixel_analysis_failed| & Per Fish & Boolean & Whether the pixel analysis process failed for a given fish. If \verb|true|, \verb|detectron|'s mask and bounding box were used for metadata generation.\\
         \verb|score| & Per Fish & Float & The percent confidence score output by \verb|detectron| for a given fish.\\
@@ -529,7 +514,7 @@ While the Otsu value occasionally generates an accurate mask as is, usually
 the contrast between foreground and background is low and much of the lighter parts of the fish (such as its tail fin) are marked as background.
 
 To overcome this improper segmentation, the threshold value should be
-either adjusted up or down, depending on if the background is lighter or darker than the fish.
+either adjusted up or down, depending on whether the background is lighter or darker than the fish.
 For our current dataset, the background is always lighter (i.e.~closer to 255), so the threshold value needs to be scaled up to include more of the
 foreground image.
 % Precisely how much to scale this value by is difficult to determine.
@@ -560,7 +545,7 @@ mask over the fish itself.
 With an accurate mask generated, it is then necessary to check whether the bounding box needs to be expanded or shrunk along any of its edges.
 Expansion is done first, by checking whether any edge intersects with any of the foreground mask pixels. If one does, it is expanded out by 1 pixel. If any edges are expanded, the whole process of masking and expansion is repeated to account for any changes in average intensities. Once no edges contain foreground pixels, the bounding box is then shrunk.
 % This process is more efficient as all that is required is to shrink
-Each edge is contacted by one pixel up until it contain one or more foreground pixels. Once the shrinkage step is accomplished, the final mask and bounding box have been generated.
+Each edge is contacted by one pixel until it contains one or more foreground pixels. Once the shrinkage step is accomplished, the final mask and bounding box have been generated.
 
 \subsubsection{Fallback} The pixel analysis process occasionally fails,
 e.g.\ when flood-filling does not produce a large enough blob or
@@ -615,7 +600,7 @@ between the two furthest projected points gives the length of the fish in pixels
 \subsection{Consideration}
 Just gonna throw some caveats in here, might be its own section might not
 \begin{itemize}
-    \item Program falls back to using detectron mask and bbox for metadata generation in the event the mask generation/pixel analysis fails. Failure is defined as never finding a cohesive flood filled mask that covers more than 10\% of the detectron bbox initially. Can provide a statistic on how often this occurs.
+    \item Program falls back to using \verb|detectron| mask and bbox for metadata generation in the event the mask generation/pixel analysis fails. Failure is defined as never finding a cohesive flood filled mask that covers more than 10\% of the \verb|detectron| bbox initially. Can provide a statistic on how often this occurs.
 \end{itemize}
 \end{comment}
 
@@ -629,7 +614,7 @@ Just gonna throw some caveats in here, might be its own section might not
 \end{figure}
 
 \section{Results}
-Technicians employed by our team have manually generated the 22 metadata properties deemed crucial to the overall BGNN project~\cite{leipzig2021biodiversity} for a large number of INHS images. \(20,699\) total entries were created by 13 technicians that spanned \(8,398\) unique images. Of these \(8,398\) images, \(7,244\) were both not part of the \verb|detectron| training set and met our current admissibility criteria for \verb|detectron| and pixel processing. We ran the metadata extraction program on these \(7,244\) images.
+Technicians employed by Tulane University have manually generated the 22 metadata properties deemed crucial to the overall BGNN project~\cite{leipzig2021biodiversity} for a large number of INHS images. \(20,699\) total entries were created by 13 technicians that spanned \(8,398\) unique images, of which \(7,244\) were both not part of the \verb|detectron| training set and met our current admissibility criteria for \verb|detectron| and pixel processing. We ran the metadata extraction program on these \(7,244\) images.
 For the properties of image scale, fish length, and fish bounding boxes
 (properties not manually generated),
 a random sample of 100 specimens from the set of \(7,244\) were analyzed by
@@ -652,7 +637,7 @@ Of the remaining 17, \verb|detectron| erroneously labeled the fish as two separa
 Fish that were double labeled were generally quite large and/or dissimilar from the fish found in the training set, such as the bottom image in
 Figure~\ref{fig:fish_detect_wrong}.
 
-\begin{figure}[H]
+\begin{figure}[b]
   \centering
   \includegraphics[width=0.49\linewidth]{images/no_ruler1}
   \includegraphics[width=0.49\linewidth]{images/no_ruler2}
@@ -677,6 +662,13 @@ Some of the rulers for which ``2'' and/or ``3'' were not detected were particula
     %\item Talk about which fish failed
     %\item Talk about which rulers failed
 %\end{itemize}
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.49\linewidth]{images/wrong_side_orig}
+  \includegraphics[width=0.49\linewidth]{images/wrong_side1}
+  \caption{A fish for which a splotch on its tail fin was labeled the most likely eye.}
+  \label{fig:wrong_eye}
+\end{figure}
 
 \subsection{Side Detection}
 \verb|detectron| was unable to find a fish eye
@@ -694,13 +686,9 @@ There were an additional 17 images for which the automated process generated a r
 This result highlights the additional utility of automated methods to
 double-check and verify manually generated metadata.
 
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.49\linewidth]{images/wrong_side_orig}
-  \includegraphics[width=0.49\linewidth]{images/wrong_side1}
-  \caption{A fish for which a splotch on its tail fin was labeled the most likely eye.}
-  \label{fig:wrong_eye}
-\end{figure}
+
+
+
 
 \subsection{Clock Value}
 Clock position values were successfully generated for \(6,991\) of the images. Of those, all but 8 were within \(\pm{}1\) of the correct result,
@@ -718,12 +706,21 @@ a mislabeled eye as discussed in the previous section.
 %Clock Value?}
 %A small number of images (such as on the right in Figure~\ref{fig:teaser}) have tags that overlap with the fish. These tags were light enough that they were correctly labeled as background by the pixel analysis.
 
-\begin{figure}[H]
+\begin{figure}[t]
   \centering
   \includegraphics[width=0.7\linewidth]{images/curved1}
   \caption{An example of a heavily curved specimen.}
   \label{fig:curvedFish}
 \end{figure}
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=0.32\linewidth]{images/dark}
+  \includegraphics[width=0.32\linewidth]{images/normal}
+  \includegraphics[width=0.32\linewidth]{images/bright}
+  \caption{Examples of low, medium and high contrast fish images.}
+  \label{fig:contrast}
+\end{figure*}
 
 \begin{comment}
 \begin{figure}[t]
@@ -732,7 +729,7 @@ a mislabeled eye as discussed in the previous section.
   \caption{Histogram for difference in brightness between foreground an background.}
   \label{fig:histo}
 \end{figure}
-\end{comment}
+
 
 \begin{figure*}[t]
   \centering
@@ -742,6 +739,7 @@ a mislabeled eye as discussed in the previous section.
   \caption{Examples of low, medium and high contrast fish images.}
   \label{fig:contrast}
 \end{figure*}
+\end{comment}
 
 \subsection{Image Contrast}
 The contrast of an image is an important image property needed
@@ -838,9 +836,10 @@ to ensure that light fins and tails are masked consistently and accurately.
   \includegraphics[width=0.49\linewidth]{images/61631_mask}
   \caption{An example of a light colored tail being missed during the pixel analysis process.}
   \label{fig:missedTail}
-\end{figure}
-
-\begin{figure}[b]
+%\end{figure}
+%
+%\begin{figure}[b]
+\vspace{10mm}
   \centering
   \includegraphics[width=0.49\linewidth]{images/54172}
   \includegraphics[width=0.49\linewidth]{images/54172_mask}
@@ -933,7 +932,7 @@ Scale calculations using the ``2'' and ``3'' method are nearly identical to thos
 Overall our results show a proof of concept and offer a path forward for using object detection technology, enhanced by image informatics techniques, to improve and enrich metadata that enables advanced specimen image analysis and investigations of scientific research questions on an unprecedented
 scale. Our investigation has thus far focused on fish as the specimen of study. Fish are vertebrate animals (phylum Chordata), with over \(34,000\) known unique species~\cite{fishbase},
 with many more likely undiscovered. Species names are merely labels, and the discovery of species variation depends on both genotype and phenotype information. The ability to computationally analyze thousands of images of a single fish species, from different habitats and time periods, can lead to new discoveries that are impossible to pursue with manual methods.
-Digital library researchers have been concerned with computationally extracting image features, using content based image retrieval methods. The work by Toress~\cite{torres2006digital}, while over 15 years old, demonstrates the challenges and opportunities to automatically generating useful metadata.
+Digital library researchers have been concerned with computationally extracting image features, using content-based image retrieval methods. The work by Toress~\cite{torres2006digital}, while over 15 years old, demonstrates the challenges and opportunities to automatically generating useful metadata.
 Efforts to integrate such automatic metadata generation methods into digital library workflows and architectures still seem limited.
 %content based information retrieval (CBIR) for digital library images\cite{ivanova2011content}
 %Link above is from the EU counterpart to JCDL, and trying to weave in, just focuses on color semantics, if we want to get another citation in there.
@@ -942,7 +941,7 @@ detection, one can apply pixel analysis and informatics methods to compute
 many more higher order properties from the initial segmentations.
 %can we say something here.
 
-Digital libraries serve to collect, provide access to, and archive rich collections of a wide array of materials. Many digital libraries interconnect with open repositories, supporting FAIR (Findable, Accessible, Interoperable, and Reuseable)~\cite{wilkinson2016fair}. In discussing the future of digital library services, Fox \cite{fox2021building} underscores the need to prepare for and test ML applications. The work presented here, within the context of the BGNN project, demonstrates a clear need for improved metadata associated with specimen image collections. Much effort, time and money have been put into photographing and digitizing physical specimens, but without detailed and complete metadata properties the utility of these repositories for advanced computational analysis and ML is limited. Since it is prohibitively time intensive to generate all the pertinent properties by hand, automated techniques are essential to generating the missing metadata at scale.
+Digital libraries serve to collect, provide access to, and archive rich collections of a wide array of materials. Many digital libraries interconnect with open repositories, supporting FAIR (Findable, Accessible, Interoperable, and Reuseable)~\cite{wilkinson2016fair}. In discussing the future of digital library services, Fox \cite{fox2021building} underscores the need to prepare for and test ML applications. The work presented here, within the context of the BGNN project, demonstrates a clear need for improved metadata associated with specimen image collections. Much effort, time and money have been put into photographing and digitizing physical specimens, but without detailed and complete metadata properties the utility of these repositories for advanced computational analysis and ML is limited. Since it is very time intensive to generate all the pertinent properties by hand, automated techniques are essential to generating the missing metadata at scale.
 
 \section{Conclusion}
 In this paper we presented an automatic metadata generation approach. 
@@ -959,8 +958,12 @@ shown itself capable of doing during initial testing. Another requirement will b
 %\section{Conclusion}
 %\textbf{Todo}
 
-%\section*{Acknowledgment}
-%can make possible note about larger BGNN team, and/or general note to Tulane data in-putters for giving us data to compare, and/or INHS collection. [we can discuss]
+\section{Acknowledgment}
+We thank the full BGNN team for support, the data curation team at the Tulane University Biodiversity Research Institute, and Chris A. Taylor, Curator of Fishes and Crustaceans at the Illinois Natural History Survey (INHS). INHS is one of six fish collections participating in the Great Lakes Invasives Network (GLIN).
+
+
+
+
 
 \bibliographystyle{IEEEtran}
 \bibliography{paper}
