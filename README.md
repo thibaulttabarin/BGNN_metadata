@@ -1,6 +1,12 @@
 # Drexel Metadata
 
 ## Goal
+
+To develop a tool to check the validity of metadata associated with an image, and generate things that are missing. Currently setting up off the shelf machine learning to detect presence of fish and count how many there are.
+## Status
+
+# In this branch go straight to the folder gen_metadata_mini
+=======
 To develop a tool to check the validity of metadata associated with an image, and generate things that are missing. Also includes various geometric and statistical properties on the mask generated over the biological specimen presented.
 
 ## Functionality
@@ -119,4 +125,5 @@ pipenv run python3 gen_metadata.py [file_or_dir_name]
 Joel Pepper
 
 Kevin Karnani
+
 

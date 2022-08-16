@@ -33,7 +33,7 @@ with open('config/mask_rcnn_R_50_FPN_3x.yaml', 'r') as f:
     iters = yaml.load(f, Loader=yaml.FullLoader)["SOLVER"]["MAX_ITER"]
 
 
-def init_model(enhance_contrast=ENHANCE, joel=JOEL):
+def init_model(enhance_contrast=ENHANCE, joel=JOEL, processor='cpu'):
     """
     Initialize model using config files for RCNN, the trained weights, and other parameters.
 
@@ -48,7 +48,9 @@ def init_model(enhance_contrast=ENHANCE, joel=JOEL):
         # cfg.OUTPUT_DIR += f"/non_enhanced_{iters}" if not enhance_contrast else f"/enhanced_{iters}"
     cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")
     cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.3
+    cfg.MODEL.DEVICE = processor
     predictor = DefaultPredictor(cfg)
+    
     return predictor
 
 
