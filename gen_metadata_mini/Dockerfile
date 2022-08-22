@@ -1,13 +1,30 @@
-FROM python:3.8-slim-buster
+FROM ubuntu:20.04
 
 # Label
-LABEL org.opencontainers.image.title="Generate metadata"
-LABEL org.opencontainers.image.authors="Joel Pepper, Kevin Karmani T. Tabarin"
-LABEL org.opencontainers.image.source="https://github.com/hdr-bgnn/drexel_metadata"
+LABEL org.opencontainers.image.title="fish trait segmentation"
+LABEL org.opencontainers.image.authors=" M. Maruf, T. Tabarin, J. Bradley"
+LABEL org.opencontainers.image.source="https://github.com/hdr-bgnn/BGNN-trait-segmentation"
 
-RUN apt-get update
-# gcc compiler and opencv prerequisites
-RUN apt-get -y install nano git build-essential libglib2.0-0 libsm6 libxext6 libxrender-dev sudo cmake ninja-build
+ARG DEBIAN_FRONTEND=noninteractive
+
+# Install some basic utilities
+RUN apt-get update && apt-get install -y \
+    curl \
+    ca-certificates \
+    sudo \
+    git \
+    bzip2 \
+    libx11-6 \
+    wget \
+    build-essential \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    sudo \
+    cmake \
+    ninja-build \
+ && rm -rf /var/lib/apt/lists/*
 
 # Create a working directory
 RUN mkdir /pipeline
@@ -23,8 +40,17 @@ USER user
 ENV HOME=/home/user
 RUN chmod 777 /home/user
 
-# Set up the environment
-ENV PATH="/home/user/.local/bin:${PATH}"
+# Set up the Conda environment
+ENV CONDA_AUTO_UPDATE_CONDA=false \
+    PATH=/home/user/miniconda/bin:$PATH
+RUN curl -sLo ~/miniconda.sh https://repo.anaconda.com/miniconda/Miniconda3-py38_4.9.2-Linux-x86_64.sh \
+ && chmod +x ~/miniconda.sh \
+ && ~/miniconda.sh -b -p ~/miniconda \
+ && rm ~/miniconda.sh \
+ && conda clean -ya
+ 
+RUN pip install numpy pandas pynrrd pillow scikit-image jedi==0.17.2 opencv-python-headless
+RUN pip install --upgrade --no-cache-dir gdown
 
 # Detectron2 prerequisites
 RUN pip install torch==1.6.0+cpu torchvision==0.7.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
@@ -34,9 +60,6 @@ RUN pip install -U 'git+https://github.com/cocodataset/cocoapi.git#subdirectory=
 RUN python -m pip install detectron2==0.4 -f https://dl.fbaipublicfiles.com/detectron2/wheels/cpu/torch1.6/index.html
 
 RUN pip install -U 'git+https://github.com/facebookresearch/fvcore'
-
-RUN pip install numpy pandas pynrrd pillow scikit-image jedi==0.17.2 opencv-python-headless
-RUN pip install --upgrade --no-cache-dir gdown
 
 # Setup pipeline specific scripts
 ENV PATH="/pipeline:${PATH}"
@@ -49,3 +72,6 @@ RUN gdown -O /pipeline/output/model_final.pth https://drive.google.com/uc?id=13p
 # Set the default command to a usage statement
 CMD echo " New Usage Metadata: python metadata_main.py  <fish_image.jpg> <metadata.json> <mask.png>"
 
+
+ 
+ 
