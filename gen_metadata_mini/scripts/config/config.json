@@ -4,7 +4,7 @@
   "PROCESSOR": "cpu",
   "NUM_CLASSES": 5,
   "VAL_SCALE_FAC": 0.5,
-  "MODEL_WEIGHT" : "output/enhanced/model_final.pth",
+  "MODEL_WEIGHT" : "output/model_final.pth",
   "IOU_PCT": 0.2
 }
 
