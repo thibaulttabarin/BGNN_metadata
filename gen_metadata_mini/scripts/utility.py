@@ -80,11 +80,20 @@ def distance(pt1, pt2):
 def adaptive_threshold(bbox, im_gray, VAL_SCALE_FAC):
     """
     Determines the best thresholding value.
-    Parameters:
-        bbox -- bounding box in [top left x, top left y, bottom right x, bottom right y] format.
-        im_gray -- grayscale version of original image.
-    Returns:
-        val -- new threshold.
+    Parameters
+    ----------
+    bbox : list (int)
+        Bounding box in [left, top, right, bottom] format.
+    im_gray : np.ndarray 
+        Grayscale version of original image.
+    VAL_SCALE_FAC : int
+        value scale factor.
+
+    Returns
+    -------
+    val: float 
+        new threshold
+
     """
     im_crop = im_gray[bbox[1]:bbox[3], bbox[0]:bbox[2]]
     val = filters.threshold_otsu(im_crop)
