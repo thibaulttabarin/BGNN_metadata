@@ -1,4 +1,5 @@
-#!/usr/local/bin/python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 '''
 This is Kevin Karnani code, modified by thibault tabarin for containerization
 
@@ -82,12 +83,12 @@ def gen_metadata(file_path, enhance_contrast=ENHANCE, visualize=False, multiple_
         file_path -- string of path to image file.
     Returns:
         {file_name: results} -- dictionary of file and associated results.
-        
+
     """
     # Extract file name base
     file_name = file_path.split('/')[-1]
     f_name = file_name.split('.')[0]
-    
+
     # Initialize model
     predictor = init_model()
     im = cv2.imread(file_path)
@@ -121,14 +122,14 @@ def gen_metadata(file_path, enhance_contrast=ENHANCE, visualize=False, multiple_
 
     results = {}
     #results['tag']='friday'
-    
+
     fish = insts[insts.pred_classes == 0]
     if len(fish):
         results['fish'] = []
         results['fish'].append({})
     else:
         fish = None
-        
+
     results['has_fish'] = bool(fish)
     try:
         ruler = insts[insts.pred_classes == 1][0]
@@ -151,7 +152,7 @@ def gen_metadata(file_path, enhance_contrast=ENHANCE, visualize=False, multiple_
         results['unit'] = 'cm'
     else:
         scale = None
- 
+
     skippable_fish = []
     fish_length = 0
     if fish:
@@ -163,32 +164,32 @@ def gen_metadata(file_path, enhance_contrast=ENHANCE, visualize=False, multiple_
         fish = fish[fish.scores > .3]
         fish_length = len(fish)
         fish = fish[fish.scores.argmax().item()]
-        
+
         for i in range(len(fish)):
             curr_fish = fish[i]
 
             if eyes:
                 eye_ols = [overlap(curr_fish, eyes[j]) for j in
                            range(len(eyes))]
-                
+
 
                 eye = None
                 if not all(ol == 0 for ol in eye_ols):
                     full = [i for i in range(
-                        len(eye_ols)) if eye_ols[i] >= .95]                    
+                        len(eye_ols)) if eye_ols[i] >= .95]
 
                     # if multiple eyes with 95% or greater overlap, pick highest confidence
                     if len(full) > 1:
                         eye = eyes[full]
                         eye = eye[eye.scores.argmax().item()]
-                        
+
                     else:
                         max_ind = max(range(len(eye_ols)),
                                       key=eye_ols.__getitem__)
-                        eye = eyes[max_ind]                    
+                        eye = eyes[max_ind]
             else:
                 eye = None
-                               
+
             bbox = [round(x) for x in curr_fish.pred_boxes.tensor.cpu().numpy().astype('float64')[0]]
             need_scaling = False
             detectron_mask = curr_fish.pred_masks[0].cpu().numpy()
@@ -232,8 +233,8 @@ def gen_metadata(file_path, enhance_contrast=ENHANCE, visualize=False, multiple_
                 #results['fish'][i]['mask']['start_coord'] = list(start)
                 #results['fish'][i]['mask']['encoding'] = code
                 results['fish'][i]['rescale'] = 'no'
-                
-                # upscale fish and then rerun                
+
+                # upscale fish and then rerun
                 if eye is None:
                     need_scaling = True
                     factor = 4
@@ -260,7 +261,7 @@ def gen_metadata(file_path, enhance_contrast=ENHANCE, visualize=False, multiple_
                     results['fish'][i]['oriented_width'] = width / scale
                 results['fish'][i]['centroid'] = centroid.tolist()
             results['fish'][i]['has_eye'] = bool(eye)
-            
+
             if eye and not need_scaling:
                 eye_center = [round(x) for x in eye.pred_boxes.get_centers()[0].cpu().numpy()]
                 results['fish'][i]['eye_center'] = list(eye_center)
@@ -389,7 +390,7 @@ def adaptive_threshold(bbox, im_gray):
     ----------
         bbox: list (int)
         bounding box in [left, top, right, bottom] format.
-        im_gray: np.ndarray 
+        im_gray: np.ndarray
         grayscale version of original image.
     Returns:
         val: int
