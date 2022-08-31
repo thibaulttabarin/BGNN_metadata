@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Mon Aug  8 11:35:50 2022
+#' Created on Mon Aug  8 11:35:50 2022
+#' @author
+#' Joel Pepper: initial code
+#' Kevin Karnani: modified it
+#' Thibault Tabarin: modularize it and trimmed the code for minnow project
+#' @description
+#' Collect all the code that uses more standard image analyis method
 
-@author: Joel Pepper, Kevin Kamani, Thibault Tabarin
-
-Collect al the code that uses classic image analyis method
-"""
 
 import cv2
 import numpy as np
@@ -20,6 +21,19 @@ from PIL import Image, ImageDraw
 def enhance_contrast(image_arr):
     '''
     Contrast enhance method CLAHE to imporve deep learning prediction
+
+    Parameters
+    ----------
+    image_arr : np.ndarray (dtype:uint8)
+        image to enhance.
+
+    Returns
+    -------
+    im_enhance : np.ndarray (dtype:uint8)
+        CLAHE enhance converted to RGB Color.
+    im_gray : np.ndarray (dtype:uint8)
+         CLAHE enhance converted to GRAY Color.
+
     '''
     
     im_gray = cv2.cvtColor(image_arr, cv2.COLOR_BGR2GRAY)
@@ -146,7 +160,7 @@ def generate_pixel_analysis(bbox, im_gray, VAL_SCALE_FAC, detectron_mask, flippe
                 if fish_pix is not None:
                     fish_pix = None
                 else:
-                    print(f'ERROR on flood fill')
+                    print('ERROR on flood fill')
                     return bbox_orig, detectron_mask.astype('uint8'), True
             temp = flood_fill(thresh, ind, 2)
             temp = np.where(temp == 2, 1, 0)
@@ -179,7 +193,7 @@ def generate_pixel_analysis(bbox, im_gray, VAL_SCALE_FAC, detectron_mask, flippe
                 bottom = min(shape[0] - 1, bottom)
                 done = False
         except:
-            print(f'Error expanding bounding box')
+            print('Error expanding bounding box')
             failed = True
             return bbox_orig, detectron_mask.astype('uint8'), failed
         # New bbox
@@ -291,7 +305,7 @@ def clean_regionprop(mask):
     filled = reconstruction(seed, mask, method='erosion')
     
     # Create the region prop
-    mask_label = measure.label(mask)
+    mask_label = measure.label(filled)
     mask_region = measure.regionprops(mask_label)
     
     # get the biggest blod (region)
@@ -393,20 +407,39 @@ def get_brightness(im, mask, bbox):
     _, im_gray = enhance_contrast(im)
     im_crop = im_gray[bbox[1]:bbox[3], bbox[0]:bbox[2]].reshape(-1)
     mask_crop = mask[bbox[1]:bbox[3], bbox[0]:bbox[2]].reshape(-1)
-    mask_coords = np.argwhere(mask != 0)[:, [1, 0]]
     fground = im_crop[np.where(mask_crop)]
     bground = im_crop[np.where(np.logical_not(mask_crop))]
     
-    dict_brightness['foreground_mean'] = np.mean(fground)
-    dict_brightness['foreground_std'] = np.std(fground)
+    dict_brightness['foreground_mean'] = round(np.mean(fground),2)
+    dict_brightness['foreground_std'] = round(np.std(fground),2)
 
-    dict_brightness['background_mean'] = np.mean(bground)
-    dict_brightness['background_std'] = np.std(bground)
+    dict_brightness['background_mean'] = round(np.mean(bground),2)
+    dict_brightness['background_std'] = round(np.std(bground),2)
 
     return dict_brightness
 
 
-def check_bbox (im, dict_fish, center=None):    
+def check_bbox (im, dict_fish, center=None):
+    '''
+    Visualization tools to assess correctness of the result.
+    Plot on the original image the bounding box for the fish and the eye and
+    if provided the center (of the eye).
+
+    Parameters
+    ----------
+    im : np.ndarray
+        image to visualize.
+    dict_fish : dictionnary
+        Dictionnary containing metadata for fish
+    center : list (int), optional
+        Coordinate of center for example eye. The default is None.
+
+    Returns
+    -------
+    img : np.ndarray
+        image .
+
+    '''
     
     img = Image.fromarray(im)
     img1 = ImageDraw.Draw(img)
