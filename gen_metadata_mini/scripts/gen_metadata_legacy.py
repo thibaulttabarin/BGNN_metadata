@@ -52,7 +52,6 @@ ENHANCE = conf['ENHANCE']
 with open(os.path.join(root_file_path,'config/mask_rcnn_R_50_FPN_3x.yaml'), 'r') as f:
     iters = yaml.load(f, Loader=yaml.FullLoader)["SOLVER"]["MAX_ITER"]
 
-
 def init_model(processor=PROCESSOR, model_weight=MODEL_WEIGHT):
     """
     Initialize model using config files for RCNN, the trained weights, and other parameters.
@@ -296,14 +295,11 @@ def gen_metadata_upscale(file_path, fish):
     im_gray = cv2.cvtColor(fish, cv2.COLOR_BGR2GRAY)
     output = predictor(im)
     insts = output['instances']
-    selector = insts.pred_classes == 0
-    selector = selector.cumsum(axis=0).cumsum(axis=0) == 1
+
     results = {}
     file_name = file_path.split('/')[-1]
     f_name = file_name.split('.')[0]
-    for i in range(1, 5):
-        temp = insts.pred_classes == i
-        selector += temp.cumsum(axis=0).cumsum(axis=0) == 1
+
     fish = insts[insts.pred_classes == 0]
     if len(fish):
         results['fish'] = []
