@@ -28,5 +28,5 @@ jobs:
     # Runs a single command using the runners shell
     - name: Send greeting
       env:
-        SUPER_SECRET: ${{ secrets.API_TOKEN }}
+        SUPER_SECRET: "WORLD"
       run: echo "$SUPER_SECRET"
