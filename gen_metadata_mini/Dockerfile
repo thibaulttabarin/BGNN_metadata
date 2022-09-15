@@ -1,4 +1,5 @@
 FROM ubuntu:20.04
+ARG DATAVERSE_API_TOKEN
 
 # Label
 LABEL org.opencontainers.image.title="metadata generation for fish image"
