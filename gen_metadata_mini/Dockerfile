@@ -1,6 +1,6 @@
 FROM ubuntu:20.04
 ARG DATAVERSE_API_TOKEN
-ENV MY_API_TOKEN=$DATAVERSE_API_TOKEN
+ENV DATAVERSE_API_TOKEN=$DATAVERSE_API_TOKEN
 # Label
 LABEL org.opencontainers.image.title="metadata generation for fish image"
 LABEL org.opencontainers.image.authors=" J. Pepper, K. Karmani, T. Tabarin"
@@ -65,9 +65,9 @@ ENV PATH="/pipeline:${PATH}"
 
 ADD scripts/ /pipeline/
 # Download Drexel Model
-RUN mkdir /pipeline/output/
-RUN gdown -O /pipeline/output/model_final.pth https://drive.google.com/uc?id=13pa5E5odN_gWNZYkA12u8ZEnEjzWGxFL
-RUN echo $MY_API_TOKEN
+#RUN mkdir /pipeline/output/
+#RUN gdown -O /pipeline/output/model_final.pth https://drive.google.com/uc?id=13pa5E5odN_gWNZYkA12u8ZEnEjzWGxFL
+RUN python dataverse_download.py https://covid-commons.osu.edu/ doi:10.5072/FK2/MMX6FY /pipeline/output/
 
 # Set the default command to a usage statement
 CMD echo "Usage Metadata: metadata_main.py  <fish_image.jpg> <metadata.json> <mask.png>"
