@@ -67,7 +67,7 @@ ADD scripts/ /pipeline/
 # Download Drexel Model
 #RUN mkdir /pipeline/output/
 #RUN gdown -O /pipeline/output/model_final.pth https://drive.google.com/uc?id=13pa5E5odN_gWNZYkA12u8ZEnEjzWGxFL
-RUN python dataverse_download.py https://covid-commons.osu.edu/ doi:10.5072/FK2/MMX6FY /pipeline/output/
+RUN python /pipeline/dataverse_download.py https://covid-commons.osu.edu/ doi:10.5072/FK2/MMX6FY /pipeline/output/
 
 # Set the default command to a usage statement
 CMD echo "Usage Metadata: metadata_main.py  <fish_image.jpg> <metadata.json> <mask.png>"
