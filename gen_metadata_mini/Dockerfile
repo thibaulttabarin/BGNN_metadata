@@ -70,7 +70,7 @@ ADD scripts/ /pipeline/
 RUN python /pipeline/dataverse_download.py https://covid-commons.osu.edu/ doi:10.5072/FK2/MMX6FY /pipeline/output/
 
 # Set the default command to a usage statement
-CMD echo "Usage Metadata: metadata_main.py  <fish_image.jpg> <metadata.json> <mask.png>"
+CMD echo "Usage Metadata 2: metadata_main.py  <fish_image.jpg> <metadata.json> <mask.png>"
 
 
  
