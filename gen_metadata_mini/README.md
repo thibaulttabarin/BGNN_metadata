@@ -4,13 +4,14 @@ This specific folder contained the minimun necessary to start using the generato
 # 1- Introduction
 
 Using detectron2 framework (an object detection tool), the original auhtors have trained a model to detect fish and ruler from a fish image obtained from museum dataset, the image used for training test and prediction are available on Tulane server. Here an example. An example of model prediction is here. 
-
+![prediction image](https://github.com/thibaulttabarin/drexel_metadata/blob/main/gen_metadata_mini/image_test/prediction_50577.jpg)
 
 - The training phase was developped by Drexel group (Joel Pepper and Kevin Karnina). They used original images from tulane server and annotations were constructed using makesense.ai interface which produce coco.json format. More detail of how the training is performed is described in the following [tutorial](https://detectron2.readthedocs.io/en/latest/tutorials/getting_started.html) and [colab](https://colab.research.google.com/drive/16jcaJoc6bCFAQ96jDe2HwtXj7BMD_-m5).
     
 - The prediction step predicts 5 classes {fish, eye, ruler, "number 2, "number 3"} in the form of instances. each instances is accessible individually and features properties such as bounding box mask center of bounding box... 
     
-- The next step is the metadata extraction. Using object instance properties and classic computer vision approach, we extract bounding box around the fish, eye center, fish orientation, scale of the ruler, background average pixel value... More exhautive list of possible output is described on the [original repo](https://github.com/hdr-bgnn/drexel_metadata)
+- The next step using a pixel analysis to refine the contour of the fish.
+- Last step is concerned with collecting the metadata and calculating some interesting measurement using pixel analysis mask, object instance properties combine with classic computer vision approach. For instance we extract bounding box around the fish, eye center, fish orientation, scale of the ruler, background average pixel value... More exhautive list of possible output is described on the [original repo](https://github.com/hdr-bgnn/drexel_metadata)
 
 - The metadata output are in the format of json file (equivalent to dictionary format in python)
 
@@ -40,8 +41,6 @@ Location of the model is on ohio state university https://datacommons.tdai.osu.e
    - Run env_setup.sh to setup an environment named gen_metadata
    - Or execute each command contained in env_setup.sh
    
-
-   
 # 3 Usage and output: 
 
 Activate your environment  
@@ -60,7 +59,7 @@ This will generate 2 files:
  
 # 4- Container
 
-The code has been contianerized and the image is available [here](https://github.com/thibaulttabarin/drexel_metadata/pkgs/container/drexel_metadata)
+The code has been containerized and the image is available [here](https://github.com/thibaulttabarin/drexel_metadata/pkgs/container/drexel_metadata). Check for more updated version. Here we are using "main" but new release may be available (tag looks like this "0.0.10")
 
 Pull command
 ```
@@ -68,9 +67,7 @@ docker pull ghcr.io/thibaulttabarin/drexel_metadata:main
 singularity pull docker://ghcr.io/thibaulttabarin/drexel_metadata:main
 ```
 
-Container Usage (for singularity:
+Container Usage (for singularity):
 ```
 singularity exec drexel_metadata_main.sif metadata_main.py INHS_FISH_50577.jpg result_metadata.json mask.png
 ``` 
- 
-
