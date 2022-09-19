@@ -200,7 +200,7 @@ def get_ruler_metadata(insts, file_name):
 
     if ruler and two and three:
         scale, unit = ut.calculate_scale(two, three, file_name)
-        dict_ruler['scale'] = scale
+        dict_ruler['scale'] = round(scale,2)
         dict_ruler['unit'] = unit
 
     return dict_ruler
