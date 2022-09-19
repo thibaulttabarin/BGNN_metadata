@@ -42,7 +42,7 @@ Location of the model is on ohio state university https://datacommons.tdai.osu.e
    
 
    
-# 3 Usage: 
+# 3 Usage and output: 
 
 Activate your environment  
 ```
@@ -54,6 +54,9 @@ This will generate 2 files:
 
     - result_metadata.json : contained various metadata information. fish bounding box, scale bounding box, scale conversion (pixel/cm)
     - mask.png : improve fish mask using the pixel analysis. (binary map)
+
+![mask](https://github.com/thibaulttabarin/drexel_metadata/blob/main/gen_metadata_mini/image_test/mask_50577.png)
+![Metadata](https://github.com/thibaulttabarin/drexel_metadata/blob/main/gen_metadata_mini/image_test/metadata_50577.json)
  
 # 4- Container
 
