@@ -1,7 +1,11 @@
 # Refactor version of the original code
 
 This specific folder contianed a simplified version of the [original code](https://github.com/hdr-bgnn/drexel_metadata), that suits better the needs of the main BGNN project "the Minnows project".
-Additionally we have refactored the code to improve readability and flexibility.
+Additionally we have refactored the code to improve readability and flexibility. Finally two papers have been published related to the original work.
+
++ [Joel Pepper et .al](https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=9651834&casa_token=csQdLvi9K2cAAAAA:pMWSDHozeLugmFMNiMTChZiVf-6OjSl8zoouLyV_DRsPp_q3GvNL0Fvloe___GbaMRSiPA&tag=1)
++ [Kevin Karnani et  .al](https://assets.researchsquare.com/files/rs-1506561/v1_covered.pdf?c=1651071974)
+
 
 # 1- Introduction
 
@@ -87,12 +91,12 @@ This will generate 2 files:
 |----------------------------------|--------------------------|-------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | base\_name              | Overall Image            | string           | image name.                                                                                                                     |
 | fish                    | -------------            | ------           | ------------------                                                                                                                      |
-| fish\_num               | Overall Image            | Integer           | The number of fish present.                                                                                                                      |
-| bbox                    | fish of interest         | list              | fish bounding box (top, left, right, bottom). 
-                                                                             |
-| pixel_analysis          | fish of interest         | Booleen           | If pixel analysis succeeded True, else False.
-                                                                             |                                         
-| eye_bbox                | for eye in fish          | list              | bounding box around the eye with best overlap with the fish.                                                                                                |                                                          
+| fish\_num               | Overall Image            | Integer          | The number of fish present.                                                                                                                      |
+| bbox                    | fish of interest         | list             | fish bounding box (top, left, right, bottom). 
+                                                         |
+| fish\_num               | Overall Image            | Integer          | The number of fish present.                                                                                                                      |
+| bbox                    | fish of interest         | list             | fish bounding box (top, left, right, bottom). 
+                                                                             |                                                      
                                                                              
 ## Properties Generated
 
