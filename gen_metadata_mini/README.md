@@ -1,5 +1,7 @@
-# User Branch for Gen_metadata
-This specific folder contained the minimun necessary to start using the generator of metadata for fish
+# Refactor version of the original code
+
+This specific folder contianed a simplified version of the [original code](https://github.com/hdr-bgnn/drexel_metadata), that suits better the needs of the main BGNN project "the Minnows project".
+Additionally we have refactored the code to improve readability and flexibility.
 
 # 1- Introduction
 
@@ -13,29 +15,35 @@ Using detectron2 framework (an object detection tool), the original auhtors have
 - The next step using a pixel analysis to refine the contour of the fish. [mask_example](https://github.com/thibaulttabarin/drexel_metadata/blob/main/gen_metadata_mini/image_test/mask_50577.png). Keep in mind that the pixel analysis sometime fail.
 - Last step is concerned with collecting the metadata and calculating some interesting measurement using pixel analysis mask, object instance properties combine with classic computer vision approach. For instance we extract bounding box around the fish, eye center, fish orientation, scale of the ruler, background average pixel value... More exhautive list of possible output is described on the [original repo](https://github.com/hdr-bgnn/drexel_metadata)
 
-- The metadata output are in the format of json file (equivalent to dictionary format in python)
+- The metadata output are in the format of json file (equivalent to dictionary format in python) [metadta example](https://github.com/thibaulttabarin/drexel_metadata/blob/main/gen_metadata_mini/image_test/metadata_50577.json)
 
 # 2- About this version
 
-This version of the code reuses original code developped by Joel and Kevin [here](https://github.com/hdr-bgnn/drexel_metadata). Here, we ruse the model weights for the prediction part. We have modified some part of the code to improve readability and simplify some functionalities to output subset of the output more relevant for the [BGNN_Snakemake project](https://github.com/hdr-bgnn/BGNN_Snakemake). For the BGNN_Snakemake and Minnows project we focus on extracting form the image the fish bounding box, the orientation, the eye orientation and scale (of the ruler). Noticeable modification
+This version of the code reuses [original code](https://github.com/hdr-bgnn/drexel_metadata) developped by Joel and Kevin [here](https://github.com/hdr-bgnn/drexel_metadata). Here, we reuse the model weights for the prediction part. We have modified some part of the code to improve readability and simplify some functionalities to output subset of the output more relevant for the [BGNN_Snakemake project](https://github.com/hdr-bgnn/BGNN_Snakemake) and [Minnows project](https://github.com/hdr-bgnn/Minnow_Traits). For the BGNN_Snakemake and Minnows project we focus on extracting form the image the fish bounding box, the orientation, the eye orientation and scale (of the ruler). Noticeable modification
 + The simplify output
-    - Json file metadata contained : {base_name: , fish:{}, ruler:{}} [example here]()
-    - PNG file for the mask of the file : [example here]()
-+ Break the code in smaller functions
-+ Remove part that weren't use in our application for 
+    - Json file metadata contained : {base_name: , fish:{}, ruler:{}} [example here](https://github.com/thibaulttabarin/drexel_metadata/blob/main/gen_metadata_mini/image_test/metadata_50577.json)
+    - PNG file for the mask of the file : [example here](https://github.com/thibaulttabarin/drexel_metadata/blob/main/gen_metadata_mini/image_test/mask_50577.png)
++ Break the code in smaller functions to add modularity.
++ Remove part that weren't use in our application for the [Minnows project](https://github.com/hdr-bgnn/Minnow_Traits) 
 
 
 # 3- Model weights: 
 
-In this repository folder we are using the follwing model. (other model have been used check the original repo and with the author for more info on the other model.  Our model of interest was trained by Kevin Karnina using INHS and UWZM dataset and using a contract enhancement fucntion.
+In this repository folder we are using the follwing model. (Other model have been used, check the original repo and with the author for more info on the other model).  Our model of interest was trained by Kevin Karnina using INHS and UWZM dataset and using a contract enhancement fucntion.
 
 More information on the training are available on the [original repo](https://github.com/hdr-bgnn/drexel_metadata)
 
-Location of the model is on ohio state university https://datacommons.tdai.osu.edu/dataset.xhtml?persistentId=doi:10.5072/FK2/MMX6FY&version=DRAFT. Current the model is unpublished, therefore to acccess the weights you need account (contact Hilmar , John or Thibault). The model should be published in a near future. However you can use the container to run the code. See next section
+Location of the model is on ohio state university https://datacommons.tdai.osu.edu/dataset.xhtml?persistentId=doi:10.5072/FK2/MMX6FY&version=DRAFT. Currently, the model is unpublished, therefore to acccess the weights you need account (contact Hilmar , John or Thibault). The model should be published in a near future. However you can use the container to run the code (generate the metadata). See next section
++ Instruction to get the weights from google drive (current public location:
    - Require pip to install gdown
    - Run load_models.sh to get the weights
-   
-# 3- Setup and Requirements
++ Instruction to download the weights from OSC using pydataverse python module
+    + use the functions developped [here](https://github.com/thibaulttabarin/drexel_metadata/blob/main/gen_metadata_mini/scripts/dataverse_download.py), [here](https://github.com/johnbradley/BGNN-trait-segmentation/commit/c6aa67663694557136e0573cff2b0072d5645143) or [read documentation](https://pydataverse.readthedocs.io/en/latest/)
+    + you will need API_TOKEN [instruction](https://guides.dataverse.org/en/latest/api/auth.html) 
+
+# 3- Suggested Setup and Requirements with anaconda 
+
+The set up for detectron2 can be a bit difficult. At the time of this project the best option found was to use conda and manually install the dependencies. The [original repo](https://github.com/hdr-bgnn/drexel_metadata/blob/main/Pipfile) was using the pipfile system. It is up to you! 
 
    - Require conda or miniconda
    - Run env_setup.sh to setup an environment named gen_metadata
@@ -46,7 +54,7 @@ Location of the model is on ohio state university https://datacommons.tdai.osu.e
 Activate your environment  
 ```
 conda activate gen_metadata
-python  INHS_FISH_50577.jpg result_metadata.json mask.png
+python  metadata_main.py INHS_FISH_50577.jpg result_metadata.json mask.png
 ```
 
 This will generate 2 files:
@@ -55,7 +63,23 @@ This will generate 2 files:
     - mask.png : improve fish mask using the pixel analysis. (binary map)
     
 [Metadata](https://github.com/thibaulttabarin/drexel_metadata/blob/main/gen_metadata_mini/image_test/metadata_50577.json)
-{"base_name": "INHS_FISH_50577", "fish": {"fish_num": 1, "bbox": [1031, 303, 4652, 1696], "pixel_analysis": true, "eye_bbox": [1227, 713, 1572, 1041], "eye_center": [1399, 877], "angle_degree": -1.59, "eye_direction": "left", "foreground_mean": 105.12, "foreground_std": 45.23, "background_mean": 242.33, "background_std": 13.96}, "ruler": {"bbox": [319, 2601, 3446, 3664], "scale": 339.88, "unit": "cm converted"}}
+{"base_name": + "INHS_FISH_50577", 
+              + "fish": {
+                      + "fish_num": 1, 
+                      + "bbox": [1031, 303, 4652, 1696], 
+                      + "pixel_analysis": true, "eye_bbox": [1227, 713, 1572, 1041], 
+                      + "eye_center": [1399, 877], 
+                      + "angle_degree": -1.59, 
+                      + "eye_direction": "left", 
+                      + "foreground_mean": 105.12, 
+                      + "foreground_std": 45.23, 
+                      + "background_mean": 242.33, 
+                      + "background_std": 13.96}, 
+               + "ruler": {
+                      + "bbox": [319, 2601, 3446, 3664], 
+                      + "scale": 339.88, 
+                      + "unit": 
+                      + "cm converted"}}
 
 ## Properties Generated
 
