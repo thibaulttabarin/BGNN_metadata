@@ -10,7 +10,7 @@ Using detectron2 framework (an object detection tool), the original auhtors have
     
 - The prediction step predicts 5 classes {fish, eye, ruler, "number 2, "number 3"} in the form of instances. each instances is accessible individually and features properties such as bounding box mask center of bounding box... 
     
-- The next step using a pixel analysis to refine the contour of the fish.
+- The next step using a pixel analysis to refine the contour of the fish. [mask_example](https://github.com/thibaulttabarin/drexel_metadata/blob/main/gen_metadata_mini/image_test/mask_50577.png). Keep in mind that the pixel analysis sometime fail.
 - Last step is concerned with collecting the metadata and calculating some interesting measurement using pixel analysis mask, object instance properties combine with classic computer vision approach. For instance we extract bounding box around the fish, eye center, fish orientation, scale of the ruler, background average pixel value... More exhautive list of possible output is described on the [original repo](https://github.com/hdr-bgnn/drexel_metadata)
 
 - The metadata output are in the format of json file (equivalent to dictionary format in python)
@@ -53,10 +53,47 @@ This will generate 2 files:
 
     - result_metadata.json : contained various metadata information. fish bounding box, scale bounding box, scale conversion (pixel/cm)
     - mask.png : improve fish mask using the pixel analysis. (binary map)
+    
+[Metadata](https://github.com/thibaulttabarin/drexel_metadata/blob/main/gen_metadata_mini/image_test/metadata_50577.json)
+{"base_name": "INHS_FISH_50577", "fish": {"fish_num": 1, "bbox": [1031, 303, 4652, 1696], "pixel_analysis": true, "eye_bbox": [1227, 713, 1572, 1041], "eye_center": [1399, 877], "angle_degree": -1.59, "eye_direction": "left", "foreground_mean": 105.12, "foreground_std": 45.23, "background_mean": 242.33, "background_std": 13.96}, "ruler": {"bbox": [319, 2601, 3446, 3664], "scale": 339.88, "unit": "cm converted"}}
+
+## Properties Generated
+
+| **Property**            | **Association** | **Type** | **Explanation**                                                                                                                                   |
+|----------------------------------|--------------------------|-------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| base\_name              | Overall Image            | string           | image name.                                                                                                                     |
+| fish                    | -------------            | ------           | ------------------                                                                                                                      |
+| fish\_num               | Overall Image            | Integer           | The number of fish present.                                                                                                                      |
+| bbox                    | fish of interest         | list              | fish bounding box (top, left, right, bottom). 
+                                                                             |
+| pixel_analysis          | fish of interest         | Booleen           | If pixel analysis succeeded True, else False.
+                                                                             |                                         
+| eye_bbox                | for eye in fish          | list              | bounding box around the eye with best overlap with the fish.                                                                                                |                                                          
+                                                                             
+## Properties Generated
+
+| **Property**            | **Association** | **Type** | **Explanation**                                                                                                                                   |
+|----------------------------------|--------------------------|-------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| base\_name              | Overall Image            | string           | image name.
+
+| fish\_num               | Overall Image            | Integer           | The number of fish present.                                                                                                                               
+| bbox                    | fish of interest         | list              | fish bounding box [top, left, right, bottom] highest "confidence" score.
+|
+| pixel_analysis          | fish of interest         | Booleen           | If pixel analysis succeeded True, else False
+|
+| eye_bbox                | for eye in fish          | list              | bounding box around the eye with best overlap with the fish.
+|
+| eye_center              | for eye in fish          | list              | Center of the eye.                                                              |                                                 
+| angle_degree            | for fish                 | Float             | Angle orientation of the PCA of the mask (in degree).                |                                                                          
+| eye_direction           | for Fish                 | string            |      |                                                                              
+| background.mean         | Per Fish                 | Float             | The mean intensity of the background within a given fish's bounding box.       |                                                                             
+| background.std          | Per Fish                 | Float             | The standard deviation of the background within a given fish's bounding box.    |                                                                            
+| foreground.mean         | Per Fish                 | Float             | The mean intensity of the foreground within a given fish's bounding box.       |                                                                             
+| foreground.std          | Per Fish                 | Float             | The scale of the image in $\frac{\mathrm{pixels}}{\mathrm{cm}}$The standard deviation of the foreground within a given fish's bounding box.                                                                                
+
 
 ![mask](https://github.com/thibaulttabarin/drexel_metadata/blob/main/gen_metadata_mini/image_test/mask_50577.png)
-![Metadata](https://github.com/thibaulttabarin/drexel_metadata/blob/main/gen_metadata_mini/image_test/metadata_50577.json)
- 
+
 # 4- Container
 
 The code has been containerized and the image is available [here](https://github.com/thibaulttabarin/drexel_metadata/pkgs/container/drexel_metadata). Check for more updated version. Here we are using "main" but new release may be available (tag looks like this "0.0.10")
