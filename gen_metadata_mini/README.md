@@ -67,58 +67,26 @@ This will generate 2 files:
     - mask.png : improve fish mask using the pixel analysis. (binary map)
     
 [Metadata](https://github.com/thibaulttabarin/drexel_metadata/blob/main/gen_metadata_mini/image_test/metadata_50577.json)
-{"base_name": + "INHS_FISH_50577", 
-              + "fish": {
-                      + "fish_num": 1, 
-                      + "bbox": [1031, 303, 4652, 1696], 
-                      + "pixel_analysis": true, "eye_bbox": [1227, 713, 1572, 1041], 
-                      + "eye_center": [1399, 877], 
-                      + "angle_degree": -1.59, 
-                      + "eye_direction": "left", 
-                      + "foreground_mean": 105.12, 
-                      + "foreground_std": 45.23, 
-                      + "background_mean": 242.33, 
-                      + "background_std": 13.96}, 
-               + "ruler": {
-                      + "bbox": [319, 2601, 3446, 3664], 
-                      + "scale": 339.88, 
-                      + "unit": 
-                      + "cm converted"}}
 
 ## Properties Generated
+| Key                   | Association   | Type    | Explanation                                                            |
+|:----------------------|:--------------|:--------|:-----------------------------------------------------------------------|
+| Base_name             | Overal image  | string  | image name without extension                                           |
+| fish                  | Fish          | dict    | collect metadata of the "main fish" with the highest score             |
+| fish.fish_num         | Fish          | int     | number of fish detected in the image                                   |
+| fish.bbox             | Fish          | list    | Bounding box of the main fish [left,top,right,bottom]                  |
+| fish.pixel_analysis   | Fish          | boolean | If pixel analysis succeeded True, else False                           |
+| fish.eye_bbox         | eye           | list    | Bounding box of the eye in the main fish [l,t,r,b]                     |
+| fish.angle_degree     | Fish          | float   | angle of the PCA of the mask                                           |
+| fish.eye_direction    | Fish          | string  | eye facing left or righ                                                |
+| fish. foreground_mean | Fish          | float   | Average of pixel value inside the mask                                 |
+| fish.foreground_std   | Fish          | float   | Standart deviation of pixel value inside the mask                      |
+| ruler                 | Ruler         | dict    | collect metadata of the ruler                                          |
+| ruler.bbox            | Ruler         | list    | Bounding box of the ruler [left,top,right,bottom]                      |
+| ruler.scale           | Ruler         | float   | pixel/unit (distance between number "2" and "3" corrected by the unit) |
+| ruler.unit            | Ruler         | string  | indicate unit (cm or inch) in which the scale is express (pixel/cm)    |
 
-| **Property**            | **Association** | **Type** | **Explanation**                                                                                                                                   |
-|----------------------------------|--------------------------|-------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| base\_name              | Overall Image            | string           | image name.                                                                                                                     |
-| fish                    | -------------            | ------           | ------------------                                                                                                                      |
-| fish\_num               | Overall Image            | Integer          | The number of fish present.                                                                                                                      |
-| bbox                    | fish of interest         | list             | fish bounding box (top, left, right, bottom). 
-                                                         |
-| fish\_num               | Overall Image            | Integer          | The number of fish present.                                                                                                                      |
-| bbox                    | fish of interest         | list             | fish bounding box (top, left, right, bottom). 
-                                                                             |                                                      
-                                                                             
-## Properties Generated
-
-| **Property**            | **Association** | **Type** | **Explanation**                                                                                                                                   |
-|----------------------------------|--------------------------|-------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| base\_name              | Overall Image            | string           | image name.
-
-| fish\_num               | Overall Image            | Integer           | The number of fish present.                                                                                                                               
-| bbox                    | fish of interest         | list              | fish bounding box [top, left, right, bottom] highest "confidence" score.
-|
-| pixel_analysis          | fish of interest         | Booleen           | If pixel analysis succeeded True, else False
-|
-| eye_bbox                | for eye in fish          | list              | bounding box around the eye with best overlap with the fish.
-|
-| eye_center              | for eye in fish          | list              | Center of the eye.                                                              |                                                 
-| angle_degree            | for fish                 | Float             | Angle orientation of the PCA of the mask (in degree).                |                                                                          
-| eye_direction           | for Fish                 | string            |      |                                                                              
-| background.mean         | Per Fish                 | Float             | The mean intensity of the background within a given fish's bounding box.       |                                                                             
-| background.std          | Per Fish                 | Float             | The standard deviation of the background within a given fish's bounding box.    |                                                                            
-| foreground.mean         | Per Fish                 | Float             | The mean intensity of the foreground within a given fish's bounding box.       |                                                                             
-| foreground.std          | Per Fish                 | Float             | The scale of the image in $\frac{\mathrm{pixels}}{\mathrm{cm}}$The standard deviation of the foreground within a given fish's bounding box.                                                                                
-
+                                                                          
 
 ![mask](https://github.com/thibaulttabarin/drexel_metadata/blob/main/gen_metadata_mini/image_test/mask_50577.png)
 
