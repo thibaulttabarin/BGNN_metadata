@@ -347,7 +347,13 @@ def ioa_(box1, box2):
 
 def get_morphological_value(mask):
     '''
-    Calculate the morphological and Statistical information from an image mask.
+    Calculate the morphological and Statistical information from an image mask such as eccentricity 
+    soliduty skewness kurtosis value of the mask...
+    Python module skimage and scipy.stats provide whole range of metrics accessible easily
+    via function. for example Check documentation 
+    https://scikit-image.org/docs/stable/api/skimage.morphology.html
+    
+    Add more functionality here or create a similar functions using this function as template
     
     Parameters
     ----------
@@ -458,4 +464,46 @@ def check_bbox (im, dict_fish, center=None):
         img1.ellipse(xy, fill='gray', outline=None, width=1)
         
     return img
+
+    
+def Crop_with_margin(im, bbox, margin=0.1, factor=4):
+    '''
+    Crop the image using the bbox with add a margin of factor 0.1 in 
+    each direction (vertical and horizontal) and increase the size by a factor 4
+
+    Parameters
+    ----------
+    im : np.ndarray 
+        image represmeted with an array.
+    bbox : list
+        bounding box [left, top, right, bottom].
+    margin : float, optional
+        Margin represented as a Percent of of the individual dimension(vertical and horizontal
+        The default is 0.1. 
+
+    Returns
+    -------
+    im_cropped : np.ndarray
+        cropped image using the updated version of the bbox (bbox + margin).
+    new_bbox : list
+        updated version of the bbox (bbox + margin).
+
+    '''
+    
+    l,t,r,b = bbox # [left, top, right, bottom]
+    delta_h= round((r-l)*margin/2) # delta horizontal
+    delta_v = round((b-t)*margin/2) # delta vertical
+
+    new_l, new_r = l-delta_h, r+delta_h
+    new_t, new_b = t-delta_v, b+delta_v
+    new_bbox = [new_l, new_t, new_r, new_b]
+    im_cropped = im[new_t:new_b,new_l:new_r]
+    
+    # resize (enlarger) image by a factor 4
+    resized_image = cv2.resize(cropped_image, (im_cropped.shape[1] * factor,
+                                               im_cropped.shape[0] * factor),
+                               interpolation=cv2.INTER_CUBIC)
+    
+    return im_cropped, new_bbox
+    
     

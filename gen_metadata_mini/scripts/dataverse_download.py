@@ -1,6 +1,10 @@
+#!/usr/local/bin/python
 # Script to download a dataset from a Dataverse (https://dataverse.org/)
-# originated from John Bradley
-# modified by Thibault Tabarin
+#' @author
+#' John Bradley: initial code
+#' Thibault Tabarin: small modification
+#' 
+
 
 import os
 import sys
@@ -20,7 +24,7 @@ def download_dataset(base_url, api_token, doi, directory_output):
 
 def download_file(data_api, dv_file, directory_output):
     filepath = dv_file["dataFile"]["filename"]
-    directory_label = dv_file["directoryLabel"]
+    #directory_label = dv_file["directoryLabel"]
     os.makedirs(directory_output, exist_ok=True)
     filepath = os.path.join(directory_output, filepath)
     file_id = dv_file["dataFile"]["id"]
@@ -63,5 +67,5 @@ if __name__ == '__main__':
         DOI = sys.argv[2]
         directory_output = sys.argv[3]
         API_TOKEN = os.environ.get('DATAVERSE_API_TOKEN')
-        print(API_TOKEN)
+        #print(API_TOKEN)
         download_dataset(BASE_URL, API_TOKEN, DOI, directory_output)
