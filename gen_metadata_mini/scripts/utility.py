@@ -480,11 +480,14 @@ def Crop_with_margin(im, bbox, margin=0.1, factor=4):
     margin : float, optional
         Margin represented as a Percent of of the individual dimension(vertical and horizontal
         The default is 0.1. 
-
+    factor : int, optional
+        factor by which we increase the image size 
+        The default is 4.    
     Returns
     -------
     im_cropped : np.ndarray
-        cropped image using the updated version of the bbox (bbox + margin).
+        cropped and resized image using the updated version of the bbox (bbox + margin) 
+        + resize by factor.
     new_bbox : list
         updated version of the bbox (bbox + margin).
 
@@ -500,10 +503,10 @@ def Crop_with_margin(im, bbox, margin=0.1, factor=4):
     im_cropped = im[new_t:new_b,new_l:new_r]
     
     # resize (enlarger) image by a factor 4
-    resized_image = cv2.resize(cropped_image, (im_cropped.shape[1] * factor,
+    resized_image = cv2.resize(im_cropped, (im_cropped.shape[1] * factor,
                                                im_cropped.shape[0] * factor),
                                interpolation=cv2.INTER_CUBIC)
     
-    return im_cropped, new_bbox
+    return resized_image, new_bbox
     
     

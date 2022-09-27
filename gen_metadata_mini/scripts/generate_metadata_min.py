@@ -6,15 +6,16 @@
 #' Thibault Tabarin: modularize it and trimmed the code for minnow project
 
 #' @description
+#' litght version of the original code developped by Joel Pepper and Kevin Karnani'
 #' Using the detectron2 framework from Facebook, we detect fish, eye and ruler object and
 #' collect metadata information such bounding box, fish mask, eye center, fish orientation...
-#' The main outputs are 
-#' Dictionnary with metadata:  {"base_name": "", "fish": 
-#' {"fish_num": , "bbox": [], "pixel_analysis": true, "eye_bbox": [], "eye_center": [], 
+#' The main outputs are
+#' Dictionnary with metadata:  {"base_name": "", "fish":
+#' {"fish_num": , "bbox": [], "pixel_analysis": true, "eye_bbox": [], "eye_center": [],
 #' "angle_degree": 9.070674226380035, "eye_direction": "left", "foreground_mean": ,
-#' "foreground_std": , "background_mean": , "background_std": }, 
+#' "foreground_std": , "background_mean": , "background_std": },
 #' "ruler": {"bbox": [], "scale": , "unit": ""}}
-#' And fish mask (binary image) 
+#' And fish mask (binary image)
 
 import json
 import math
@@ -30,7 +31,7 @@ from detectron2.engine import DefaultPredictor
 from detectron2 import model_zoo
 from detectron2.utils.visualizer import Visualizer, ColorMode
 from detectron2.structures import Boxes, pairwise_ioa
-#from matplotlib import pyplot as plt # for development phase
+from matplotlib import pyplot as plt # for development phase
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -92,7 +93,7 @@ def create_metadata_obj():
     Returns
     -------
     metadata : detectron2.data.catalog.Metadata
-        detectron object that contains information on the data structure. More info on 
+        detectron object that contains information on the data structure. More info on
         detectron2 documentation.
 
     '''
@@ -104,34 +105,31 @@ def create_metadata_obj():
     return metadata
 
 
-def predict_detectron(file_path):
+def predict_detectron(im):
     '''
     import the image file, enhance imae contrast and predict the classes
     Classes : ['fish', 'ruler', 'eye', 'two', 'three']
 
     Parameters
     ----------
-    file_path : string
-        Loacation of the file (absolute path).
+    im : np.ndarray
+        image to predict. (import option :    im = cv2.imread(file_path))
+
 
     Returns
     -------
     insts : dectetron object detectron2.structures.instances.Instances
         List of dict of list...
-    im : np.ndarray (dtype=uint8)
-        Image loaded by cv2.
     '''
 
     # Initialize the model
     predictor = init_model()
-    # load the image
-    im = cv2.imread(file_path)
     # CLAHE + prediction
     im_enh, im_gray = ut.enhance_contrast(im)
     output = predictor(im_enh)
     insts = output['instances']
 
-    return insts, im
+    return insts
 
 
 def create_prediction_image(im, insts):
@@ -152,7 +150,7 @@ def create_prediction_image(im, insts):
         more information.
 
     '''
-    
+
     metadata = create_metadata_obj()
     v = Visualizer(im[:, :, ::-1], metadata=metadata,scale=0.5,
                    instance_mode=ColorMode.IMAGE_BW)
@@ -230,7 +228,7 @@ def get_fish_metadata (insts, im):
 
     '''
 
-    dict_fish={"fish_num" : 0, "bbox":"None", "pixel_analysis":"None",
+    dict_fish={"fish_num" : 0, "bbox":"None", "pixel_analysis":"None","rescale":"no",
                "eye_bbox":"None", "eye_center":"None"}
 
     # Select the fish with highest score
@@ -244,9 +242,9 @@ def get_fish_metadata (insts, im):
 
         ### Fish
         # generate a new mask of the fish using pixel analysis
-        mask_uint8, bbox, analysis_failed = generate_new_mask(main_fish_inst, im_gray)
+        mask_uint8, bbox_fish, analysis_failed = generate_new_mask(main_fish_inst, im_gray)
 
-        dict_fish ['bbox'] = bbox
+        dict_fish ['bbox'] = bbox_fish
         if analysis_failed:
             dict_fish ['pixel_analysis'] = False
         else:
@@ -254,16 +252,21 @@ def get_fish_metadata (insts, im):
 
         ### eye
         # Convert bbox list in Boxes structure
-        Boxes_fish = Boxes(torch.tensor(bbox)[None,:])
+        Boxes_fish = Boxes(torch.tensor(bbox_fish)[None,:])
         # find the main eye in the main fish
         main_eye_inst, num_eyes = find_main_eye(Boxes_fish, insts)
         # measure eye center and bbox
-        eye_center = []
         if  main_eye_inst :
             eye_center = [round(x) for x in main_eye_inst.pred_boxes.get_centers()[0].cpu().numpy()]
             eye_bbox = [round(x) for x in main_eye_inst.pred_boxes.tensor.cpu().numpy()[0]]
             dict_fish ['eye_bbox'] = eye_bbox
             dict_fish ['eye_center'] = eye_center
+        # if no eye found the first time, rescale and try again
+        else:
+            eye_center, eye_bbox = rescale_find_eye(bbox_fish,im)
+            dict_fish ['eye_bbox'] = eye_bbox
+            dict_fish ['eye_center'] = eye_center
+            dict_fish['rescale'] = 'yes'
 
         ## Orientation  {'angle_degree' : "None" , 'eye_direction' :"None" }
         dict_orientation = get_fish_orientation(mask_uint8, eye_center)
@@ -272,13 +275,14 @@ def get_fish_metadata (insts, im):
 
         ## Brightness  {'foreground_mean':'None', 'foreground_std':'None',
         ##  'background_mean':'None', 'background_std':'None'}
-        dict_brightness= ut.get_brightness(im, mask_uint8, bbox)
+        dict_brightness= ut.get_brightness(im, mask_uint8, bbox_fish)
         dict_fish.update(dict_brightness)
 
     return dict_fish, mask_uint8
 
 
 def select_main_fish(insts):
+
     '''
     Select the fish with highest score >0.3 from instance object generated by detectron
 
@@ -309,7 +313,7 @@ def select_main_fish(insts):
 
     return main_fish, num_fish
 
-           
+
 def generate_new_mask(fish, im_gray):
     '''
     Parameters
@@ -366,8 +370,7 @@ def find_main_eye(Boxes_fish, insts):
     num_eyes = len(eyes_insts)
 
     # eyes_insts are sort by score value in descending order
-    for idx in range(len(eyes_insts)):
-
+    for idx in range(num_eyes):
 
         # Boxes_fish and eye are Boxes structure from detectron2
         Boxes_eye = eyes_insts[idx].pred_boxes
@@ -423,13 +426,77 @@ def get_fish_orientation(mask_fish, eye_center):
     return dict_orientation
 
 
-def main(file_path, output_json, output_mask):
+def rescale_find_eye(original_fish_bbox, im):
+    '''
+    Rescale and find the eye
+    1- Crop the image around the bbox of the fish found in the first prediction and increase size by 4
+    2- Recalcule the prediction using the crop fish
+    3- find the first eye detected in the new prediction that overlap with the original fish bbox
+
+    Parameters
+    ----------
+    original_bbox : list of int
+        DESCRIPTION. bounding box around the fish [l,t,r,b]
+    im : np.ndarray (uint8)
+        DESCRIPTION. original fish image
+
+    Returns
+    -------
+    eye_center : list of int
+        DESCRIPTION. eye center coordinate
+    eye_bbox : list of int
+        DESCRIPTION. bounding box around the find eye [l,t,r,b]
+
+    '''
+    # initialize the output to empty list
+    eye_bbox=[]
+    eye_center=[]
+    # 1- cropped the fish out using the bbox + margin of 10 % (each direction, x +10% y+10%)
+    # and resized (multiple) by a factor 4
+    resized_image, new_bbox = ut.Crop_with_margin(im,original_fish_bbox, margin=0.1, factor=4)
+
+    # 2-  Predict classes {fish, eye....} using the cropped image
+    insts_crop = predict_detectron(resized_image)
+
+    # 3- find the first eye detected in the new prediction that overlap with the original fish bbox
+    eye_insts_crop = insts_crop[insts_crop.pred_classes==2]
+    if len(eye_insts_crop) >0:
+
+        # get center, bbox  of the eye instances and store then in list
+        boxes = eye_insts_crop.pred_boxes.tensor.numpy().astype("int").tolist()
+        centers = eye_insts_crop.pred_boxes.get_centers().numpy().astype("int").tolist()
+
+        # change referential to the original image for boxes
+        ch_ref_boxes = lambda a, b : [a[0]+int(b[0]/4),a[1]+int(b[1]/4),
+                                      a[0]+int(b[2]/4),a[1]+int(b[3]/4)]
+        new_bboxes = [ch_ref_boxes(new_bbox,i) for i in boxes]
+
+        # change referential to original image for eyes centers
+        ch_ref_centers = lambda a, b : [a[0]+int(b[0]/4),a[1]+int(b[1]/4)]
+        new_centers = [ch_ref_centers(new_bbox,i) for i in centers]
+
+        # Check if the newly found eye bbox is inside the original fish bbox
+        # loop through all the eye instances (ordered by highest score) and find the first with overlap >.5
+        fish_bbox = Boxes(torch.tensor(original_fish_bbox)[None,:]) # convert the original fish box to Boxes object
+        for i in range (len(new_bboxes)):
+            eye_bbox = Boxes(torch.tensor(new_bboxes[i])[None,:])  # convert to Boxes object
+            overlap_fish_eye = pairwise_ioa(fish_bbox, eye_bbox).item()
+
+            if overlap_fish_eye >.5:
+                eye_center = new_centers[i]
+                eye_bbox = new_bboxes[i]
+                break
+
+    return  eye_center, eye_bbox
+
+
+def main(file_path, output_json, output_mask, statistic = False):
     '''
     Combine the different step of the analysis
     1- import model and create a object detection prediction
     2- Collect metadata for the ruler
     3- Collect metadata for the fish and the fish mask
-    4- Collect statistic from the fish mask
+    4- Collect statistic from the fish mask (Optional)
     5- Save the result in outputs (.json amd .png files)
 
     Parameters
@@ -446,31 +513,32 @@ def main(file_path, output_json, output_mask):
     None.
 
     '''
-
-    # try to run and save
+    # try to run and save the result
     name_base = os.path.split(file_path)[1].rsplit('.',1)[0]
     result = {'base_name': name_base, 'status':'failed'}
     # empty mask if the analysis fail
     mask = np.zeros((100,100))
     try :
-        insts, im = predict_detectron(file_path)
+        # load the image
+        im = cv2.imread(file_path)
+        # predict classes
+        insts = predict_detectron(im)
         # ruler metadata
         dict_ruler = get_ruler_metadata(insts, file_path)
         # fish
         dict_fish, mask = get_fish_metadata(insts, im)
-        # Morphology and statistic
-        #dict_morph_stat = ut.get_morphological_value(mask)
+        # Morphology and statistic Optional
+        if statistic:
+           dict_morph_stat = ut.get_morphological_value(mask)
 
         result = {'base_name': name_base, 'fish': dict_fish, 'ruler': dict_ruler}
 
     except Exception as e:
         # write the error in the result dictionnary
         result['error'] = f'({e})'
-                
-    with open(output_json, 'w') as f:        
+
+    with open(output_json, 'w') as f:
         json.dump(result, f)
 
     if output_mask != None:
         cv2.imwrite(output_mask, mask)
-
-
